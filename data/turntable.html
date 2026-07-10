@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8">
+<style>html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#f0f0f0}
+canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+canvas.dragging{cursor:grabbing}</style>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.module.js","three/addons/":"https://cdn.jsdelivr.net/npm/three@0.183.2/examples/jsm/"}}
+</script>
+</head><body>
+<canvas id="c"></canvas>
+<script type="module">
+import * as THREE from 'three';
+import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
+import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
+
+const file = new URLSearchParams(location.search).get('file') || '';
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+renderer.setSize(innerWidth,innerHeight,false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f0f0);
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment()).texture;
+pmrem.dispose();
+const camera = new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.01,1000);
+const turntable = new THREE.Group();
+scene.add(turntable);
+
+// Standard initial view: camera-orbit="0deg 100deg auto"
+// 100deg polar = 10deg above horizontal
+const POLAR = 10 * Math.PI / 180;
+let camDist = 3, camTarget = 3;
+
+function setCamera(d) {
+  camera.position.set(0, Math.sin(POLAR)*d, Math.cos(POLAR)*d);
+  camera.lookAt(0,0,0);
+}
+
+new GLTFLoader().load(file, gltf=>{
+  turntable.add(gltf.scene);
+  // Center and auto-fit
+  const box = new THREE.Box3().setFromObject(gltf.scene);
+  gltf.scene.position.sub(box.getCenter(new THREE.Vector3()));
+  const size = box.getSize(new THREE.Vector3());
+  const radius = size.length() / 2 || 1;
+  const fov = THREE.MathUtils.degToRad(camera.fov);
+  camDist = Math.max(radius / Math.tan(fov/2) * 1.1, 0.5);
+  camTarget = camDist;
+  setCamera(camDist);
+  animate();
+});
+
+let drag=false, lx=0, ly=0;
+canvas.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;canvas.classList.add('dragging');canvas.setPointerCapture(e.pointerId)});
+canvas.addEventListener('pointermove',e=>{if(!drag)return;
+  const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+  const qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), 3*dx/innerWidth);
+  const qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), 3*dy/innerHeight);
+  turntable.quaternion.premultiply(qy.multiply(qx));
+});
+canvas.addEventListener('pointerup',()=>{drag=false;canvas.classList.remove('dragging')});
+canvas.addEventListener('pointercancel',()=>{drag=false;canvas.classList.remove('dragging')});
+canvas.addEventListener('wheel',e=>{e.preventDefault();camTarget*=Math.exp(0.0015*e.deltaY);camTarget=THREE.MathUtils.clamp(camTarget,0.3*camDist,5*camDist)},{passive:false});
+addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
+function animate(){requestAnimationFrame(animate);
+  const d = camDist + 0.18*(camTarget-camDist); camDist=d;
+  setCamera(d);
+  renderer.render(scene,camera);
+}
+</script></body></html>
