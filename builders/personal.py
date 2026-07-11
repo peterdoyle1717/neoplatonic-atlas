@@ -237,6 +237,10 @@ def build_net(job):
 
 def main():
     os.makedirs(os.path.join(OUT, "glb"), exist_ok=True)
+    # viewer wrappers: source of truth is builders/assets/
+    import shutil
+    for w in ("morph.html", "turntable.html"):
+        shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
     jobs = []
     with open(os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
         for ln in f:
