@@ -24,6 +24,7 @@ from walklib import develop
 from clers_tools import clers_svg, COLORS
 
 BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
+HOROZ = os.environ.get("HOROZ_BIN", "/Users/doyle/Dropbox/neo/ideal/src/horoz_c")
 ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(24)][::-1]   # ~2.1 .. 59.9
 
 RGB = {'A': (1.0, 0.0, 0.0), 'B': (1.0, 0.53, 0.0), 'C': (1.0, 0.8, 0.0),
@@ -75,6 +76,70 @@ def solve_alpha(nc, a):
             if len(t) >= 6 and t[0] == '#' and t[1] == 'bend'}
 
 
+
+def make_svg(positions, edges, size=100, pad=6):
+    """Inline SVG wireframe (lifted from atlas/python/build_ideal.py)."""
+    pts = list(positions.values())
+    if not pts:
+        return ''
+    xs = [p[0] for p in pts]
+    ys = [p[1] for p in pts]
+    xmin, xmax = min(xs), max(xs)
+    ymin, ymax = min(ys), max(ys)
+    w = xmax - xmin or 1.0
+    h = ymax - ymin or 1.0
+    scale = (size - 2 * pad) / max(w, h)
+    cx = (xmin + xmax) / 2.0
+    cy = (ymin + ymax) / 2.0
+    mid = (size - 2 * pad) / 2.0
+
+    def tx(x):
+        return pad + (x - cx) * scale + mid
+
+    def ty(y):
+        return pad + (cy - y) * scale + mid
+
+    lines = []
+    for u, w2 in edges:
+        if u not in positions or w2 not in positions:
+            continue
+        x1, y1 = tx(positions[u][0]), ty(positions[u][1])
+        x2, y2 = tx(positions[w2][0]), ty(positions[w2][1])
+        lines.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" '
+                     f'y2="{y2:.1f}" stroke="#000" stroke-width="0.7"/>')
+    return (f'<svg viewBox="0 0 {size} {size}" width="100%" '
+            f'xmlns="http://www.w3.org/2000/svg" style="display:block">'
+            + ''.join(lines) + '</svg>')
+
+
+def ideal_net_svg(nc, faces):
+    """The ideal net: Perron placement via horoz_c (vertex 1 at infinity),
+    edges not through vertex 1, rendered as segments."""
+    import struct
+    try:
+        r = subprocess.run([HOROZ], input=(nc + "\n").encode(),
+                           capture_output=True, timeout=120)
+        data = r.stdout
+    except Exception:
+        return ''
+    V = max(max(f) for f in faces)
+    if len(data) < V * 24:
+        return ''
+    positions = {}
+    for vi in range(V):
+        u, x, y = struct.unpack_from('<ddd', data, vi * 24)
+        if vi == 0 or math.isnan(u):
+            continue
+        positions[vi + 1] = (x, y)
+    edges = set()
+    for a, b, c in faces:
+        for u2, w2 in ((a, b), (b, c), (a, c)):
+            if u2 == 1 or w2 == 1:
+                continue
+            edges.add((min(u2, w2), max(u2, w2)))
+    return make_svg(positions, sorted(edges))
+
+
 def glb_euclid(name, faces, V, bends, outdir):
     pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
@@ -118,11 +183,17 @@ def build_net(job):
     V = max(max(f) for f in faces)
     outdir = os.path.join(OUT, "glb")
     os.makedirs(outdir, exist_ok=True)
-    bends = solve_prove_60(nc)
-    if bends is None:
-        return (name, "SOLVE-FAIL")
-    glb_euclid(name, faces, V, bends, outdir)
-    nframes = glb_movies(name, faces, V, nc, outdir)
+    if not (os.path.exists(os.path.join(outdir, f"{name}_rb.glb"))
+            and os.path.exists(os.path.join(outdir, f"{name}_clers.glb"))):
+        bends = solve_prove_60(nc)
+        if bends is None:
+            return (name, "SOLVE-FAIL")
+        glb_euclid(name, faces, V, bends, outdir)
+    if (os.path.exists(os.path.join(outdir, f"{name}_morph_p.glb"))
+            and os.path.exists(os.path.join(outdir, f"{name}_morph_k.glb"))):
+        nframes = 24
+    else:
+        nframes = glb_movies(name, faces, V, nc, outdir)
     E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
 
     def cell_iframe(src, label):
@@ -138,8 +209,12 @@ def build_net(job):
             f'<p class=info>V={V} &nbsp; E={E} &nbsp; F={len(faces)}</p>'
             f'<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>',
-            cell_iframe(f'../turntable.html?file=glb/{name}_rb.glb', 'Euclidean'),
-            '</div>']
+            cell_iframe(f'../turntable.html?file=glb/{name}_rb.glb', 'Euclidean')]
+    inet = ideal_net_svg(nc, faces)
+    if inet:
+        body.append(f'<div><div class=cell><div class=svgwrap>{inet}</div></div>'
+                    f'<div class=label>ideal net</div></div>')
+    body.append('</div>')
     if nframes >= 2:
         body += ['<div class=pair>',
                  cell_iframe(f'../morph.html?file=glb/{name}_morph_p.glb',
