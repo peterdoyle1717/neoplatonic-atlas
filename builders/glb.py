@@ -265,3 +265,92 @@ def main(argv):
 if __name__ == "__main__":
     raise SystemExit(main(sys.argv))
 
+
+def write_gltf_groups(outpath, verts, groups, embedded=True, meshname=None):
+    """Like write_gltf_like but with one primitive per color group.
+    groups: list of (rgb_triple, list_of_faces)."""
+    nverts = len(verts)
+    use32 = nverts > 65535
+    idx_comp = pg.UNSIGNED_INT if use32 else pg.UNSIGNED_SHORT
+
+    def pack_indices(idxs):
+        if not idxs:
+            return b""
+        fmt = "<" + ("I" if use32 else "H") * len(idxs)
+        return struct.pack(fmt, *idxs)
+
+    blobs = []
+    bufferViews = []
+    accessors = []
+    offset = 0
+
+    def add_index_stream(idxs):
+        nonlocal offset
+        raw = pack_indices(idxs)
+        padded = pad4(raw)
+        view_index = len(bufferViews)
+        bufferViews.append(pg.BufferView(
+            buffer=0, byteOffset=offset, byteLength=len(raw),
+            target=pg.ELEMENT_ARRAY_BUFFER))
+        accessor_index = len(accessors)
+        accessors.append(pg.Accessor(
+            bufferView=view_index, byteOffset=0, componentType=idx_comp,
+            count=len(idxs), type=pg.SCALAR,
+            max=[max(idxs)] if idxs else [0],
+            min=[min(idxs)] if idxs else [0]))
+        blobs.append(padded)
+        offset += len(padded)
+        return accessor_index
+
+    group_accessors = []
+    for _, gfaces in groups:
+        idxs = [i for tri in gfaces for i in tri]
+        group_accessors.append(add_index_stream(idxs) if idxs else None)
+
+    cx = sum(v[0] for v in verts) / len(verts)
+    cy = sum(v[1] for v in verts) / len(verts)
+    cz = sum(v[2] for v in verts) / len(verts)
+    verts = [(v[0]-cx, v[1]-cy, v[2]-cz) for v in verts]
+    pos_flat = [c for v in verts for c in v]
+    pos_raw = struct.pack("<" + "f" * len(pos_flat), *pos_flat)
+    pos_padded = pad4(pos_raw)
+    pos_view = len(bufferViews)
+    bufferViews.append(pg.BufferView(
+        buffer=0, byteOffset=offset, byteLength=len(pos_raw),
+        target=pg.ARRAY_BUFFER))
+    xs = [v[0] for v in verts]; ys = [v[1] for v in verts]; zs = [v[2] for v in verts]
+    pos_accessor = len(accessors)
+    accessors.append(pg.Accessor(
+        bufferView=pos_view, byteOffset=0, componentType=pg.FLOAT,
+        count=nverts, type=pg.VEC3,
+        max=[max(xs), max(ys), max(zs)], min=[min(xs), min(ys), min(zs)]))
+    blobs.append(pos_padded)
+    offset += len(pos_padded)
+
+    binary_blob = b"".join(blobs)
+    gltf = pg.GLTF2()
+    gltf.asset = pg.Asset(version="2.0")
+    gltf.buffers = [pg.Buffer(byteLength=len(binary_blob))]
+    gltf.bufferViews = bufferViews
+    gltf.accessors = accessors
+    gltf.materials = [make_material(list(color), 1.0, 0.45) for color, _ in groups]
+
+    primitives = []
+    for m, acc in enumerate(group_accessors):
+        if acc is None:
+            continue
+        prim = pg.Primitive()
+        prim.attributes.POSITION = pos_accessor
+        prim.indices = acc
+        prim.material = m
+        primitives.append(prim)
+    gltf.meshes = [pg.Mesh(name=meshname, primitives=primitives)]
+    gltf.nodes = [pg.Node(name=meshname, mesh=0)]
+    gltf.scenes = [pg.Scene(name=meshname, nodes=[0])]
+    gltf.scene = 0
+    gltf.set_binary_blob(binary_blob)
+    if embedded:
+        gltf.convert_buffers(pg.BufferFormat.DATAURI)
+        gltf.save(str(outpath))
+    else:
+        gltf.save_binary(str(outpath))
