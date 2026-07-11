@@ -354,3 +354,112 @@ def write_gltf_groups(outpath, verts, groups, embedded=True, meshname=None):
         gltf.save(str(outpath))
     else:
         gltf.save_binary(str(outpath))
+
+def write_gltf_morph(outpath, frames, faces, embedded=True, meshname=None):
+    """Single animated GLB: base mesh = frames[0], one morph target per
+    later frame, weights animation crossfading them in sequence.
+    frames: list of vertex lists (same length); faces: triangle indices."""
+    base = frames[0]
+    n = len(base)
+    # normalize: base frame to radius 0.95, same scale for all frames
+    r = max(math.sqrt(x*x + y*y + z*z) for (x, y, z) in base) or 1.0
+    s = 0.95 / r
+    frames = [[(x*s, y*s, z*s) for (x, y, z) in fr] for fr in frames]
+    base = frames[0]
+    K = len(frames) - 1
+
+    idxs = [i for tri in faces for i in tri]
+    use32 = n > 65535
+    idx_comp = pg.UNSIGNED_INT if use32 else pg.UNSIGNED_SHORT
+
+    blobs = []
+    bufferViews = []
+    accessors = []
+    offset = 0
+
+    def add_blob(raw, target=None):
+        nonlocal offset
+        padded = pad4(raw)
+        vi = len(bufferViews)
+        bufferViews.append(pg.BufferView(buffer=0, byteOffset=offset,
+                                         byteLength=len(raw), target=target))
+        blobs.append(padded)
+        offset += len(padded)
+        return vi
+
+    def vec3_accessor(vi, data):
+        ai = len(accessors)
+        xs = [v[0] for v in data]; ys = [v[1] for v in data]; zs = [v[2] for v in data]
+        accessors.append(pg.Accessor(
+            bufferView=vi, byteOffset=0, componentType=pg.FLOAT,
+            count=len(data), type=pg.VEC3,
+            max=[max(xs), max(ys), max(zs)], min=[min(xs), min(ys), min(zs)]))
+        return ai
+
+    # indices
+    fmt = "<" + ("I" if use32 else "H") * len(idxs)
+    vi = add_blob(struct.pack(fmt, *idxs), target=pg.ELEMENT_ARRAY_BUFFER)
+    idx_acc = len(accessors)
+    accessors.append(pg.Accessor(bufferView=vi, byteOffset=0,
+                                 componentType=idx_comp, count=len(idxs),
+                                 type=pg.SCALAR, max=[max(idxs)], min=[min(idxs)]))
+    # base positions
+    raw = struct.pack("<" + "f"*(3*n), *[c for v in base for c in v])
+    pos_acc = vec3_accessor(add_blob(raw, target=pg.ARRAY_BUFFER), base)
+    # morph targets: deltas
+    target_accs = []
+    for fr in frames[1:]:
+        deltas = [(fr[i][0]-base[i][0], fr[i][1]-base[i][1], fr[i][2]-base[i][2])
+                  for i in range(n)]
+        raw = struct.pack("<" + "f"*(3*n), *[c for v in deltas for c in v])
+        target_accs.append(vec3_accessor(add_blob(raw, target=pg.ARRAY_BUFFER), deltas))
+    # animation: times 0..1, weights one-hot ramps
+    times = [k / K for k in range(K + 1)]
+    raw = struct.pack("<" + "f"*len(times), *times)
+    vi = add_blob(raw)
+    t_acc = len(accessors)
+    accessors.append(pg.Accessor(bufferView=vi, byteOffset=0,
+                                 componentType=pg.FLOAT, count=len(times),
+                                 type=pg.SCALAR, max=[times[-1]], min=[times[0]]))
+    weights = []
+    for k in range(K + 1):
+        row = [0.0] * K
+        if k > 0:
+            row[k - 1] = 1.0
+        weights.extend(row)
+    raw = struct.pack("<" + "f"*len(weights), *weights)
+    vi = add_blob(raw)
+    w_acc = len(accessors)
+    accessors.append(pg.Accessor(bufferView=vi, byteOffset=0,
+                                 componentType=pg.FLOAT, count=len(weights),
+                                 type=pg.SCALAR))
+
+    binary_blob = b"".join(blobs)
+    gltf = pg.GLTF2()
+    gltf.asset = pg.Asset(version="2.0")
+    gltf.buffers = [pg.Buffer(byteLength=len(binary_blob))]
+    gltf.bufferViews = bufferViews
+    gltf.accessors = accessors
+    gltf.materials = [make_material([0.25, 0.55, 0.85], 1.0, 0.45)]
+    prim = pg.Primitive()
+    prim.attributes.POSITION = pos_acc
+    prim.indices = idx_acc
+    prim.material = 0
+    prim.targets = [pg.Attributes(POSITION=acc) for acc in target_accs]
+    gltf.meshes = [pg.Mesh(name=meshname, primitives=[prim],
+                           weights=[0.0] * K)]
+    gltf.nodes = [pg.Node(name=meshname, mesh=0)]
+    gltf.scenes = [pg.Scene(name=meshname, nodes=[0])]
+    gltf.scene = 0
+    gltf.animations = [pg.Animation(
+        channels=[pg.AnimationChannel(
+            sampler=0,
+            target=pg.AnimationChannelTarget(node=0, path="weights"))],
+        samplers=[pg.AnimationSampler(input=t_acc, output=w_acc,
+                                      interpolation="LINEAR")])]
+    gltf.set_binary_blob(binary_blob)
+    if embedded:
+        gltf.convert_buffers(pg.BufferFormat.DATAURI)
+        gltf.save(str(outpath))
+    else:
+        gltf.save_binary(str(outpath))

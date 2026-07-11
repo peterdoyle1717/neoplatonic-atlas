@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>turntable morph</title>
+<style>
+  html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: #f0f0f0; font-family: Georgia, serif; }
+  #c { display: block; width: 100%; height: calc(100% - 4em); touch-action: none; cursor: grab; }
+  #c.dragging { cursor: grabbing; }
+  .controls { height: 4em; display: flex; align-items: center; justify-content: center; gap: 0.5em; background: #f0f0f0; }
+  .controls button { padding: 0.3em 0.8em; cursor: pointer; font-size: 0.9em; }
+  .controls input[type=range] { width: 40%; }
+  .controls .info { font-size: 0.8em; color: #888; min-width: 12em; text-align: center; }
+</style>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.183.2/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.183.2/examples/jsm/"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div class="controls">
+  <button id="rev">&#9664;</button>
+  <button id="pause">&#9646;&#9646;</button>
+  <button id="fwd">&#9654;</button>
+  <input type="range" id="slider" min="0" max="1000" step="1" value="0">
+  <div class="info" id="info">loading...</div>
+</div>
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+const params = new URLSearchParams(window.location.search);
+const glbFile = params.get('file') || 'morph_glb/10/CCCACACACACACAAE.glb';
+
+const BLUE = new THREE.Color(0.25, 0.55, 0.85);
+const RED  = new THREE.Color(1.0, 0.0, 0.0);
+const rhos = ['57.6\u00B0', '57.3\u00B0', '56.9\u00B0', '56.4\u00B0', '55.9\u00B0', '55.3\u00B0', '54.6\u00B0', '53.8\u00B0', '52.8\u00B0', '51.8\u00B0', '50.5\u00B0', '49.1\u00B0', '47.5\u00B0', '45.6\u00B0', '43.5\u00B0', '41.0\u00B0', '38.2\u00B0', '34.9\u00B0', '31.1\u00B0', '26.8\u00B0', '21.9\u00B0', '16.2\u00B0', '9.6\u00B0', '2.1\u00B0'];
+
+const canvas = document.getElementById('c');
+const slider = document.getElementById('slider');
+const info = document.getElementById('info');
+
+// Renderer
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.0;
+
+// Scene
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0xf0f0f0);
+
+// Environment (matches model-viewer)
+const pmremGenerator = new THREE.PMREMGenerator(renderer);
+scene.environment = pmremGenerator.fromScene(new RoomEnvironment()).texture;
+pmremGenerator.dispose();
+
+// Camera
+const camera = new THREE.PerspectiveCamera(45, canvas.clientWidth / canvas.clientHeight, 0.01, 1000);
+
+// Turntable group
+const turntable = new THREE.Group();
+scene.add(turntable);
+
+let mixer = null;
+let clip = null;
+let meshMaterials = [];
+let homecamz = 5;
+let camtargetz = 5;
+
+function setCamera(z) {
+  camera.position.set(0, 0, z);
+  camera.lookAt(0, 0, 0);
+}
+
+function fitModel(root) {
+  /* Our morph GLBs have base mesh at radius 0.95.
+     Can't trust Box3 — it includes morph target displacements. */
+  homecamz = 2.8;
+  camtargetz = homecamz;
+  setCamera(homecamz);
+}
+
+// Load GLB
+const loader = new GLTFLoader();
+loader.load(glbFile, (gltf) => {
+  turntable.add(gltf.scene);
+  fitModel(gltf.scene);
+
+  gltf.scene.traverse((obj) => {
+    if (obj.isMesh && obj.material) meshMaterials.push(obj.material);
+  });
+
+  if (gltf.animations && gltf.animations.length > 0) {
+    mixer = new THREE.AnimationMixer(gltf.scene);
+    clip = gltf.animations[0];
+    const action = mixer.clipAction(clip);
+    action.setLoop(THREE.LoopOnce, 1);
+    action.clampWhenFinished = true;
+    action.play();
+    mixer.setTime(0);
+  }
+
+  info.textContent = 'ready';
+  applyState(0);
+  animate();
+}, undefined, (e) => { info.textContent = 'error: ' + e.message; });
+
+// State
+let u = 0;
+let playing = 0;
+
+function applyState(newU) {
+  u = Math.max(0, Math.min(1, newU));
+  if (mixer && clip) mixer.setTime(Math.min(u, 0.999) * clip.duration);
+  const color = u >= 1.0 ? RED : BLUE;
+  for (const mat of meshMaterials) mat.color.copy(color);
+  slider.value = Math.round(u * 1000);
+  const n = rhos.length;
+  const frame = Math.min(Math.round(u * (n - 1)), n - 1);
+  info.textContent = '\u03B1 = ' + rhos[frame] +
+    (frame === 0 ? ' (near ideal)' : frame >= n - 1 ? ' (near Euclidean)' : '');
+}
+
+// Playback controls
+document.getElementById('fwd').onclick = () => { playing = 1; };
+document.getElementById('rev').onclick = () => { playing = -1; };
+document.getElementById('pause').onclick = () => { playing = 0; };
+slider.addEventListener('input', () => {
+  playing = 0;
+  applyState(parseInt(slider.value) / 1000);
+});
+
+// Turntable drag
+let dragging = false, lastx = 0, lasty = 0;
+
+canvas.addEventListener('pointerdown', e => {
+  dragging = true; lastx = e.clientX; lasty = e.clientY;
+  canvas.classList.add('dragging');
+  canvas.setPointerCapture(e.pointerId);
+});
+canvas.addEventListener('pointermove', e => {
+  if (!dragging) return;
+  const dx = e.clientX - lastx, dy = e.clientY - lasty;
+  lastx = e.clientX; lasty = e.clientY;
+  const w = Math.max(canvas.clientWidth, 1), h = Math.max(canvas.clientHeight, 1);
+  if (e.shiftKey) {
+    turntable.quaternion.premultiply(
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 0, 1), 2.5 * dx / w));
+  } else {
+    turntable.quaternion.premultiply(
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0, 1, 0), 3.0 * dx / w));
+    turntable.quaternion.premultiply(
+      new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1, 0, 0), 3.0 * dy / h));
+  }
+});
+canvas.addEventListener('pointerup', e => {
+  dragging = false; canvas.classList.remove('dragging');
+  try { canvas.releasePointerCapture(e.pointerId); } catch(_) {}
+});
+canvas.addEventListener('pointercancel', () => { dragging = false; canvas.classList.remove('dragging'); });
+
+// Zoom
+canvas.addEventListener('wheel', e => {
+  e.preventDefault();
+  camtargetz *= Math.exp(0.0015 * e.deltaY);
+  camtargetz = THREE.MathUtils.clamp(camtargetz, 0.35 * homecamz, 6.0 * homecamz);
+}, { passive: false });
+
+// Resize
+window.addEventListener('resize', () => {
+  camera.aspect = canvas.clientWidth / canvas.clientHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(canvas.clientWidth, canvas.clientHeight, false);
+});
+
+// Animate
+function animate() {
+  requestAnimationFrame(animate);
+  if (playing !== 0) {
+    let newU = u + playing * 0.003;
+    if (newU <= 0) { newU = 0; playing = 0; }
+    if (newU >= 1) { newU = 1; playing = 0; }
+    applyState(newU);
+  }
+  camera.position.z += 0.18 * (camtargetz - camera.position.z);
+  camera.lookAt(0, 0, 0);
+  renderer.render(scene, camera);
+}
+</script>
+</body>
+</html>

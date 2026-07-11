@@ -18,7 +18,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
 OUT = os.path.join(TOP, "site", "personal")
 sys.path.insert(0, HERE)
-from glb import retreat_to_incenter, write_gltf_like, write_gltf_groups
+from glb import retreat_to_incenter, write_gltf_like, write_gltf_groups, write_gltf_morph
 from realize_h import develop_h, klein, poincare, center
 from walklib import develop
 from clers_tools import clers_svg, COLORS
@@ -32,16 +32,20 @@ BLACK = (0.0, 0.0, 0.0)
 
 STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
          "line-height:1.6;color:#222;padding:0 1em}"
-         "h1{font-family:monospace;font-size:1.15em;word-break:break-all}"
-         ".info{font-size:.9em;color:#555;margin:-.4em 0 1em}"
-         ".cell{position:relative;width:100%;padding-bottom:88%}"
-         ".cell model-viewer{position:absolute;top:0;left:0;width:100%;"
-         "height:100%;background:#f0f0f0}"
-         ".svgwrap{border:1px solid #ddd;padding:2%}"
-         ".svgwrap svg{width:100%;height:auto}"
-         ".label{text-align:center;font-size:.85em;color:#888;margin:.2em 0 1.2em}"
-         "input[type=range]{width:100%}"
-         "a{color:#06c}")
+         "h1{font-family:monospace;font-size:1.2em;word-break:break-all}"
+         "nav{font-size:.9em}nav a{color:#2255aa;text-decoration:none}"
+         "nav a:hover{text-decoration:underline}"
+         ".info{font-size:.9em;color:#555;margin:-.5em 0 .5em}"
+         ".hint{font-size:.8em;color:#aaa;font-style:italic;margin-bottom:1em}"
+         ".pair{display:grid;grid-template-columns:1fr 1fr;gap:.8em;margin-bottom:1em}"
+         ".cell{position:relative;width:100%;padding-bottom:100%}"
+         ".cell iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}"
+         ".cell .svgwrap{position:absolute;top:0;left:0;width:100%;height:100%;"
+         "display:flex;align-items:center;justify-content:center;"
+         "border:1px solid #ddd;box-sizing:border-box}"
+         ".cell .svgwrap svg{max-width:90%;max-height:90%}"
+         ".label{text-align:center;font-size:.8em;color:#888;margin-top:.2em}"
+         "a{color:#2255aa}")
 
 MV = ('<script type="module" src="https://ajax.googleapis.com/ajax/libs/'
       'model-viewer/3.5.0/model-viewer.min.js"></script>')
@@ -86,42 +90,27 @@ def glb_euclid(name, faces, V, bends, outdir):
     write_gltf_groups(os.path.join(outdir, f"{name}_clers.glb"), v2, groups)
 
 
-def glb_morphs(name, faces, V, nc, outdir):
+def glb_movies(name, faces, V, nc, outdir):
+    """two animated morph GLBs (Poincare, Klein), ideal end -> Euclidean."""
     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
-    frames = []
-    for i, a in enumerate(ALPHAS):
+    fp, fk, f2ref = [], [], None
+    for a in ALPHAS:
         bends = solve_alpha(nc, a)
         if bends is None:
-            frames = []          # contiguous from the ideal end
+            fp, fk = [], []          # contiguous from the ideal end
             continue
         bd = {tuple(sorted(e)): b for e, b in bends.items()}
         pos = center(develop_h(faces, bd, math.radians(a))[0])
-        for proj, tag in ((poincare, "p"), (klein, "k")):
+        for proj, acc in ((poincare, fp), (klein, fk)):
             P = proj(pos)
             verts = [tuple(map(float, P[v])) for v in range(1, V + 1)]
-            v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
-            write_gltf_like(os.path.join(outdir, f"{name}_{tag}{i:02d}.glb"),
-                            v2, f2, mats)
-        frames.append((i, round(a, 2)))
-    return frames
-
-
-def slider(name, tag, frames, label):
-    idxs = [i for i, _ in frames]
-    alphas = {i: a for i, a in frames}
-    import json as _json
-    js_i = _json.dumps(idxs)
-    js_a = _json.dumps({str(i): alphas[i] for i in idxs})
-    last = idxs[-1]
-    return (f'<div class=cell><model-viewer id="mv_{tag}" '
-            f'src="../glb/{name}_{tag}{last:02d}.glb" camera-controls></model-viewer></div>'
-            f'<input type=range min=0 max={len(idxs)-1} value={len(idxs)-1} '
-            f'oninput=\'(function(k){{var I={js_i},A={js_a};var i=I[k];'
-            f'document.getElementById("mv_{tag}").src="../glb/{name}_"+"{tag}"+'
-            f'String(i).padStart(2,"0")+".glb";'
-            f'document.getElementById("lb_{tag}").textContent="{label}, alpha = "+A[i]+" deg";}})(this.value)\'>'
-            f'<div class=label id="lb_{tag}">{label}, alpha = {alphas[last]} deg</div>')
-
+            v2, f2, _ = retreat_to_incenter(verts, fidx, 0.9)
+            acc.append(v2)
+            f2ref = f2
+    if len(fp) >= 2:
+        write_gltf_morph(os.path.join(outdir, f"{name}_morph_p.glb"), fp, f2ref)
+        write_gltf_morph(os.path.join(outdir, f"{name}_morph_k.glb"), fk, f2ref)
+    return len(fp)
 
 def build_net(job):
     name, nc = job
@@ -133,31 +122,42 @@ def build_net(job):
     if bends is None:
         return (name, "SOLVE-FAIL")
     glb_euclid(name, faces, V, bends, outdir)
-    frames = glb_morphs(name, faces, V, nc, outdir)
+    nframes = glb_movies(name, faces, V, nc, outdir)
     E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
+
+    def cell_iframe(src, label):
+        return (f'<div><div class=cell><iframe src="{src}"></iframe></div>'
+                f'<div class=label>{label}</div></div>')
+
     body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
             f'<meta name=viewport content="width=device-width,initial-scale=1">'
-            f'<title>{name}</title>{MV}<style>{STYLE}</style></head><body>'
+            f'<title>{name}</title><style>{STYLE}</style></head><body>'
+            f'<nav><a href="index.html">{V} vertices</a> &middot; '
+            f'<a href="../index.html">neoplatonic solids</a></nav>'
             f'<h1>{name}</h1>'
-            f'<div class=info>v = {V} &middot; {len(faces)} faces &middot; {E} edges'
-            f' &middot; <a href="index.html">v = {V} index</a></div>'
-            f'<div class=cell><model-viewer src="../glb/{name}_rb.glb" '
-            f'camera-controls></model-viewer></div>'
-            f'<div class=label>the realization</div>']
-    if frames:
-        body.append(slider(name, "p", frames, "morph, Poincar&eacute;"))
-        body.append(slider(name, "k", frames, "morph, Klein"))
-    body.append(f'<div class=cell><model-viewer src="../glb/{name}_clers.glb" '
-                f'camera-controls></model-viewer></div>'
-                f'<div class=label>CLERS coloring</div>')
-    body.append(f'<div class=svgwrap>{clers_svg(name)}</div>'
-                f'<div class=label>CLERS layout</div>')
-    body.append('</body></html>')
+            f'<p class=info>V={V} &nbsp; E={E} &nbsp; F={len(faces)}</p>'
+            f'<p class=hint>Models can be manipulated.</p>',
+            '<div class=pair>',
+            cell_iframe(f'../turntable.html?file=glb/{name}_rb.glb', 'Euclidean'),
+            '</div>']
+    if nframes >= 2:
+        body += ['<div class=pair>',
+                 cell_iframe(f'../morph.html?file=glb/{name}_morph_p.glb',
+                             'ideal to Euclidean, Poincar&eacute;'),
+                 cell_iframe(f'../morph.html?file=glb/{name}_morph_k.glb',
+                             'ideal to Euclidean, Klein'),
+                 '</div>']
+    body += ['<div class=pair>',
+             cell_iframe(f'../turntable.html?file=glb/{name}_clers.glb',
+                         'CLERS colored'),
+             f'<div><div class=cell><div class=svgwrap>{clers_svg(name)}</div></div>'
+             f'<div class=label>CLERS layout</div></div>',
+             '</div>', '</body></html>']
     vdir = os.path.join(OUT, str(V))
     os.makedirs(vdir, exist_ok=True)
     with open(os.path.join(vdir, f"{name}.html"), "w") as f:
         f.write('\n'.join(body))
-    return (name, f"OK {len(frames)} frames")
+    return (name, f"OK {nframes} frames")
 
 
 def main():
