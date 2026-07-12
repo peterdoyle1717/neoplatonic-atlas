@@ -206,20 +206,24 @@ def klein_to_poincare(verts):
 
 
 def align_frames(frames):
-    """rotate each frame (proper rotation, Kabsch) onto its predecessor:
-    frames are developed and centered independently, so consecutive
-    frames differ by a spurious rigid rotation on top of the genuine
-    shape change; this removes the rotation."""
+    """remove the spurious rigid rotation between consecutive frames
+    (each is developed and centered independently), anchoring at the
+    LAST frame: the Euclidean end keeps the flat developer's own
+    coordinates -- the same frame the red-black GLB is built in -- and
+    each earlier frame is rotated onto its successor (best-fit proper
+    rotation via SVD, the standard point-set superposition recipe)."""
     import numpy as np
-    out = [np.asarray(frames[0], float)]
-    for F in frames[1:]:
-        A = np.asarray(F, float)
+    n = len(frames)
+    out = [None] * n
+    out[-1] = np.asarray(frames[-1], float)
+    for k in range(n - 2, -1, -1):
+        A = np.asarray(frames[k], float)
         A = A - A.mean(axis=0)
-        B = out[-1] - out[-1].mean(axis=0)
+        B = out[k + 1] - out[k + 1].mean(axis=0)
         U, _, Vt = np.linalg.svd(A.T @ B)
         d = 1.0 if np.linalg.det(U @ Vt) > 0 else -1.0
         R = U @ np.diag([1.0, 1.0, d]) @ Vt
-        out.append(A @ R)
+        out[k] = A @ R
     return [[tuple(v) for v in F] for F in out]
 
 
