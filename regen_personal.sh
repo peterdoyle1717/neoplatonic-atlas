@@ -10,3 +10,6 @@ NEO="$(cd .. && pwd)"
 
 /bin/rm -rf site/personal
 python3 builders/personal.py
+# hull-buried exemplars (v=17..24) + front page + special pages
+python3 builders/personal.py data/nets_buried_old.txt
+python3 builders/special.py

@@ -235,17 +235,21 @@ def build_net(job):
     return (name, f"OK {nframes} frames")
 
 
-def main():
+def main(input_path=None, exemplars=False):
+    """Build pages for the nets in input_path (default data/nets_v4_14.txt,
+    lines: name netcode [extra columns ignored]). exemplars=True is for
+    extra sets beyond the browse range: per-v indexes list just what was
+    built and the master index is left alone (special.py owns it)."""
     os.makedirs(os.path.join(OUT, "glb"), exist_ok=True)
     # viewer wrappers: source of truth is builders/assets/
     import shutil
     for w in ("morph.html", "turntable.html"):
         shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
     jobs = []
-    with open(os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
+    with open(input_path or os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
         for ln in f:
-            name, nc = ln.split()
-            jobs.append((name, nc))
+            t = ln.split()
+            jobs.append((t[0], t[1]))
     with Pool(6) as pool:
         results = pool.map(build_net, jobs)
     for name, msg in results:
@@ -263,18 +267,26 @@ def main():
     for V in sorted(byv):
         names = sorted(byv[V])
         master.append(f'<p><a href="{V}/index.html">v = {V}</a> ({len(names)} nets)</p>')
+        note = (' &middot; exemplars only, not the full set at this size'
+                if exemplars else '')
         rows = [f'<!DOCTYPE html><html><head><meta charset=utf-8>'
                 f'<title>v = {V}</title><style>{STYLE}</style></head><body>'
-                f'<h1>v = {V}</h1><div class=info><a href="../index.html">all</a></div>']
+                f'<h1>v = {V}</h1><div class=info>'
+                f'<a href="../index.html">all</a>{note}</div>']
         rows += [f'<p><a href="{n}.html">{n}</a></p>' for n in names]
         rows.append('</body></html>')
         with open(os.path.join(OUT, str(V), "index.html"), "w") as f:
             f.write('\n'.join(rows))
-    master.append('</body></html>')
-    with open(os.path.join(OUT, "index.html"), "w") as f:
-        f.write('\n'.join(master))
+    if not exemplars:
+        master.append('</body></html>')
+        with open(os.path.join(OUT, "index.html"), "w") as f:
+            f.write('\n'.join(master))
     print("indexes written", flush=True)
 
 
 if __name__ == "__main__":
-    main()
+    import sys
+    if len(sys.argv) > 1:
+        main(sys.argv[1], exemplars=True)
+    else:
+        main()
