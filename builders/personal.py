@@ -143,14 +143,14 @@ def glb_euclid(name, faces, V, bends, outdir):
     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
-    write_gltf_like(os.path.join(outdir, f"{name}_rb.glb"), v2, f2, mats)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
     # CLERS coloring: retreat emits 7 faces per original (6 border, 1 center)
     groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
     for L, rgb in RGB.items():
         gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
         if gf:
             groups.append((rgb, gf))
-    write_gltf_groups(os.path.join(outdir, f"{name}_clers.glb"), v2, groups)
+    write_gltf_groups(os.path.join(outdir, "clers.glb"), v2, groups)
 
 
 ## geometric from the ideal end, then a linear tail so the arrival at 60
@@ -251,29 +251,33 @@ def glb_movies(name, faces, V, nc, outdir):
     fk.append(ve)
     fp = align_frames(fp)
     fk = align_frames(fk)
-    write_gltf_morph(os.path.join(outdir, f"{name}_morph_p.glb"), fp, tris)
-    write_gltf_morph(os.path.join(outdir, f"{name}_morph_k.glb"), fk, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
     return len(fp)
 
 def build_net(job):
+    """One directory per net: <v>/<NAME>/ holds the page (index.html)
+    and all of the net's artifacts (rb.glb, clers.glb, morph_p.glb,
+    morph_k.glb). Shared viewers live two levels up."""
     name, nc = job
     faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
     V = max(max(f) for f in faces)
-    outdir = os.path.join(OUT, "glb")
-    os.makedirs(outdir, exist_ok=True)
-    if not (os.path.exists(os.path.join(outdir, f"{name}_rb.glb"))
-            and os.path.exists(os.path.join(outdir, f"{name}_clers.glb"))):
+    netdir = os.path.join(OUT, str(V), name)
+    os.makedirs(netdir, exist_ok=True)
+    if not (os.path.exists(os.path.join(netdir, "rb.glb"))
+            and os.path.exists(os.path.join(netdir, "clers.glb"))):
         bends = solve_prove_60(nc)
         if bends is None:
             return (name, "SOLVE-FAIL")
-        glb_euclid(name, faces, V, bends, outdir)
-    if (os.path.exists(os.path.join(outdir, f"{name}_morph_p.glb"))
-            and os.path.exists(os.path.join(outdir, f"{name}_morph_k.glb"))):
+        glb_euclid(name, faces, V, bends, netdir)
+    if (os.path.exists(os.path.join(netdir, "morph_p.glb"))
+            and os.path.exists(os.path.join(netdir, "morph_k.glb"))):
         nframes, built = len(MORPH_ALPHAS) + 1, "reused"
     else:
-        nframes = glb_movies(name, faces, V, nc, outdir)
+        nframes = glb_movies(name, faces, V, nc, netdir)
         built = f"built {nframes} frames"
     E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
+    here = f"{V}/{name}"   # file= paths are resolved relative to the viewers at OUT root
 
     def cell_iframe(src, label):
         return (f'<div><div class=cell><iframe src="{src}"></iframe></div>'
@@ -282,19 +286,19 @@ def build_net(job):
     body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
             f'<meta name=viewport content="width=device-width,initial-scale=1">'
             f'<title>{name}</title><style>{STYLE}</style></head><body>'
-            f'<nav><a href="index.html">{V} vertices</a> &middot; '
-            f'<a href="../index.html">neoplatonic solids</a></nav>'
+            f'<nav><a href="../index.html">{V} vertices</a> &middot; '
+            f'<a href="../../index.html">neoplatonic solids</a></nav>'
             f'<h1>{name}</h1>'
             f'<p class=info>V={V} &nbsp; E={E} &nbsp; F={len(faces)}</p>'
             f'<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>',
-            cell_iframe(f'../turntable.html?file=glb/{name}_rb.glb', 'Euclidean')]
+            cell_iframe(f'../../turntable.html?file={here}/rb.glb', 'Euclidean')]
     # 2x2 block:  Euclidean | Poincare morph
     #             Klein morph | ideal net
     if nframes >= 2:
-        body += [cell_iframe(f'../morph.html?file=glb/{name}_morph_p.glb',
+        body += [cell_iframe(f'../../morph.html?file={here}/morph_p.glb',
                              'ideal to Euclidean, Poincar&eacute;'),
-                 cell_iframe(f'../morph.html?file=glb/{name}_morph_k.glb',
+                 cell_iframe(f'../../morph.html?file={here}/morph_k.glb',
                              'ideal to Euclidean, Klein')]
     inet = ideal_net_svg(nc, faces)
     if inet:
@@ -302,24 +306,23 @@ def build_net(job):
                     f'<div class=label>ideal net</div></div>')
     body.append('</div>')
     body += ['<div class=pair>',
-             cell_iframe(f'../turntable.html?file=glb/{name}_clers.glb',
+             cell_iframe(f'../../turntable.html?file={here}/clers.glb',
                          'CLERS colored'),
              f'<div><div class=cell><div class=svgwrap>{clers_svg(name)}</div></div>'
              f'<div class=label>CLERS layout</div></div>',
              '</div>', '</body></html>']
-    vdir = os.path.join(OUT, str(V))
-    os.makedirs(vdir, exist_ok=True)
-    with open(os.path.join(vdir, f"{name}.html"), "w") as f:
+    with open(os.path.join(netdir, "index.html"), "w") as f:
         f.write('\n'.join(body))
     return (name, f"OK morphs {built}")
 
 
 def main(input_path=None, exemplars=False):
     """Build pages for the nets in input_path (default data/nets_v4_14.txt,
-    lines: name netcode [extra columns ignored]). exemplars=True is for
-    extra sets beyond the browse range: per-v indexes list just what was
-    built and the master index is left alone (special.py owns it)."""
-    os.makedirs(os.path.join(OUT, "glb"), exist_ok=True)
+    lines: name netcode [extra columns ignored]). Each net gets its own
+    directory <v>/<NAME>/. exemplars=True marks sets beyond the browse
+    range: their per-v indexes carry a note. The front page is
+    special.py's job."""
+    os.makedirs(OUT, exist_ok=True)
     # viewer wrappers: source of truth is builders/assets/
     import shutil
     for w in ("morph.html", "turntable.html"):
@@ -333,33 +336,22 @@ def main(input_path=None, exemplars=False):
         results = pool.map(build_net, jobs)
     for name, msg in results:
         print(name, msg, flush=True)
-    # per-v indexes and master index (glb paths are relative to the v-dirs,
-    # so symlink glb into each v-dir? no: pages live in <v>/ and reference
-    # glb/... -> place a relative link one level up instead)
     byv = {}
     for name, nc in jobs:
         V = max(max(int(x) for x in f.split(',')) for f in nc.split(';'))
         byv.setdefault(V, []).append(name)
-    master = ['<!DOCTYPE html><html><head><meta charset=utf-8>'
-              f'<title>personal pages</title><style>{STYLE}</style></head><body>'
-              '<h1>Prime nets, v &le; 14</h1>']
     for V in sorted(byv):
         names = sorted(byv[V])
-        master.append(f'<p><a href="{V}/index.html">v = {V}</a> ({len(names)} nets)</p>')
         note = (' &middot; exemplars only, not the full set at this size'
                 if exemplars else '')
         rows = [f'<!DOCTYPE html><html><head><meta charset=utf-8>'
                 f'<title>v = {V}</title><style>{STYLE}</style></head><body>'
                 f'<h1>v = {V}</h1><div class=info>'
-                f'<a href="../index.html">all</a>{note}</div>']
-        rows += [f'<p><a href="{n}.html">{n}</a></p>' for n in names]
+                f'<a href="../index.html">neoplatonic solids</a>{note}</div>']
+        rows += [f'<p><a href="{n}/">{n}</a></p>' for n in names]
         rows.append('</body></html>')
         with open(os.path.join(OUT, str(V), "index.html"), "w") as f:
             f.write('\n'.join(rows))
-    if not exemplars:
-        master.append('</body></html>')
-        with open(os.path.join(OUT, "index.html"), "w") as f:
-            f.write('\n'.join(master))
     print("indexes written", flush=True)
 
 
