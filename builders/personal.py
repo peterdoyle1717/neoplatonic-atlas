@@ -205,6 +205,24 @@ def klein_to_poincare(verts):
     return out
 
 
+def align_frames(frames):
+    """rotate each frame (proper rotation, Kabsch) onto its predecessor:
+    frames are developed and centered independently, so consecutive
+    frames differ by a spurious rigid rotation on top of the genuine
+    shape change; this removes the rotation."""
+    import numpy as np
+    out = [np.asarray(frames[0], float)]
+    for F in frames[1:]:
+        A = np.asarray(F, float)
+        A = A - A.mean(axis=0)
+        B = out[-1] - out[-1].mean(axis=0)
+        U, _, Vt = np.linalg.svd(A.T @ B)
+        d = 1.0 if np.linalg.det(U @ Vt) > 0 else -1.0
+        R = U @ np.diag([1.0, 1.0, d]) @ Vt
+        out.append(A @ R)
+    return [[tuple(v) for v in F] for F in out]
+
+
 def glb_movies(name, faces, V, nc, outdir):
     """two animated morph GLBs (Poincare, Klein): ideal end first,
     exact Euclidean solid last, every frame filling the window."""
@@ -227,6 +245,8 @@ def glb_movies(name, faces, V, nc, outdir):
     ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
     fp.append(ve)
     fk.append(ve)
+    fp = align_frames(fp)
+    fk = align_frames(fk)
     write_gltf_morph(os.path.join(outdir, f"{name}_morph_p.glb"), fp, tris)
     write_gltf_morph(os.path.join(outdir, f"{name}_morph_k.glb"), fk, tris)
     return len(fp)

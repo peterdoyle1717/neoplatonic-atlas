@@ -58,7 +58,9 @@ def develop_h(faces, bend, alpha):
         wt = wt - mdot(wt, u) * u
         w = norm_sp(wt)
         # n: spacelike unit vector orthogonal to M, u, w; sign fixed so the
-        # Euclidean limit matches the flat developer (calibrated below)
+        # Euclidean limit matches the flat developer (measured: Procrustes
+        # of the alpha=59.9 frame against walklib.develop needs rotation
+        # only, residual ~1e-3; the opposite sign needs a reflection)
         n = None
         for cand in (np.array([0.,0.,1.,0.]), np.array([0.,1.,0.,0.]),
                      np.array([1.,0.,0.,0.]), np.array([0.,0.,0.,1.])):
@@ -68,7 +70,7 @@ def develop_h(faces, bend, alpha):
             if q > 1e-12:
                 n = t / math.sqrt(q); break
         # orientation: det(M, w, u, n) fixes handedness of the frame
-        if np.linalg.det(np.stack([M, w, u, n])) < 0:
+        if np.linalg.det(np.stack([M, w, u, n])) > 0:
             n = -n
         d = -math.cos(theta) * w + math.sin(theta) * n
         return cha * M + sha * d
