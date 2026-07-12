@@ -355,17 +355,41 @@ def write_gltf_groups(outpath, verts, groups, embedded=True, meshname=None):
     else:
         gltf.save_binary(str(outpath))
 
-def write_gltf_morph(outpath, frames, faces, embedded=True, meshname=None):
+def vertex_normals(verts, faces):
+    """area-weighted per-vertex normals from the face winding."""
+    N = [[0.0, 0.0, 0.0] for _ in verts]
+    for a, b, c in faces:
+        A, B, C = verts[a], verts[b], verts[c]
+        u = (B[0]-A[0], B[1]-A[1], B[2]-A[2])
+        w = (C[0]-A[0], C[1]-A[1], C[2]-A[2])
+        nx = u[1]*w[2] - u[2]*w[1]
+        ny = u[2]*w[0] - u[0]*w[2]
+        nz = u[0]*w[1] - u[1]*w[0]
+        for i in (a, b, c):
+            N[i][0] += nx; N[i][1] += ny; N[i][2] += nz
+    out = []
+    for x, y, z in N:
+        r = math.sqrt(x*x + y*y + z*z) or 1.0
+        out.append((x/r, y/r, z/r))
+    return out
+
+
+def write_gltf_morph(outpath, frames, faces, embedded=True, meshname=None,
+                     seconds_per_frame=1.0):
     """Single animated GLB: base mesh = frames[0], one morph target per
     later frame, weights animation crossfading them in sequence.
-    frames: list of vertex lists (same length); faces: triangle indices."""
+    frames: list of vertex lists (same length); faces: triangle indices.
+    Old-atlas conventions: every frame normalized independently to max
+    radius 0.95 (the model fills the window at every stage), one second
+    per transition, smooth normals carried as morph NORMAL deltas."""
+    def norm95(fr):
+        r = max(math.sqrt(x*x + y*y + z*z) for (x, y, z) in fr) or 1.0
+        s = 0.95 / r
+        return [(x*s, y*s, z*s) for (x, y, z) in fr]
+    frames = [norm95(fr) for fr in frames]
+    normals = [vertex_normals(fr, faces) for fr in frames]
     base = frames[0]
     n = len(base)
-    # normalize: base frame to radius 0.95, same scale for all frames
-    r = max(math.sqrt(x*x + y*y + z*z) for (x, y, z) in base) or 1.0
-    s = 0.95 / r
-    frames = [[(x*s, y*s, z*s) for (x, y, z) in fr] for fr in frames]
-    base = frames[0]
     K = len(frames) - 1
 
     idxs = [i for tri in faces for i in tri]
@@ -403,18 +427,25 @@ def write_gltf_morph(outpath, frames, faces, embedded=True, meshname=None):
     accessors.append(pg.Accessor(bufferView=vi, byteOffset=0,
                                  componentType=idx_comp, count=len(idxs),
                                  type=pg.SCALAR, max=[max(idxs)], min=[min(idxs)]))
-    # base positions
-    raw = struct.pack("<" + "f"*(3*n), *[c for v in base for c in v])
-    pos_acc = vec3_accessor(add_blob(raw, target=pg.ARRAY_BUFFER), base)
-    # morph targets: deltas
+    def pack_vec3(data, target=pg.ARRAY_BUFFER):
+        raw = struct.pack("<" + "f"*(3*len(data)), *[c for v in data for c in v])
+        return vec3_accessor(add_blob(raw, target=target), data)
+
+    def deltas(cur, ref):
+        return [(cur[i][0]-ref[i][0], cur[i][1]-ref[i][1], cur[i][2]-ref[i][2])
+                for i in range(n)]
+
+    # base positions + normals
+    pos_acc = pack_vec3(base)
+    nrm_acc = pack_vec3(normals[0])
+    # morph targets: POSITION and NORMAL deltas
     target_accs = []
-    for fr in frames[1:]:
-        deltas = [(fr[i][0]-base[i][0], fr[i][1]-base[i][1], fr[i][2]-base[i][2])
-                  for i in range(n)]
-        raw = struct.pack("<" + "f"*(3*n), *[c for v in deltas for c in v])
-        target_accs.append(vec3_accessor(add_blob(raw, target=pg.ARRAY_BUFFER), deltas))
-    # animation: times 0..1, weights one-hot ramps
-    times = [k / K for k in range(K + 1)]
+    for k in range(1, K + 1):
+        pa = pack_vec3(deltas(frames[k], base))
+        na = pack_vec3(deltas(normals[k], normals[0]))
+        target_accs.append((pa, na))
+    # animation: seconds_per_frame per transition, weights one-hot ramps
+    times = [k * seconds_per_frame for k in range(K + 1)]
     raw = struct.pack("<" + "f"*len(times), *times)
     vi = add_blob(raw)
     t_acc = len(accessors)
@@ -443,9 +474,11 @@ def write_gltf_morph(outpath, frames, faces, embedded=True, meshname=None):
     gltf.materials = [make_material([0.25, 0.55, 0.85], 1.0, 0.45)]
     prim = pg.Primitive()
     prim.attributes.POSITION = pos_acc
+    prim.attributes.NORMAL = nrm_acc
     prim.indices = idx_acc
     prim.material = 0
-    prim.targets = [pg.Attributes(POSITION=acc) for acc in target_accs]
+    prim.targets = [pg.Attributes(POSITION=pa, NORMAL=na)
+                    for pa, na in target_accs]
     gltf.meshes = [pg.Mesh(name=meshname, primitives=[prim],
                            weights=[0.0] * K)]
     gltf.nodes = [pg.Node(name=meshname, mesh=0)]

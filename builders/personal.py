@@ -25,8 +25,6 @@ from clers_tools import clers_svg, COLORS
 
 BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
 HOROZ = os.environ.get("HOROZ_BIN", "/Users/doyle/Dropbox/neo/ideal/src/horoz_c")
-ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(24)][::-1]   # ~2.1 .. 59.9
-
 RGB = {'A': (1.0, 0.0, 0.0), 'B': (1.0, 0.53, 0.0), 'C': (1.0, 0.8, 0.0),
        'D': (0.0, 0.67, 0.0), 'E': (0.0, 0.4, 1.0)}
 BLACK = (0.0, 0.0, 0.0)
@@ -155,26 +153,79 @@ def glb_euclid(name, faces, V, bends, outdir):
     write_gltf_groups(os.path.join(outdir, f"{name}_clers.glb"), v2, groups)
 
 
+MORPH_ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(0, 24, 3)]  # 2.1..56.9
+SUBDIV = 10
+
+
+def bary_grid(n):
+    """barycentric weights + triangle pattern for one subdivided face,
+    wound consistently with the face's (a, b, c) orientation."""
+    pts, idx = [], {}
+    for i in range(n + 1):
+        for j in range(n + 1 - i):
+            idx[(i, j)] = len(pts)
+            pts.append(((n - i - j) / n, i / n, j / n))
+    tris = []
+    for i in range(n):
+        for j in range(n - i):
+            a, b, c = idx[(i, j)], idx[(i + 1, j)], idx[(i, j + 1)]
+            tris.append((a, b, c))
+            if j < n - i - 1:
+                tris.append((b, idx[(i + 1, j + 1)], c))
+    return pts, tris
+
+
+def subdivided_frame(faces, P, grid):
+    """sample each face on the barycentric grid, linearly in the given
+    3d coordinates (in Klein, chords are geodesics, so the linear
+    samples lie on the hyperbolic face; in Euclidean they lie on the
+    flat face). Returns (verts, tris) with per-face vertex blocks."""
+    wts, pat = grid
+    verts, tris = [], []
+    for a, b, c in faces:
+        base = len(verts)
+        A, B, C = P[a], P[b], P[c]
+        for wa, wb, wc in wts:
+            verts.append((wa * A[0] + wb * B[0] + wc * C[0],
+                          wa * A[1] + wb * B[1] + wc * C[1],
+                          wa * A[2] + wb * B[2] + wc * C[2]))
+        tris += [(base + i, base + j, base + k) for i, j, k in pat]
+    return verts, tris
+
+
+def klein_to_poincare(verts):
+    out = []
+    for x, y, z in verts:
+        q = math.sqrt(max(0.0, 1.0 - (x * x + y * y + z * z)))
+        s = 1.0 / (1.0 + q)
+        out.append((x * s, y * s, z * s))
+    return out
+
+
 def glb_movies(name, faces, V, nc, outdir):
-    """two animated morph GLBs (Poincare, Klein), ideal end -> Euclidean."""
-    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
-    fp, fk, f2ref = [], [], None
-    for a in ALPHAS:
+    """two animated morph GLBs (Poincare, Klein): ideal end first,
+    exact Euclidean solid last, every frame filling the window."""
+    grid = bary_grid(SUBDIV)
+    fp, fk, tris = [], [], None
+    for a in MORPH_ALPHAS:
         bends = solve_alpha(nc, a)
         if bends is None:
-            fp, fk = [], []          # contiguous from the ideal end
-            continue
+            return 0
         bd = {tuple(sorted(e)): b for e, b in bends.items()}
         pos = center(develop_h(faces, bd, math.radians(a))[0])
-        for proj, acc in ((poincare, fp), (klein, fk)):
-            P = proj(pos)
-            verts = [tuple(map(float, P[v])) for v in range(1, V + 1)]
-            v2, f2, _ = retreat_to_incenter(verts, fidx, 0.9)
-            acc.append(v2)
-            f2ref = f2
-    if len(fp) >= 2:
-        write_gltf_morph(os.path.join(outdir, f"{name}_morph_p.glb"), fp, f2ref)
-        write_gltf_morph(os.path.join(outdir, f"{name}_morph_k.glb"), fk, f2ref)
+        vk, tris = subdivided_frame(faces, klein(pos), grid)
+        fk.append(vk)
+        fp.append(klein_to_poincare(vk))
+    bends60 = solve_prove_60(nc)
+    if bends60 is None:
+        return 0
+    pos60, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends60.items()})
+    ctr = sum(pos60.values()) / len(pos60)
+    ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+    fp.append(ve)
+    fk.append(ve)
+    write_gltf_morph(os.path.join(outdir, f"{name}_morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, f"{name}_morph_k.glb"), fk, tris)
     return len(fp)
 
 def build_net(job):
@@ -191,9 +242,10 @@ def build_net(job):
         glb_euclid(name, faces, V, bends, outdir)
     if (os.path.exists(os.path.join(outdir, f"{name}_morph_p.glb"))
             and os.path.exists(os.path.join(outdir, f"{name}_morph_k.glb"))):
-        nframes = 24
+        nframes, built = 9, "reused"
     else:
         nframes = glb_movies(name, faces, V, nc, outdir)
+        built = f"built {nframes} frames"
     E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
 
     def cell_iframe(src, label):
@@ -232,7 +284,7 @@ def build_net(job):
     os.makedirs(vdir, exist_ok=True)
     with open(os.path.join(vdir, f"{name}.html"), "w") as f:
         f.write('\n'.join(body))
-    return (name, f"OK {nframes} frames")
+    return (name, f"OK morphs {built}")
 
 
 def main(input_path=None, exemplars=False):

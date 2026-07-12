@@ -41,7 +41,7 @@ const glbFile = params.get('file') || 'morph_glb/10/CCCACACACACACAAE.glb';
 
 const BLUE = new THREE.Color(0.25, 0.55, 0.85);
 const RED  = new THREE.Color(1.0, 0.0, 0.0);
-const rhos = ['57.6\u00B0', '57.3\u00B0', '56.9\u00B0', '56.4\u00B0', '55.9\u00B0', '55.3\u00B0', '54.6\u00B0', '53.8\u00B0', '52.8\u00B0', '51.8\u00B0', '50.5\u00B0', '49.1\u00B0', '47.5\u00B0', '45.6\u00B0', '43.5\u00B0', '41.0\u00B0', '38.2\u00B0', '34.9\u00B0', '31.1\u00B0', '26.8\u00B0', '21.9\u00B0', '16.2\u00B0', '9.6\u00B0', '2.1\u00B0'];
+const rhos = ['2.1\u00B0', '21.9\u00B0', '34.9\u00B0', '43.5\u00B0', '49.1\u00B0', '52.8\u00B0', '55.3\u00B0', '56.9\u00B0', '60\u00B0'];
 
 const canvas = document.getElementById('c');
 const slider = document.getElementById('slider');
@@ -127,7 +127,7 @@ function applyState(newU) {
   const n = rhos.length;
   const frame = Math.min(Math.round(u * (n - 1)), n - 1);
   info.textContent = '\u03B1 = ' + rhos[frame] +
-    (frame === 0 ? ' (near ideal)' : frame >= n - 1 ? ' (near Euclidean)' : '');
+    (frame === 0 ? ' (ideal end)' : frame >= n - 1 ? ' (Euclidean)' : '');
 }
 
 // Playback controls
