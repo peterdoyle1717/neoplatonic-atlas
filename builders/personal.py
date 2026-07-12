@@ -153,7 +153,10 @@ def glb_euclid(name, faces, V, bends, outdir):
     write_gltf_groups(os.path.join(outdir, f"{name}_clers.glb"), v2, groups)
 
 
-MORPH_ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(0, 24, 3)]  # 2.1..56.9
+## geometric from the ideal end, then a linear tail so the arrival at 60
+## is even-paced (shape change near Euclid scales like 60 - alpha)
+MORPH_ALPHAS = ([60.0 - 57.9 * (0.87 ** i) for i in range(0, 24, 3)]
+                + [58.0, 59.0])  # 2.1 .. 56.9, 58, 59 (then exact 60)
 SUBDIV = 10
 
 
@@ -242,7 +245,7 @@ def build_net(job):
         glb_euclid(name, faces, V, bends, outdir)
     if (os.path.exists(os.path.join(outdir, f"{name}_morph_p.glb"))
             and os.path.exists(os.path.join(outdir, f"{name}_morph_k.glb"))):
-        nframes, built = 9, "reused"
+        nframes, built = len(MORPH_ALPHAS) + 1, "reused"
     else:
         nframes = glb_movies(name, faces, V, nc, outdir)
         built = f"built {nframes} frames"
@@ -262,18 +265,18 @@ def build_net(job):
             f'<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>',
             cell_iframe(f'../turntable.html?file=glb/{name}_rb.glb', 'Euclidean')]
+    # 2x2 block:  Euclidean | Poincare morph
+    #             Klein morph | ideal net
+    if nframes >= 2:
+        body += [cell_iframe(f'../morph.html?file=glb/{name}_morph_p.glb',
+                             'ideal to Euclidean, Poincar&eacute;'),
+                 cell_iframe(f'../morph.html?file=glb/{name}_morph_k.glb',
+                             'ideal to Euclidean, Klein')]
     inet = ideal_net_svg(nc, faces)
     if inet:
         body.append(f'<div><div class=cell><div class=svgwrap>{inet}</div></div>'
                     f'<div class=label>ideal net</div></div>')
     body.append('</div>')
-    if nframes >= 2:
-        body += ['<div class=pair>',
-                 cell_iframe(f'../morph.html?file=glb/{name}_morph_p.glb',
-                             'ideal to Euclidean, Poincar&eacute;'),
-                 cell_iframe(f'../morph.html?file=glb/{name}_morph_k.glb',
-                             'ideal to Euclidean, Klein'),
-                 '</div>']
     body += ['<div class=pair>',
              cell_iframe(f'../turntable.html?file=glb/{name}_clers.glb',
                          'CLERS colored'),
