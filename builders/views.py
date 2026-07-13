@@ -73,12 +73,11 @@ def flag_line(rec):
         bits.append("floppy")
     ei = rec.get("eisenstein", {})
     if ei.get("family"):
+        nid = rec.get("id", rec.get("name", ""))
         bits.append(f'Eisenstein: {ei["family"]} T={ei["T"]} '
-                    f'({ei["a"]},{ei["b"]})')
-    if ei.get("ancestors"):
-        bits.append("ancestors " + ", ".join(netlink(n) for n in ei["ancestors"]))
-    if ei.get("descendants"):
-        bits.append("descendants " + ", ".join(netlink(n) for n in ei["descendants"]))
+                    f'({ei["a"]},{ei["b"]}) &middot; '
+                    f'<a href="../../eisenmap/{ei["family"]}.html?net={nid}">'
+                    f'family map</a>')
     return " &middot; ".join(bits)
 
 

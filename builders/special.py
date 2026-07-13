@@ -205,7 +205,8 @@ def main():
     parts = []
     for fam in sorted(fams):
         rows = sorted(fams[fam], key=lambda r: r["eisenstein"]["T"])
-        parts.append(f'<h2>{fam}</h2>')
+        parts.append(f'<h2>{fam} &middot; <a href="../eisenmap/{fam}.html" '
+                     f'style="font-size:.85em">lattice map</a></h2>')
         parts.append(grid([item(r, f'T={r["eisenstein"]["T"]} '
                                    f'({r["eisenstein"]["a"]},{r["eisenstein"]["b"]}) '
                                    f'v={r["v"]}') for r in rows]))
@@ -309,6 +310,8 @@ document.getElementById('q').addEventListener('keydown',
     with open(os.path.join(OUT, 'index.html'), 'w') as f:
         f.write(front)
     print('front page written')
+    import eisenmap
+    eisenmap.generate()
 
 
 if __name__ == "__main__":
