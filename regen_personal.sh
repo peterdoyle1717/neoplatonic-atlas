@@ -9,7 +9,9 @@ NEO="$(cd .. && pwd)"
 [ -x "$NEO/ideal/src/horoz_c" ] || make -C "$NEO/ideal" src/horoz_c
 
 /bin/rm -rf site/personal
+# classification sweep (from neo/data/objs, ~2 min) and the page-worthy
+# list; then records+artifacts+pages; then galleries/by-v/front
+python3 builders/classify.py
+python3 builders/members.py
 python3 builders/personal.py
-# hull-buried exemplars (v=17..24) + front page + special pages
-python3 builders/personal.py data/nets_buried_old.txt
 python3 builders/special.py

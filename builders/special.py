@@ -1,32 +1,27 @@
 #!/usr/bin/env python3
-"""Front page + themed galleries for the personal atlas, in the old
-atlas's markup (CSS and cell structure lifted from the deployed
-math.dartmouth.edu/~doyle/docs/atlas pages).
+"""Site generator over the net records: stamps classification flags
+(data/class_v30.tsv) and Eisenstein relations (data/eisenstein.tsv)
+into each net.json, re-renders every page, then builds the galleries,
+the by-v listing pages, and the front page. Markup and CSS follow the
+old deployed atlas.
 
-Layout: site/personal/index.html (front), site/personal/gallery/*.html
-(themed thumbnail grids of model-viewers, captions linking to the
-per-net pages at <v>/<NAME>/).
-
-Galleries built here: hull-buried (exemplar list from the old atlas,
-depths recomputed), convex, pancakes. Classification is computed from
-the solved bends and developed coordinates of every net that has a
-page (data/nets_v4_14.txt + data/nets_buried_old.txt).
+Run after personal.py has built the net directories.
 """
-import math, os, sys
-import numpy as np
-from scipy.spatial import ConvexHull
+import csv, json, math, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
 OUT = os.path.join(TOP, "site", "personal")
+NETS = os.path.join(OUT, "nets")
 sys.path.insert(0, HERE)
-from walklib import develop
-from personal import solve_prove_60, MV
+from personal import MV
+from views import render_page
 
 GALLERY_CSS = (
     "body{font-family:Georgia,serif;max-width:1000px;margin:2em auto;"
     "line-height:1.6;color:#222;padding:0 1em}h1{font-size:1.3em}"
     "h1 a{color:inherit;text-decoration:none}h1 a:hover{text-decoration:underline}"
+    "h2{font-size:1em;margin-top:1.6em}"
     "p.desc{font-size:.9em;color:#555}"
     ".grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5em;margin-top:1em}"
     ".item{text-align:center}.item .cell{position:relative;width:100%;padding-bottom:100%}"
@@ -62,114 +57,192 @@ FRONT_CSS = (
     "#search-msg.err{color:#c33}")
 
 
-def solve_and_develop(nc):
-    """(P, V, bends) for one net; P = V x 3 developed coordinates."""
-    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
-    V = max(max(f) for f in faces)
-    bends = solve_prove_60(nc)
-    if bends is None:
-        return None, None, None
-    pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
-    return np.array([pos[v] for v in range(1, V + 1)]), V, bends
+def load_records():
+    recs = {}
+    for d in sorted(os.listdir(NETS)):
+        p = os.path.join(NETS, d, "net.json")
+        if os.path.exists(p):
+            recs[d] = json.load(open(p))
+    return recs
 
 
-def is_flat(P):
-    Q = P - P.mean(axis=0)
-    return np.linalg.svd(Q, compute_uv=False)[2] < 1e-9 * len(P)
+def stamp(recs):
+    """classification flags + eisenstein relations -> records; save +
+    re-render changed pages."""
+    cls = {}
+    cpath = os.path.join(TOP, "data", "class_v30.tsv")
+    if os.path.exists(cpath):
+        for r in csv.DictReader(open(cpath), delimiter='\t'):
+            if r['pancake'] != 'ERR':
+                cls[r['name']] = r
+    eis = {}
+    epath = os.path.join(TOP, "data", "eisenstein.tsv")
+    if os.path.exists(epath):
+        for r in csv.DictReader(open(epath), delimiter='\t'):
+            eis[r['name']] = r
+    for name, rec in recs.items():
+        changed = False
+        c = cls.get(name)
+        if c:
+            flags = {"pancake": bool(int(c['pancake'])),
+                     "convex": bool(int(c['convex'])),
+                     "strictly_convex": bool(int(c['strict'])),
+                     "buried": int(c['nburied']),
+                     "buried_depth": float(c['depth']),
+                     "floppy": bool(int(c['floppy']))}
+            if rec.get("flags") != flags:
+                rec["flags"] = flags
+                changed = True
+        e = eis.get(name)
+        if e:
+            ei = {"family": e['family'], "T": int(e['T']),
+                  "a": int(e['a']), "b": int(e['b']),
+                  "ancestors": [x for x in e['ancestors'].split(',') if x],
+                  "descendants": [x for x in e['descendants'].split(',') if x]}
+            if rec.get("eisenstein") != ei:
+                rec["eisenstein"] = ei
+                changed = True
+        if changed:
+            netdir = os.path.join(NETS, name)
+            with open(os.path.join(netdir, "net.json"), "w") as f:
+                json.dump(rec, f, indent=1)
+            render_page(netdir)
 
 
-def buried_info(P, tol=1e-6):
-    """(count, max depth) of vertices strictly inside the hull; depth =
-    min facet-plane distance = distance to the hull boundary."""
-    if is_flat(P):
-        return 0, 0.0
-    hull = ConvexHull(P)
-    A = hull.equations[:, :3]
-    b = hull.equations[:, 3]
-    depths = -(P @ A.T + b[None, :]).max(axis=1)
-    buried = depths[depths > tol]
-    return len(buried), (float(buried.max()) if len(buried) else 0.0)
-
-
-def item(name, V, caption):
+def item(rec, caption):
+    name = rec["name"]
     return (f'<div class=item><div class=cell>'
-            f'<model-viewer src="../{V}/{name}/rb.glb" '
+            f'<model-viewer src="../nets/{name}/rb.glb" '
             f'camera-orbit="0deg 100deg auto" camera-controls '
             f'interaction-prompt=none></model-viewer></div>'
-            f'<a href="../{V}/{name}/">{name}</a> '
+            f'<a href="../nets/{name}/">{name}</a> '
             f'<span class=v>{caption}</span></div>')
 
 
-def gallery(fname, title, desc, items):
+def gallery(fname, title, desc, body_html):
     html = (f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
             f'<meta name=viewport content="width=device-width,initial-scale=1">'
             f'<title>{title}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
             f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; {title}</h1>'
-            f'<p class=desc>{desc}</p><div class=grid>'
-            + ''.join(items) + '</div></body></html>')
+            f'<p class=desc>{desc}</p>' + body_html + '</body></html>')
     with open(os.path.join(OUT, "gallery", fname), 'w') as f:
         f.write(html)
-    print(f'gallery/{fname}: {len(items)} items')
+    print(f'gallery/{fname} written')
+
+
+def grid(items):
+    return '<div class=grid>' + ''.join(items) + '</div>'
+
+
+def census_counts():
+    """class counts over the full v<=30 census (not just built pages)."""
+    n = {"total": 0, "pancake": 0, "convex": 0, "floppy": 0, "buried": 0}
+    cpath = os.path.join(TOP, "data", "class_v30.tsv")
+    if os.path.exists(cpath):
+        for r in csv.DictReader(open(cpath), delimiter='\t'):
+            if r['pancake'] == 'ERR':
+                continue
+            n["total"] += 1
+            n["pancake"] += int(r['pancake'])
+            n["convex"] += int(r['convex'])
+            n["floppy"] += int(r['floppy'])
+            n["buried"] += 1 if int(r['nburied']) else 0
+    return n
 
 
 def main():
-    jobs = []
-    with open(os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
-        for ln in f:
-            name, nc = ln.split()
-            jobs.append((name, nc, None))
-    extra = os.path.join(TOP, "data", "nets_buried_old.txt")
-    if os.path.exists(extra):
-        with open(extra) as f:
-            for ln in f:
-                name, nc, d = ln.split()
-                jobs.append((name, nc, float(d)))
-
     os.makedirs(os.path.join(OUT, "gallery"), exist_ok=True)
-    buried, convex, pancakes, byv = [], [], [], {}
-    for name, nc, dold in jobs:
-        P, V, bends = solve_and_develop(nc)
-        if P is None:
-            print(f'SOLVE FAILED {name}')
-            continue
-        if dold is None:
-            byv.setdefault(V, []).append(name)
-        if is_flat(P):
-            pancakes.append((V, name))
-        elif min(bends.values()) >= -1e-9:
-            convex.append((V, name))
-        k, d = buried_info(P)
-        if k:
-            buried.append((V, name, k, d))
-        if dold is not None:
-            tag = 'ok' if abs(d - dold) < 5e-3 else 'MISMATCH'
-            print(f'{tag} v={V} depth={d:.3f} old={dold:.3f} {name}')
+    os.makedirs(os.path.join(OUT, "by-v"), exist_ok=True)
+    recs = load_records()
+    stamp(recs)
+    recs = load_records()
+    cn = census_counts()
 
-    buried.sort()
+    # -- galleries ---------------------------------------------------
+    buried = sorted((r for r in recs.values() if r["flags"].get("buried")),
+                    key=lambda r: -r["flags"]["buried_depth"])
     gallery('buried.html', 'Hull-buried',
-            'Solids with a vertex strictly inside the convex hull. None of '
-            f'the {sum(len(v) for v in byv.values())} nets with v &le; 14 '
-            'has one; the first appears at v = 17. Shown: the '
-            f'{len(buried)} examples of the old atlas&rsquo;s hull-buried '
-            'gallery (v = 17&ndash;24), recomputed here. d = depth of the '
-            'deepest buried vertex (edge length 1).',
-            [item(n, V, f'v={V} d={d:.3f}') for V, n, k, d in buried])
-    convex.sort()
-    gallery('convex.html', 'Convex',
-            'Solids that are convex: every bend nonnegative (pancakes '
-            'listed separately).',
-            [item(n, V, f'v={V}') for V, n in convex])
-    pancakes.sort()
-    gallery('pancakes.html', 'Pancakes',
-            'Flat solids: doubled polygons, the degenerate convex case.',
-            [item(n, V, f'v={V}') for V, n in pancakes])
+            f'Solids with a vertex strictly inside the convex hull: '
+            f'{cn["buried"]} of the {cn["total"]} prime nets with '
+            f'v &le; 30 (none below v = 17). Shown: the deepest built '
+            f'here, sorted by depth d of the deepest buried vertex '
+            f'(edge length 1); up to 8 per size have pages.',
+            grid([item(r, f'v={r["v"]} d={r["flags"]["buried_depth"]:.3f}')
+                  for r in buried]))
 
-    # front page, old atlas structure (Browse-by-size table dropped)
-    quick = ''.join(f'<a href="{v}/index.html">v={v}</a>\n' for v in sorted(byv))
-    ex = 'CCCACACACACAAE'
-    if ex not in byv.get(9, []):
-        ex = sorted(byv[min(byv)])[0]
-    exv = next(v for v, names in byv.items() if ex in names)
+    convex = sorted((r for r in recs.values() if r["flags"].get("convex")
+                     and not r["flags"].get("pancake")),
+                    key=lambda r: (r["v"], r["name"]))
+    gallery('convex.html', 'Convex',
+            f'Convex solids: every bend nonnegative &mdash; all '
+            f'{cn["convex"]} among the {cn["total"]} prime nets with '
+            f'v &le; 30 (pancakes listed separately). '
+            f'&ldquo;strictly&rdquo; marks strictly convex (every bend '
+            f'positive).',
+            grid([item(r, f'v={r["v"]}'
+                       + (' strictly' if r["flags"].get("strictly_convex") else ''))
+                  for r in convex]))
+
+    pancakes = sorted((r for r in recs.values() if r["flags"].get("pancake")),
+                      key=lambda r: (r["v"], r["name"]))
+    gallery('pancakes.html', 'Pancakes',
+            f'Flat solids (doubled polygons), the degenerate convex case: '
+            f'all {cn["pancake"]} among the prime nets with v &le; 30.',
+            grid([item(r, f'v={r["v"]}') for r in pancakes]))
+
+    floppy = sorted((r for r in recs.values() if r["flags"].get("floppy")),
+                    key=lambda r: (r["v"], r["name"]))
+    gallery('floppy.html', 'Floppy',
+            f'Nets whose realization has an infinitesimal flex (rank '
+            f'deficit): all {cn["floppy"]} among the prime nets with '
+            f'v &le; 30, from the flopper census.',
+            grid([item(r, f'v={r["v"]}') for r in floppy]))
+
+    subdiv = [r for r in recs.values() if r.get("eisenstein", {}).get("family")]
+    fams = {}
+    for r in subdiv:
+        fams.setdefault(r["eisenstein"]["family"], []).append(r)
+    parts = []
+    for fam in sorted(fams):
+        rows = sorted(fams[fam], key=lambda r: r["eisenstein"]["T"])
+        parts.append(f'<h2>{fam}</h2>')
+        parts.append(grid([item(r, f'T={r["eisenstein"]["T"]} '
+                                   f'({r["eisenstein"]["a"]},{r["eisenstein"]["b"]}) '
+                                   f'v={r["v"]}') for r in rows]))
+    gallery('subdiv.html', 'Eisenstein subdivisions',
+            'Subdivision families: each base net subdivided by the '
+            'Eisenstein integer a + b&omega;, T = a&sup2;+ab+b&sup2; '
+            '(&ldquo;geodesic subdivision&rdquo; in the old atlas). '
+            'Members up to v = 132 are built so far; each page lists '
+            'the net&rsquo;s Eisenstein ancestors and descendants.',
+            ''.join(parts))
+
+    # -- by-v listing pages -------------------------------------------
+    byv = {}
+    for r in recs.values():
+        byv.setdefault(r["v"], []).append(r)
+    for v, rows in sorted(byv.items()):
+        note = ('' if v <= 14 else
+                ' &middot; exemplars only, not the full set at this size')
+        body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
+                f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
+                f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
+                f'v = {v}</h1><p class=desc>{len(rows)} nets{note}</p>',
+                grid([item(r, f'v={v}') for r in
+                      sorted(rows, key=lambda r: r["name"])]),
+                '</body></html>']
+        with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
+            f.write('\n'.join(body))
+    print(f'by-v pages: {len(byv)}')
+
+    # -- front page ----------------------------------------------------
+    quick = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                    for v in sorted(byv) if v <= 14)
+    more = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                   for v in sorted(byv) if v > 14)
+    ex = "v9CCCACACACACAAE"
+    if ex not in recs:
+        ex = sorted(recs)[0]
     front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Neoplatonic Solids</title><style>{FRONT_CSS}</style>{MV}</head><body>
@@ -183,12 +256,16 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <h2>Quick links by size</h2>
 <div class="gallery-links">
 {quick}</div>
+<div class="gallery-links" style="font-size:.85em">
+{more}</div>
 
 <h2>Themed galleries</h2>
 <div class="gallery-links">
 <a href="gallery/buried.html">Hull-buried</a>
 <a href="gallery/convex.html">Convex</a>
 <a href="gallery/pancakes.html">Pancakes</a>
+<a href="gallery/floppy.html">Floppy</a>
+<a href="gallery/subdiv.html">Eisenstein subdivisions</a>
 </div>
 
 <h2>Example</h2>
@@ -201,16 +278,16 @@ with equilateral triangle faces, meeting at most six to a vertex.
     embedded copy is shown below.
   </div>
   <div class="thumb">
-    <model-viewer src="{exv}/{ex}/rb.glb"
+    <model-viewer src="nets/{ex}/rb.glb"
       camera-orbit="0deg 100deg auto" camera-controls interaction-prompt="none"></model-viewer>
-    <div class="label"><a href="{exv}/{ex}/">{ex}</a></div>
+    <div class="label"><a href="nets/{ex}/">{ex}</a></div>
   </div>
 </div>
-<iframe class="example-full" src="{exv}/{ex}/" loading="lazy" title="per-net page preview"></iframe>
+<iframe class="example-full" src="nets/{ex}/" loading="lazy" title="per-net page preview"></iframe>
 
 <h2>Find a net</h2>
 <div class="search">
-<input id=q placeholder="CLERS name, e.g. {ex}">
+<input id=q placeholder="CLERS name, e.g. CCCACACACACAAE">
 <button onclick="go()">go</button>
 <div id="search-msg"></div>
 </div>
@@ -219,10 +296,11 @@ function go() {{
   var m = document.getElementById('search-msg');
   var s = document.getElementById('q').value.trim().toUpperCase();
   m.className = 'err';
+  if (/^V[0-9]+/.test(s)) s = s.replace(/^V[0-9]+/, '');
   if (!/^[ABCDE]+$/.test(s)) {{ m.textContent = 'letters ABCDE only'; return; }}
   var v = (s.length + 4) / 2;
   if (v !== Math.floor(v)) {{ m.textContent = 'length must be even'; return; }}
-  window.location = v + '/' + s + '/';
+  window.location = 'nets/v' + v + s + '/';
 }}
 document.getElementById('q').addEventListener('keydown',
   function(e) {{ if (e.key === 'Enter') go(); }});

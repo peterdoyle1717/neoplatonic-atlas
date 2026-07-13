@@ -256,108 +256,80 @@ def glb_movies(name, faces, V, nc, outdir):
     return len(fp)
 
 def build_net(job):
-    """One directory per net: <v>/<NAME>/ holds the page (index.html)
-    and all of the net's artifacts (rb.glb, clers.glb, morph_p.glb,
-    morph_k.glb). Shared viewers live two levels up."""
+    """One directory per net under nets/, named v{V}{CLERS}: a database
+    record (net.json) plus the net's artifacts (rb.glb, clers.glb,
+    morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
+    page itself is rendered from the record by views.py."""
+    import json
+    from views import render_page
     name, nc = job
     faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
     V = max(max(f) for f in faces)
-    netdir = os.path.join(OUT, str(V), name)
+    vname = f"v{V}{name}"
+    netdir = os.path.join(OUT, "nets", vname)
     os.makedirs(netdir, exist_ok=True)
     if not (os.path.exists(os.path.join(netdir, "rb.glb"))
             and os.path.exists(os.path.join(netdir, "clers.glb"))):
         bends = solve_prove_60(nc)
         if bends is None:
-            return (name, "SOLVE-FAIL")
+            return (vname, "SOLVE-FAIL")
         glb_euclid(name, faces, V, bends, netdir)
     if (os.path.exists(os.path.join(netdir, "morph_p.glb"))
             and os.path.exists(os.path.join(netdir, "morph_k.glb"))):
-        nframes, built = len(MORPH_ALPHAS) + 1, "reused"
+        built = "reused"
     else:
         nframes = glb_movies(name, faces, V, nc, netdir)
         built = f"built {nframes} frames"
+    inet_path = os.path.join(netdir, "ideal_net.svg")
+    if not os.path.exists(inet_path):
+        inet = ideal_net_svg(nc, faces)
+        if inet:
+            with open(inet_path, "w") as f:
+                f.write(inet)
+    layout_path = os.path.join(netdir, "clers_layout.svg")
+    if not os.path.exists(layout_path):
+        with open(layout_path, "w") as f:
+            f.write(clers_svg(name))
     E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
-    here = f"{V}/{name}"   # file= paths are resolved relative to the viewers at OUT root
-
-    def cell_iframe(src, label):
-        return (f'<div><div class=cell><iframe src="{src}"></iframe></div>'
-                f'<div class=label>{label}</div></div>')
-
-    body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
-            f'<meta name=viewport content="width=device-width,initial-scale=1">'
-            f'<title>{name}</title><style>{STYLE}</style></head><body>'
-            f'<nav><a href="../index.html">{V} vertices</a> &middot; '
-            f'<a href="../../index.html">neoplatonic solids</a></nav>'
-            f'<h1>{name}</h1>'
-            f'<p class=info>V={V} &nbsp; E={E} &nbsp; F={len(faces)}</p>'
-            f'<p class=hint>Models can be manipulated.</p>',
-            '<div class=pair>',
-            cell_iframe(f'../../turntable.html?file={here}/rb.glb', 'Euclidean')]
-    # 2x2 block:  Euclidean | Poincare morph
-    #             Klein morph | ideal net
-    if nframes >= 2:
-        body += [cell_iframe(f'../../morph.html?file={here}/morph_p.glb',
-                             'ideal to Euclidean, Poincar&eacute;'),
-                 cell_iframe(f'../../morph.html?file={here}/morph_k.glb',
-                             'ideal to Euclidean, Klein')]
-    inet = ideal_net_svg(nc, faces)
-    if inet:
-        body.append(f'<div><div class=cell><div class=svgwrap>{inet}</div></div>'
-                    f'<div class=label>ideal net</div></div>')
-    body.append('</div>')
-    body += ['<div class=pair>',
-             cell_iframe(f'../../turntable.html?file={here}/clers.glb',
-                         'CLERS colored'),
-             f'<div><div class=cell><div class=svgwrap>{clers_svg(name)}</div></div>'
-             f'<div class=label>CLERS layout</div></div>',
-             '</div>', '</body></html>']
-    with open(os.path.join(netdir, "index.html"), "w") as f:
-        f.write('\n'.join(body))
-    return (name, f"OK morphs {built}")
+    have = {k: os.path.exists(os.path.join(netdir, fn)) for k, fn in
+            (("rb", "rb.glb"), ("clers_glb", "clers.glb"),
+             ("morph_p", "morph_p.glb"), ("morph_k", "morph_k.glb"),
+             ("ideal_net", "ideal_net.svg"), ("clers_layout", "clers_layout.svg"))}
+    recpath = os.path.join(netdir, "net.json")
+    rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
+    rec.update({"name": vname, "clers": name, "v": V, "E": E, "F": len(faces),
+                "netcode": nc, "artifacts": have})
+    rec.setdefault("flags", {})
+    rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
+    with open(recpath, "w") as f:
+        json.dump(rec, f, indent=1)
+    render_page(netdir)
+    return (vname, f"OK morphs {built}")
 
 
-def main(input_path=None, exemplars=False):
-    """Build pages for the nets in input_path (default data/nets_v4_14.txt,
-    lines: name netcode [extra columns ignored]). Each net gets its own
-    directory <v>/<NAME>/. exemplars=True marks sets beyond the browse
-    range: their per-v indexes carry a note. The front page is
-    special.py's job."""
+def main(input_path=None):
+    """Build records + artifacts + pages for the nets in input_path
+    (default data/nets_pages.txt, lines: name netcode). Listing pages,
+    galleries, and the front page are special.py's job."""
     os.makedirs(OUT, exist_ok=True)
     # viewer wrappers: source of truth is builders/assets/
     import shutil
     for w in ("morph.html", "turntable.html"):
         shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
     jobs = []
-    with open(input_path or os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
+    with open(input_path or os.path.join(TOP, "data", "nets_pages.txt")) as f:
         for ln in f:
             t = ln.split()
             jobs.append((t[0], t[1]))
     with Pool(6) as pool:
         results = pool.map(build_net, jobs)
+    fails = [n for n, msg in results if "FAIL" in msg]
     for name, msg in results:
         print(name, msg, flush=True)
-    byv = {}
-    for name, nc in jobs:
-        V = max(max(int(x) for x in f.split(',')) for f in nc.split(';'))
-        byv.setdefault(V, []).append(name)
-    for V in sorted(byv):
-        names = sorted(byv[V])
-        note = (' &middot; exemplars only, not the full set at this size'
-                if exemplars else '')
-        rows = [f'<!DOCTYPE html><html><head><meta charset=utf-8>'
-                f'<title>v = {V}</title><style>{STYLE}</style></head><body>'
-                f'<h1>v = {V}</h1><div class=info>'
-                f'<a href="../index.html">neoplatonic solids</a>{note}</div>']
-        rows += [f'<p><a href="{n}/">{n}</a></p>' for n in names]
-        rows.append('</body></html>')
-        with open(os.path.join(OUT, str(V), "index.html"), "w") as f:
-            f.write('\n'.join(rows))
-    print("indexes written", flush=True)
+    print(f"built {len(results) - len(fails)}/{len(results)}"
+          + (f"  FAILURES: {fails}" if fails else ""), flush=True)
 
 
 if __name__ == "__main__":
     import sys
-    if len(sys.argv) > 1:
-        main(sys.argv[1], exemplars=True)
-    else:
-        main()
+    main(sys.argv[1] if len(sys.argv) > 1 else None)
