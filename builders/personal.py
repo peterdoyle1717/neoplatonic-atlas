@@ -52,7 +52,7 @@ MV = ('<script type="module" src="https://ajax.googleapis.com/ajax/libs/'
 
 def solve_prove_60(nc):
     r = subprocess.run([BIN, "--prove", "--alpha", "60.0", "--name", "X", nc],
-                       capture_output=True, text=True, timeout=300)
+                       capture_output=True, text=True, timeout=1800)
     if "end" not in r.stdout:
         return None
     bends = {}
@@ -66,7 +66,7 @@ def solve_prove_60(nc):
 def solve_alpha(nc, a):
     r = subprocess.run([BIN, "--bends-only", "--alpha", f"{a:.6f}",
                         "--name", "X", nc],
-                       capture_output=True, text=True, timeout=180)
+                       capture_output=True, text=True, timeout=900)
     if "end" not in r.stdout:
         return None
     return {(int(t[3]), int(t[4])): float(t[5]) for t in
@@ -261,12 +261,13 @@ def build_net(job):
     morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
     page itself is rendered from the record by views.py."""
     import json
-    from views import render_page
+    from views import render_page, net_id
     name, nc = job
     faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
     V = max(max(f) for f in faces)
     vname = f"v{V}{name}"
-    netdir = os.path.join(OUT, "nets", vname)
+    nid = net_id(V, name)
+    netdir = os.path.join(OUT, "nets", nid)
     os.makedirs(netdir, exist_ok=True)
     if not (os.path.exists(os.path.join(netdir, "rb.glb"))
             and os.path.exists(os.path.join(netdir, "clers.glb"))):
@@ -297,8 +298,8 @@ def build_net(job):
              ("ideal_net", "ideal_net.svg"), ("clers_layout", "clers_layout.svg"))}
     recpath = os.path.join(netdir, "net.json")
     rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
-    rec.update({"name": vname, "clers": name, "v": V, "E": E, "F": len(faces),
-                "netcode": nc, "artifacts": have})
+    rec.update({"id": nid, "name": vname, "clers": name, "v": V, "E": E,
+                "F": len(faces), "netcode": nc, "artifacts": have})
     rec.setdefault("flags", {})
     rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
     with open(recpath, "w") as f:

@@ -15,7 +15,7 @@ OUT = os.path.join(TOP, "site", "personal")
 NETS = os.path.join(OUT, "nets")
 sys.path.insert(0, HERE)
 from personal import MV
-from views import render_page
+from views import render_page, display, net_id
 
 GALLERY_CSS = (
     "body{font-family:Georgia,serif;max-width:1000px;margin:2em auto;"
@@ -80,9 +80,9 @@ def stamp(recs):
     if os.path.exists(epath):
         for r in csv.DictReader(open(epath), delimiter='\t'):
             eis[r['name']] = r
-    for name, rec in recs.items():
+    for d, rec in recs.items():
         changed = False
-        c = cls.get(name)
+        c = cls.get(rec.get("name", d))
         if c:
             flags = {"pancake": bool(int(c['pancake'])),
                      "convex": bool(int(c['convex'])),
@@ -93,7 +93,7 @@ def stamp(recs):
             if rec.get("flags") != flags:
                 rec["flags"] = flags
                 changed = True
-        e = eis.get(name)
+        e = eis.get(rec.get("name", d))
         if e:
             ei = {"family": e['family'], "T": int(e['T']),
                   "a": int(e['a']), "b": int(e['b']),
@@ -103,19 +103,19 @@ def stamp(recs):
                 rec["eisenstein"] = ei
                 changed = True
         if changed:
-            netdir = os.path.join(NETS, name)
+            netdir = os.path.join(NETS, d)
             with open(os.path.join(netdir, "net.json"), "w") as f:
                 json.dump(rec, f, indent=1)
             render_page(netdir)
 
 
 def item(rec, caption):
-    name = rec["name"]
+    nid = rec.get("id", rec["name"])
     return (f'<div class=item><div class=cell>'
-            f'<model-viewer src="../nets/{name}/rb.glb" '
+            f'<model-viewer src="../nets/{nid}/rb.glb" '
             f'camera-orbit="0deg 100deg auto" camera-controls '
             f'interaction-prompt=none></model-viewer></div>'
-            f'<a href="../nets/{name}/">{name}</a> '
+            f'<a href="../nets/{nid}/">{display(rec["name"])}</a> '
             f'<span class=v>{caption}</span></div>')
 
 

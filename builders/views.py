@@ -6,11 +6,27 @@ what a net's homepage looks like. Rerun over all records to change
 the display (python3 builders/views.py re-renders every page under
 site/personal/nets/).
 """
-import json, os, sys
+import hashlib, json, os, sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
 OUT = os.path.join(TOP, "site", "personal")
+
+
+def net_id(V, clers):
+    """directory key for a net: the v-prefixed name when it fits the
+    filesystem (255-byte path components; v=128 names hit 256), else a
+    hashed key. Display names always come from the record, never from
+    the key."""
+    full = f"v{V}{clers}"
+    if len(full) <= 200:
+        return full
+    return f"v{V}h" + hashlib.sha1(clers.encode()).hexdigest()[:16]
+
+
+def display(name, cap=44):
+    """elide long display names for gallery captions."""
+    return name if len(name) <= cap else name[:cap - 12] + '&hellip;' + name[-8:]
 
 STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
          "line-height:1.6;color:#222;padding:0 1em}"
@@ -31,6 +47,15 @@ STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
          "a{color:#2255aa}")
 
 
+def netlink(name):
+    """name -> link to its page (recomputes the id rule)."""
+    i = 1
+    while i < len(name) and name[i].isdigit():
+        i += 1
+    V, clers = int(name[1:i]), name[i:]
+    return f'<a href="../{net_id(V, clers)}/">{display(name, 28)}</a>'
+
+
 def flag_line(rec):
     fl = rec.get("flags", {})
     bits = []
@@ -47,16 +72,20 @@ def flag_line(rec):
     if fl.get("floppy"):
         bits.append("floppy")
     ei = rec.get("eisenstein", {})
+    if ei.get("family"):
+        bits.append(f'Eisenstein: {ei["family"]} T={ei["T"]} '
+                    f'({ei["a"]},{ei["b"]})')
     if ei.get("ancestors"):
-        bits.append("Eisenstein descendant of " + ", ".join(ei["ancestors"]))
+        bits.append("ancestors " + ", ".join(netlink(n) for n in ei["ancestors"]))
     if ei.get("descendants"):
-        bits.append("Eisenstein ancestor of " + ", ".join(ei["descendants"]))
+        bits.append("descendants " + ", ".join(netlink(n) for n in ei["descendants"]))
     return " &middot; ".join(bits)
 
 
 def render_page(netdir):
     rec = json.load(open(os.path.join(netdir, "net.json")))
     name, V = rec["name"], rec["v"]
+    nid = rec.get("id", name)
     art = rec.get("artifacts", {})
 
     def cell_iframe(src, label):
@@ -80,21 +109,21 @@ def render_page(netdir):
             + '<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>']
     if art.get("rb"):
-        body.append(cell_iframe(f'../../turntable.html?file=nets/{name}/rb.glb',
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/rb.glb',
                                 'Euclidean'))
     # 2x2 block:  Euclidean | Poincare morph
     #             Klein morph | ideal net
     if art.get("morph_p"):
-        body += [cell_iframe(f'../../morph.html?file=nets/{name}/morph_p.glb',
+        body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb',
                              'ideal to Euclidean, Poincar&eacute;'),
-                 cell_iframe(f'../../morph.html?file=nets/{name}/morph_k.glb',
+                 cell_iframe(f'../../morph.html?file=nets/{nid}/morph_k.glb',
                              'ideal to Euclidean, Klein')]
     if art.get("ideal_net"):
         body.append(cell_svg('ideal_net.svg', 'ideal net'))
     body.append('</div>')
     body.append('<div class=pair>')
     if art.get("clers_glb"):
-        body.append(cell_iframe(f'../../turntable.html?file=nets/{name}/clers.glb',
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/clers.glb',
                                 'CLERS colored'))
     if art.get("clers_layout"):
         body.append(cell_svg('clers_layout.svg', 'CLERS layout'))
