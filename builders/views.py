@@ -127,7 +127,9 @@ def render_page(netdir):
             f'<nav><a href="../../by-v/{V}.html">{V} vertices</a> &middot; '
             f'<a href="../../index.html">neoplatonic solids</a></nav>'
             f'<h1>{name}</h1>'
-            f'<p class=info>V={V} &nbsp; E={rec["E"]} &nbsp; F={rec["F"]}</p>'
+            + (f'<p style="font-size:1.05em;margin:-.4em 0 .2em">'
+               f'{"; ".join(rec["names"])}</p>' if rec.get("names") else '')
+            + f'<p class=info>V={V} &nbsp; E={rec["E"]} &nbsp; F={rec["F"]}</p>'
             + (f'<p class=flags>{flags}</p>' if flags else '')
             + '<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>']

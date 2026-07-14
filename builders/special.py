@@ -119,10 +119,18 @@ def stamp(recs):
                 changed = True
         cx = classics.get(rec.get("name", d))
         if cx:
-            tag = ("The neoplatonic (capped/fanned) form of: "
-                   + "; ".join(dict.fromkeys(cx)) + ".")
-            if tag not in rec.get("notes", ""):
-                rec["notes"] = (rec.get("notes", "") + " " + tag).strip()
+            names = list(dict.fromkeys(cx))
+            if rec.get("names") != names:
+                rec["names"] = names
+                changed = True
+        # strip the retired machine-note sentence (names field replaces it)
+        nn_ = rec.get("notes", "")
+        if "The neoplatonic (capped/fanned) form of:" in nn_:
+            import re as _re
+            nn2 = _re.sub(r"\s*The neoplatonic \(capped/fanned\) form of:[^.]*\.",
+                          "", nn_).strip()
+            if nn2 != nn_:
+                rec["notes"] = nn2
                 changed = True
         sy = sym.get(d)
         if sy and (rec.get("flags", {}).get("sym_order") != sy[0]
@@ -302,7 +310,7 @@ def main():
         parts.append(grid([item(r, f'v={v}') for v, r in rows_[:8]]))
     gallery('symmetry.html', 'Symmetry',
             'One class per symmetry group, labeled by Conway orbifold '
-            'symbol (digits ascending: 235 and *235 for the chiral and '
+            'symbol (digits descending: 532 and *532 for the chiral and '
             'full icosahedral groups), computed from the combinatorial '
             'automorphisms, which act as isometries by uniqueness of the '
             'realization. Up to 8 exemplars per class, smallest first.',
@@ -310,10 +318,10 @@ def main():
 
     # icosahedral symmetry gallery (235 / *235)
     isym = sorted(((v, cwv, r) for order, refl, v, r, cwv in symrows
-                   if cwv in ('235', '*235')), key=lambda t: (t[0], t[2]["name"]))
+                   if cwv in ('532', '*532')), key=lambda t: (t[0], t[2]["name"]))
     gallery('icosym.html', 'Icosahedral symmetry',
-            'Nets with 60-fold or 120-fold symmetry &mdash; Conway 235 '
-            '(chiral) or *235 (full). The geodesic domes live here, '
+            'Nets with 60-fold or 120-fold symmetry &mdash; Conway 532 '
+            '(chiral) or *532 (full). The geodesic domes live here, '
             'joined by the capped icosahedral classics.',
             grid([item(r, f'v={v} &middot; {cwv}') for v, cwv, r in isym]))
 

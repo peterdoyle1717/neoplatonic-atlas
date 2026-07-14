@@ -10,7 +10,8 @@ as a finite sphere group; the symbol is decided combinatorially:
     the inversion is the reversing involution fixing NOTHING;
     counting mirrors/inversion + max reversing order separates
     *nn / n* / nx, *22n / 2*n, *332 / 3*2, *432, *235.
-Convention (PD): digits ascending, e.g. 235 and *235 (not 532).
+Convention (PD 2026-07-14): digits DESCENDING, e.g. 532 and *532,
+dihedral n22 / *n22 (432, 332, 3*2, 2*n as standard).
 Output: data/conway.tsv (id, symbol); validation table printed.
 """
 import json, math, os, sys
@@ -117,20 +118,20 @@ def symbol(faces, V):
     def d(k):            # digit with separator for >9
         return str(k) if k < 10 else f'({k})'
     if not revs:
-        return {'I': '235', 'O': '432', 'T': '332',
+        return {'I': '532', 'O': '432', 'T': '332',
                 'C': '1' if n == 1 else d(n) + d(n),
-                'D': '22' + d(n)}[R]
+                'D': d(n) + '22'}[R]
     mirrors = sum(1 for m, o in revs if o == 2 and fixes_cell(m, faces, edges))
     inv = sum(1 for m, o in revs if o == 2 and not fixes_cell(m, faces, edges))
     maxrev = max(o for _, o in revs)
     if R == 'I':
-        return '*235'
+        return '*532'
     if R == 'O':
         return '*432'
     if R == 'T':
         return '3*2' if inv else '*332'
     if R == 'D':
-        return ('*22' + d(n)) if mirrors == n + 1 else ('2*' + d(n))
+        return ('*' + d(n) + '22') if mirrors == n + 1 else ('2*' + d(n))
     # cyclic
     if n == 1:
         return '*' if mirrors else 'x'
