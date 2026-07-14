@@ -408,6 +408,34 @@ def main():
                 '&alpha; = 360/7; morphs run from the ideal end up to it.',
                 grid([item(r, f'v={v} &middot; {names}') for v, names, r in d7rows]))
 
+    # -- geodesic domes: the icosahedron's Eisenstein family -------------
+    geo = []
+    epath2 = os.path.join(TOP, "data", "eisenstein.tsv")
+    if os.path.exists(epath2):
+        for r in csv.DictReader(open(epath2), delimiter='\t'):
+            if r['family'] != 'ico':
+                continue
+            name = r['name']
+            i = 1
+            while i < len(name) and name[i].isdigit():
+                i += 1
+            V, cl = int(name[1:i]), name[i:]
+            rec = byname_pre.get(name)
+            if rec:
+                geo.append((int(r['T']), int(r['a']), int(r['b']), V, rec))
+    geo.sort()
+    gallery('geodesic.html', 'Geodesic domes',
+            'Eisenstein subdivisions of the icosahedron &mdash; the '
+            'geodesic domes. Any neoplatonic can be Eisenstein-subdivided '
+            '(the (a,b) subdivision multiplies the face count by '
+            'T = a&sup2;+ab+b&sup2;), and the atlas builds seven families '
+            'out (see <a href="subdiv.html">Eisenstein subdivisions</a> '
+            'and the per-family lattice maps); the icosahedron&rsquo;s '
+            'family is the famous one. '
+            '<a href="../eisenmap/ico.html">Lattice map</a>.',
+            grid([item(rec, f'T={T} ({a},{b}) &middot; v={V}')
+                  for T, a, b, V, rec in geo]))
+
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
     if os.path.exists(cxpath):
@@ -498,6 +526,9 @@ def main():
                 "flops", "nonprime", "preapproved", "small"):
         rows = theme_list(tag)
         title, desc = tdesc.get(tag, (tag, ""))
+        fname = f'{tag}.html'
+        if tag == "bucky":
+            fname, title = 'fullerene.html', 'Fullerene duals'
         if tag == "bucky":
             parts = []
             byvv = {}
@@ -509,7 +540,7 @@ def main():
             body_html = ''.join(parts)
         else:
             body_html = grid([item(r, f'v={r["v"]}') for r in rows])
-        gallery(f'{tag}.html', title, desc, body_html)
+        gallery(fname, title, desc, body_html)
 
     # dented: old-atlas dent GLBs living in the owning nets' dirs,
     # thumbnails linking through to the (undented) net page
@@ -580,7 +611,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <h2>Themed galleries</h2>
 <div class="gallery-links">
 <a href="gallery/small.html">Small (v&le;12)</a>
-<a href="gallery/bucky.html">Bucky</a>
+<a href="gallery/fullerene.html">Fullerene duals</a>
 <a href="gallery/convex.html">Convex</a>
 <a href="gallery/dented.html">Dented</a>
 <a href="gallery/buried.html">Hull-buried</a>
@@ -597,6 +628,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
 <a href="gallery/phyllo51.html">(5,1)</a>
+<a href="gallery/geodesic.html">Geodesic domes</a>
 <a href="gallery/subdiv.html">Eisenstein subdivisions</a>
 <a href="gallery/preapproved.html">Preapproved</a>
 <a href="gallery/nonprime.html">Non-prime</a>
