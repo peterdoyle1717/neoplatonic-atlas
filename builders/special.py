@@ -411,13 +411,11 @@ def main():
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
     if os.path.exists(cxpath):
-        seenc, crows, nonnet = set(), [], []
+        seenc, crows = set(), []
         for ln in open(cxpath).read().splitlines()[1:]:
             t = ln.split('\t')
             V = int(t[3])
-            if len(t) > 4 and t[4] == '0':
-                nonnet.append(t[1])
-                continue
+            hyp = len(t) > 4 and t[4] == '0'
             nm = f"v{V}{t[2]}"
             if nm in seenc:
                 for c in crows:
@@ -427,7 +425,7 @@ def main():
             seenc.add(nm)
             r = byname_pre.get(nm)
             if r:
-                crows.append([V, [t[1]], r])
+                crows.append([V, [t[1]], r, hyp])
         def rank_of(names):
             first = names[0]
             if first in ('tetrahedron', 'cube', 'octahedron', 'icosahedron',
@@ -438,34 +436,44 @@ def main():
             if first.startswith(('pri', 'ant')):
                 return 2
             return 3
-        SECT = {0: 'Platonic', 1: 'Archimedean', 2: 'Prisms and antiprisms',
-                3: 'Johnson solids'}
+
+        def cap(v, names, hyp):
+            c = f'v={v} &middot; ' + '; '.join(names[:2])
+            if len(names) > 2:
+                c += '&hellip;'
+            if hyp:
+                c += ' &middot; hyperbolic, &alpha; &le; 360/7'
+            return c
+        SECT = {0: 'Platonic', 1: 'Archimedean', 2: 'Prisms and antiprisms'}
         parts = []
-        for rank in (0, 1, 2, 3):
-            sel = [(v, names, r) for v, names, r in crows
+        for rank in (0, 1, 2):
+            sel = [(v, names, r, hyp) for v, names, r, hyp in crows
                    if rank_of(names) == rank]
             if not sel:
                 continue
-            note = (' &mdash; a ragtag bunch, in the cheap seats'
-                    if rank == 3 else '')
-            parts.append(f'<h2>{SECT[rank]}{note}</h2>')
-            parts.append(grid([item(r, f'v={v} &middot; '
-                                    + '; '.join(names[:2])
-                                    + ('&hellip;' if len(names) > 2 else ''))
-                               for v, names, r in sel]))
+            parts.append(f'<h2>{SECT[rank]}</h2>')
+            parts.append(grid([item(r, cap(v, names, hyp))
+                               for v, names, r, hyp in sel]))
         gallery('classics.html', 'The classics, neoplatonized',
                 'Named solids in their neoplatonic reading: triangle faces '
                 'kept, squares and pentagons capped by unit pyramids, '
                 'hexagons filled by flat unit fans (faces are in the eye '
                 'of the beholder). Generated from Antiprism models '
-                '(builders/classics.py); distinct diminished/augmented/'
-                'gyrate variants of one solid collapse to the same net '
-                'and share its cell.',
-                ''.join(parts)
-                + ('<p class=desc><b>Not neoplatonizable</b> (capping '
-                   'forces a vertex of degree 7, hence negative curvature, '
-                   'outside the 6-net universe; see the degree-7 annex): '
-                   + ', '.join(sorted(set(nonnet))) + '.</p>' if nonnet else ''))
+                '(builders/classics.py); variants that collapse to the '
+                'same net share a cell. Blue models are the degree-7 '
+                'members: no Euclidean form, realized hyperbolically up '
+                'to &alpha; = 360/7 (see the degree-7 annex). Johnson '
+                'solids have their own gallery, Odds and ends.',
+                ''.join(parts))
+
+        jsel = [(v, names, r, hyp) for v, names, r, hyp in crows
+                if rank_of(names) == 3]
+        gallery('oddsends.html', 'Odds and ends',
+                'Johnson solids and other named constructions in their '
+                'neoplatonic reading. Blue models are degree-7 members, '
+                'realized hyperbolically up to &alpha; = 360/7.',
+                grid([item(r, cap(v, names, hyp))
+                      for v, names, r, hyp in jsel]))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
@@ -582,6 +590,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
+<a href="gallery/oddsends.html">Odds and ends</a>
 <a href="gallery/icorel.html">Icosahedral relatives</a>
 <a href="gallery/deg7.html">Degree-7 classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
