@@ -26,7 +26,7 @@ clers_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clers_mod)
 decode = clers_mod.decode
 
-SUBDIV_VCAP = 164
+SUBDIV_VCAP = 999
 
 
 def netcode_of(name):

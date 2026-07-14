@@ -77,12 +77,30 @@ def flag_line(rec):
                     f'&alpha; = 360/{rec["maxdeg"]}')
     ei = rec.get("eisenstein", {})
     if ei.get("family"):
-        nid = rec.get("id", rec.get("name", ""))
         bits.append(f'Eisenstein: {ei["family"]} T={ei["T"]} '
-                    f'({ei["a"]},{ei["b"]}) &middot; '
-                    f'<a href="../../eisenmap/{ei["family"]}.html?net={nid}">'
-                    f'family map</a>')
+                    f'({ei["a"]},{ei["b"]})')
     return " &middot; ".join(bits)
+
+
+_LEADERS = None
+
+
+def family_leader_id(fam):
+    """net id of the family's (1,0) unit, from data/eisenstein.tsv."""
+    global _LEADERS
+    if _LEADERS is None:
+        _LEADERS = {}
+        import csv
+        p = os.path.join(TOP, "data", "eisenstein.tsv")
+        if os.path.exists(p):
+            for r in csv.DictReader(open(p), delimiter='\t'):
+                if r['a'] == '1' and r['b'] == '0':
+                    name = r['name']
+                    i = 1
+                    while i < len(name) and name[i].isdigit():
+                        i += 1
+                    _LEADERS[r['family']] = net_id(int(name[1:i]), name[i:])
+    return _LEADERS.get(fam)
 
 
 def render_page(netdir):
@@ -151,11 +169,16 @@ def render_page(netdir):
     if os.path.exists(empath):
         with open(empath) as f:
             emsvg = f.read()
+        fam = ei.get("family", "")
+        lead = family_leader_id(fam)
+        leadlink = (f' &middot; <a href="../../eisenmap/{fam}.html?net={lead}">'
+                    f'family map, from the unit&rsquo;s point of view</a>'
+                    if lead else '')
         body += [f'<p class=info style="margin-top:1em">Eisenstein family '
-                 f'{ei.get("family", "")} &mdash; red this net, blue '
-                 f'ancestors, green descendants, grey cousins; mirror '
-                 f'sector below the axis (reflections lumped); dashed ray = '
-                 f'the Z-multiples.</p>',
+                 f'{fam} &mdash; red this net, blue ancestors, green '
+                 f'descendants, grey cousins; mirror sector below the axis '
+                 f'(reflections lumped); dashed ray = the Z-multiples.'
+                 f'{leadlink}</p>',
                  emsvg]
     body.append('</body></html>')
     with open(os.path.join(netdir, "index.html"), "w") as f:
