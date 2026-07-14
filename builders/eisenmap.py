@@ -187,7 +187,8 @@ function divM(a1,b1,a2,b2) {{
   return divides(a1,b1,a2,b2) || divides(b1,a1,a2,b2);
 }}
 const sel = new URLSearchParams(location.search).get('net');
-const me = MEMBERS.find(m => m.id === sel);
+const me = MEMBERS.find(m => m.id === sel)
+  || MEMBERS.find(m => m.a === 1 && m.b === 0);   // default: the unit's view
 if (me) {{
   for (const el of document.querySelectorAll('circle[data-a]')) {{
     const a = +el.dataset.a, b = +el.dataset.b;
