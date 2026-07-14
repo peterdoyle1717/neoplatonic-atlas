@@ -1,5 +1,16 @@
 # Atlas HANDOFF (chat bootstrap)
 
+## Charter (what this chat is about)
+
+This is the ATLAS chat: it owns the site — records, views, galleries,
+eisenmaps, per-net artifacts, regeneration, and eventually hosting.
+Success = every net Peter wants visible has a correct, beautiful,
+regenerable page. NOT this chat: proving things (prover chat:
+~/Dropbox/neo/bendq_sandbox/boundary_cert/HANDOFF.md) or Lean (lob:
+~/Dropbox/lob/TEAMWORK.md). It CONSUMES their outputs as committed
+data files (classifications, certificates, specimen lists) and turns
+them into pages and galleries.
+
 Pick-up for a fresh atlas chat: read this + `git log --oneline -15`.
 
 ## What this is
