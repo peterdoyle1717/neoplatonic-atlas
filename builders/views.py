@@ -126,7 +126,22 @@ def render_page(netdir):
                                 'CLERS colored'))
     if art.get("clers_layout"):
         body.append(cell_svg('clers_layout.svg', 'CLERS layout'))
-    body += ['</div>', '</body></html>']
+    body.append('</div>')
+    # Eisenstein lattice, embedded inline for nets with a built ancestor
+    # or descendant (eismap.svg written by eisenmap.py; inline so the
+    # dot links work)
+    empath = os.path.join(netdir, "eismap.svg")
+    ei = rec.get("eisenstein", {})
+    if os.path.exists(empath):
+        with open(empath) as f:
+            emsvg = f.read()
+        body += [f'<p class=info style="margin-top:1em">Eisenstein family '
+                 f'{ei.get("family", "")} &mdash; red this net, blue '
+                 f'ancestors, green descendants, grey cousins; mirror '
+                 f'sector below the axis (reflections lumped); dashed ray = '
+                 f'the Z-multiples.</p>',
+                 emsvg]
+    body.append('</body></html>')
     with open(os.path.join(netdir, "index.html"), "w") as f:
         f.write('\n'.join(body))
 

@@ -26,7 +26,7 @@ clers_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clers_mod)
 decode = clers_mod.decode
 
-SUBDIV_VCAP = 132
+SUBDIV_VCAP = 164
 
 
 def netcode_of(name):
@@ -80,10 +80,14 @@ def main():
 
     # Eisenstein subdivision families
     fam = []
-    with open(os.path.join(NEO, "atlas", "subdiv", "names.tsv")) as f:
-        for row in csv.DictReader(f, delimiter='\t'):
-            fam.append((row['base'], int(row['T']), int(row['a']),
-                        int(row['b']), int(row['V']), row['CLERS']))
+    for src in (os.path.join(NEO, "atlas", "subdiv", "names.tsv"),
+                os.path.join(TOP, "data", "subdiv_extra.tsv")):
+        if not os.path.exists(src):
+            continue
+        with open(src) as f:
+            for row in csv.DictReader(f, delimiter='\t'):
+                fam.append((row['base'], int(row['T']), int(row['a']),
+                            int(row['b']), int(row['V']), row['CLERS']))
     eis_rows = []
     for base, T, a, b, V, clers in fam:
         anc, desc = [], []

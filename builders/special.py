@@ -312,6 +312,8 @@ document.getElementById('q').addEventListener('keydown',
     print('front page written')
     import eisenmap
     eisenmap.generate()
+    import views
+    views.main()
 
 
 if __name__ == "__main__":
