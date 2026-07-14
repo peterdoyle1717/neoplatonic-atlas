@@ -144,7 +144,9 @@ def gallery(fname, title, desc, body_html):
     html = (f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
             f'<meta name=viewport content="width=device-width,initial-scale=1">'
             f'<title>{title}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
-            f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; {title}</h1>'
+            f'<nav style="font-size:.9em"><a href="../index.html">'
+            f'neoplatonic solids</a></nav>'
+            f'<h1>{title}</h1>'
             f'<p class=desc>{desc}</p>' + body_html + '</body></html>')
     with open(os.path.join(OUT, "gallery", fname), 'w') as f:
         f.write(html)
@@ -283,21 +285,44 @@ def main():
         rrows = []
         for ln in open(rpath).read().splitlines()[1:]:
             t = ln.split('\t')
-            if len(t) >= 4 and t[2] == '1' and int(t[3]) > 0:
+            if len(t) >= 4 and t[2] == '1':
                 V = int(t[1])
                 r = byname_pre.get(f"v{V}{t[0]}")
                 if r:
                     rrows.append((V, int(t[3]), r))
         rrows.sort(key=lambda x: (x[0], x[2]["name"]))
         gallery('recognized.html', 'All angles recognized',
-                'Nets whose every bend is a recognized construction angle '
-                '(the library of notes/bend_recognize.py: platonic atoms, '
-                'polygon-pyramid and antiprism dihedrals; |b| matched to '
-                '1e-7 against solver-emitted bends), with at least one '
-                'icosahedral atom I = &pi; &minus; acos(&minus;&radic;5/3). '
-                'Criterion v1 &mdash; to be tinkered with.',
-                grid([item(r, f'v={v} &middot; {k}&times;I')
+                f'All {len(rrows)} prime nets v &le; 30 whose every bend '
+                'is a recognized construction angle (library of '
+                'notes/bend_recognize.py, |b| matched at 1e-7 against '
+                'solver-emitted bends). PD: this mostly detects pentagon '
+                '(and square) pyramid vertices; the icosahedral-relative '
+                'criterion is under construction. Captions mark '
+                'icosahedral-atom counts where present.',
+                grid([item(r, f'v={v}' + (f' &middot; {k}&times;I' if k else ''))
                       for v, k, r in rrows]))
+
+    # cap-replaced convex gallery (decap_search.py)
+    dpath2 = os.path.join(TOP, "data", "decap_v30.tsv")
+    if os.path.exists(dpath2):
+        drows2 = []
+        for ln in open(dpath2).read().splitlines()[1:]:
+            t = ln.split('\t')
+            if t[4] == 'CONVEX':
+                V = int(t[1])
+                r = byname_pre.get(f"v{V}{t[0]}")
+                if r:
+                    drows2.append((V, int(t[2]), int(t[3]), r))
+        drows2.sort(key=lambda x: (x[0], x[3]["name"]))
+        gallery('decap.html', 'Cap-replaced convex',
+                f'Nets whose realization carries exact square or pentagon '
+                f'pyramid caps (planar unit ring, diagonals &radic;2 or '
+                f'&phi;, tol 1e-4) and becomes CONVEX when every cap is '
+                f'replaced by its flat polygon &mdash; all '
+                f'{len(drows2)} such prime nets v &le; 30 '
+                f'(decap_search.py over the census coordinates).',
+                grid([item(r, f'v={v} &middot; {ns} sq, {np_} pent')
+                      for v, ns, np_, r in drows2]))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
@@ -409,6 +434,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/floppy.html">Floppy</a>
 <a href="gallery/symmetry.html">Symmetry</a>
 <a href="gallery/recognized.html">All angles recognized</a>
+<a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
