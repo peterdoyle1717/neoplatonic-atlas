@@ -80,6 +80,11 @@ def stamp(recs):
     if os.path.exists(epath):
         for r in csv.DictReader(open(epath), delimiter='\t'):
             eis[r['name']] = r
+    themes = {}
+    tpath = os.path.join(TOP, "data", "themes.tsv")
+    if os.path.exists(tpath):
+        for r in csv.DictReader(open(tpath), delimiter='\t'):
+            themes[r['name']] = r['themes'].split(',')
     for d, rec in recs.items():
         changed = False
         c = cls.get(rec.get("name", d))
@@ -93,6 +98,10 @@ def stamp(recs):
             if rec.get("flags") != flags:
                 rec["flags"] = flags
                 changed = True
+        t = themes.get(rec.get("name", d))
+        if t is not None and rec.get("themes") != t:
+            rec["themes"] = t
+            changed = True
         e = eis.get(rec.get("name", d))
         if e:
             ei = {"family": e['family'], "T": int(e['T']),
@@ -168,7 +177,12 @@ def main():
             f'here, sorted by depth d of the deepest buried vertex '
             f'(edge length 1); up to 8 per size have pages.',
             grid([item(r, f'v={r["v"]} d={r["flags"]["buried_depth"]:.3f}')
-                  for r in buried]))
+                  for r in buried[:120]])
+            + '<h2>All built hull-buried nets</h2><p class=desc>'
+            + ' &middot; '.join(
+                f'<a href="../nets/{r.get("id", r["name"])}/">'
+                f'{display(r["name"], 30)}</a> d={r["flags"]["buried_depth"]:.3f}'
+                for r in buried) + '</p>')
 
     convex = sorted((r for r in recs.values() if r["flags"].get("convex")
                      and not r["flags"].get("pancake")),
@@ -218,6 +232,66 @@ def main():
             'the net&rsquo;s Eisenstein ancestors and descendants.',
             ''.join(parts))
 
+    # -- themed galleries from the old atlas ---------------------------
+    tdesc = {}
+    dpath = os.path.join(TOP, "data", "theme_desc.tsv")
+    if os.path.exists(dpath):
+        for r in csv.DictReader(open(dpath), delimiter='\t'):
+            tdesc[r['theme']] = (r['title'], r['desc'])
+    byname = {r["name"]: r for r in recs.values()}
+
+    def theme_list(tag):
+        out = []
+        tp = os.path.join(TOP, "data", f"theme_{tag}.txt")
+        if os.path.exists(tp):
+            for nm in open(tp).read().split():
+                V = (len(nm) + 4) // 2
+                r = byname.get(f"v{V}{nm}")
+                if r:
+                    out.append(r)
+        return out
+
+    for tag in ("bucky", "phyllo31", "phyllo22", "phyllo41", "phyllo51",
+                "flops", "nonprime", "preapproved", "small"):
+        rows = theme_list(tag)
+        title, desc = tdesc.get(tag, (tag, ""))
+        if tag == "bucky":
+            parts = []
+            byvv = {}
+            for r in rows:
+                byvv.setdefault(r["v"], []).append(r)
+            for vv in sorted(byvv):
+                parts.append(f'<h2>v = {vv}</h2>')
+                parts.append(grid([item(r, f'v={vv}') for r in byvv[vv]]))
+            body_html = ''.join(parts)
+        else:
+            body_html = grid([item(r, f'v={r["v"]}') for r in rows])
+        gallery(f'{tag}.html', title, desc, body_html)
+
+    # dented: old-atlas dent GLBs living in the owning nets' dirs,
+    # thumbnails linking through to the (undented) net page
+    drows = []
+    ddpath = os.path.join(TOP, "data", "dented_old.tsv")
+    if os.path.exists(ddpath):
+        for r in csv.DictReader(open(ddpath), delimiter='\t'):
+            V = (len(r['name']) + 4) // 2
+            rec = byname.get(f"v{V}{r['name']}")
+            if not rec:
+                continue
+            nid = rec.get("id", rec["name"])
+            if os.path.exists(os.path.join(NETS, nid, f"dent_v{r['k']}.glb")):
+                drows.append(
+                    f'<div class=item><div class=cell>'
+                    f'<model-viewer src="../nets/{nid}/dent_v{r["k"]}.glb" '
+                    f'camera-orbit="0deg 100deg auto" camera-controls '
+                    f'interaction-prompt=none></model-viewer></div>'
+                    f'<a href="../nets/{nid}/">{display(rec["name"])}</a> '
+                    f'<span class=v>v={V} dent at vertex {r["k"]}</span></div>')
+    title, desc = tdesc.get("dented", ("Dented", ""))
+    gallery('dented.html', title,
+            desc + ' Thumbnails link to the undented realization.',
+            grid(drows))
+
     # -- by-v listing pages -------------------------------------------
     byv = {}
     for r in recs.values():
@@ -229,7 +303,9 @@ def main():
                 f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
                 f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
                 f'v = {v}</h1><p class=desc>{len(rows)} nets{note}</p>',
-                grid([item(r, f'v={v}') for r in
+                grid([item(r, f'v={v}'
+                           + (' non-prime' if 'nonprime' in r.get("themes", [])
+                              else '')) for r in
                       sorted(rows, key=lambda r: r["name"])]),
                 '</body></html>']
         with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
@@ -252,6 +328,7 @@ def main():
 <p>
 A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
 with equilateral triangle faces, meeting at most six to a vertex.
+<a href="about.html">More &rarr;</a>
 </p>
 
 <h2>Quick links by size</h2>
@@ -262,11 +339,21 @@ with equilateral triangle faces, meeting at most six to a vertex.
 
 <h2>Themed galleries</h2>
 <div class="gallery-links">
-<a href="gallery/buried.html">Hull-buried</a>
+<a href="gallery/small.html">Small (v&le;12)</a>
+<a href="gallery/bucky.html">Bucky</a>
 <a href="gallery/convex.html">Convex</a>
+<a href="gallery/dented.html">Dented</a>
+<a href="gallery/buried.html">Hull-buried</a>
 <a href="gallery/pancakes.html">Pancakes</a>
 <a href="gallery/floppy.html">Floppy</a>
+<a href="gallery/phyllo31.html">(3,1)</a>
+<a href="gallery/phyllo22.html">(2,2)</a>
+<a href="gallery/phyllo41.html">(4,1)</a>
+<a href="gallery/phyllo51.html">(5,1)</a>
 <a href="gallery/subdiv.html">Eisenstein subdivisions</a>
+<a href="gallery/preapproved.html">Preapproved</a>
+<a href="gallery/nonprime.html">Non-prime</a>
+<a href="gallery/flops.html">Tough cases</a>
 </div>
 
 <h2>Example</h2>
@@ -310,6 +397,9 @@ document.getElementById('q').addEventListener('keydown',
     with open(os.path.join(OUT, 'index.html'), 'w') as f:
         f.write(front)
     print('front page written')
+    import shutil
+    shutil.copy(os.path.join(HERE, "assets", "about.html"),
+                os.path.join(OUT, "about.html"))
     import eisenmap
     eisenmap.generate()
     import views

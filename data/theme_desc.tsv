@@ -1,0 +1,11 @@
+theme	title	desc
+bucky	Bucky	Primes in which every vertex has degree 5 or 6 &mdash; the duals of fullerenes. By Euler there are always exactly 12 degree-5 vertices and (<em>v</em>&minus;12) degree-6 vertices. v=12 is the icosahedron (dual of C<sub>20</sub>); C<sub>60</sub>'s dual is at v=32. Shown: all 342 such nets with v&nbsp;&le;&nbsp;25.
+phyllo31	(3,1) phyllohedra	The lex-first prime for each vertex count.
+phyllo22	(2,2) phyllohedra	The lex-second prime for each vertex count.
+phyllo41	(4,1) phyllohedra - Neoplatonic solids	8 prime (4,1) phyllohedra, v=17–24.
+phyllo51	(5,1) phyllohedra - Neoplatonic solids	8 prime (5,1) phyllohedra, v=17–24.
+flops	Tough cases	Large primes that were hard for the proof pipeline. The near-floppy cases below have one vertex almost but not quite flat; the truly floppy cases further down have a vertex that's <em>exactly</em> flat (min_turn = 0 algebraically) and need the bigface fallback.
+nonprime	Non-prime neoplatonics	2, 3, or 4 regular tets sharing a common axis edge <em>AB</em>. The first is the triangular bipyramid; the four-tet configuration is terminal (a fifth would push a pole to degree 7).
+preapproved	Preapproved	Preapproved neoplatonics: primes whose existence is known by construction (existence known by construction, no numerical proof needed).
+small	Small (v=4–12)	47 prime solids with at most 12 vertices.
+dented	Dented - Neoplatonic solids	26 embedded dented solids. Created by reflecting a vertex through the centroid of its neighbors, then solving for unit edge lengths.

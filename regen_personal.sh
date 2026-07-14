@@ -14,4 +14,5 @@ NEO="$(cd .. && pwd)"
 python3 builders/classify.py
 python3 builders/members.py
 python3 builders/personal.py
+python3 builders/fetch_dents.py
 python3 builders/special.py
