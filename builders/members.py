@@ -63,6 +63,21 @@ def main():
             n, nc, _ = ln.split()
             add(n, nc)
 
+    # themed galleries harvested from the old atlas; also emit the
+    # name -> themes map for record stamping
+    import glob as _glob
+    themes = {}
+    for tp in sorted(_glob.glob(os.path.join(TOP, "data", "theme_*.txt"))):
+        tag = os.path.basename(tp)[6:-4]
+        for nm in open(tp).read().split():
+            add(nm)
+            themes.setdefault(nm, []).append(tag)
+    with open(os.path.join(TOP, "data", "themes.tsv"), "w") as f:
+        f.write("name\tthemes\n")
+        for nm, ts in sorted(themes.items()):
+            V = (len(nm) + 4) // 2
+            f.write(f"v{V}{nm}\t{','.join(ts)}\n")
+
     rows = [r for r in csv.DictReader(
         open(os.path.join(TOP, "data", "class_v30.tsv")), delimiter='\t')
         if r['pancake'] != 'ERR']
@@ -75,6 +90,9 @@ def main():
             byv_buried.setdefault(int(r['v']), []).append(
                 (float(r['depth']), clers))
     for v, lst in byv_buried.items():
+        for d, clers in sorted(lst, reverse=True):
+            if d >= 0.1:
+                add(clers)
         for _, clers in sorted(lst, reverse=True)[:8]:
             add(clers)
 
