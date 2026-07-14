@@ -80,6 +80,12 @@ def stamp(recs):
     if os.path.exists(epath):
         for r in csv.DictReader(open(epath), delimiter='\t'):
             eis[r['name']] = r
+    sym = {}
+    spath = os.path.join(TOP, "data", "symmetry.tsv")
+    if os.path.exists(spath):
+        for ln in open(spath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            sym[t[0]] = (int(t[3]), int(t[4]), int(t[5]))
     themes = {}
     tpath = os.path.join(TOP, "data", "themes.tsv")
     if os.path.exists(tpath):
@@ -98,6 +104,12 @@ def stamp(recs):
             if rec.get("flags") != flags:
                 rec["flags"] = flags
                 changed = True
+        sy = sym.get(d)
+        if sy and (rec.get("flags", {}).get("sym_order") != sy[0]
+                   or rec.get("flags", {}).get("sym_refl") != (sy[2] > 0)):
+            rec.setdefault("flags", {})["sym_order"] = sy[0]
+            rec["flags"]["sym_refl"] = sy[2] > 0
+            changed = True
         t = themes.get(rec.get("name", d))
         if t is not None and rec.get("themes") != t:
             rec["themes"] = t
@@ -228,9 +240,64 @@ def main():
             'Subdivision families: each base net subdivided by the '
             'Eisenstein integer a + b&omega;, T = a&sup2;+ab+b&sup2; '
             '(&ldquo;geodesic subdivision&rdquo; in the old atlas). '
+            'Subdivisions are computed with the <a href="https://www.antiprism.com/">'
+            'Antiprism</a> package by Adrian Rossiter (the <code>geodesic</code> '
+            'program). '
             'Members up to v = 132 are built so far; each page lists '
             'the net&rsquo;s Eisenstein ancestors and descendants.',
             ''.join(parts))
+
+    # -- symmetry gallery ----------------------------------------------
+    symrows = []
+    spath = os.path.join(TOP, "data", "symmetry.tsv")
+    if os.path.exists(spath):
+        for ln in open(spath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            r = recs.get(t[0])
+            if r:
+                symrows.append((int(t[3]), int(t[5]) > 0, int(t[2]), r))
+    classes = {}
+    for order, refl, v, r in symrows:
+        classes.setdefault((order, refl), []).append((v, r))
+    parts = []
+    for (order, refl) in sorted(classes, key=lambda k: (-k[0], k[1])):
+        rows_ = sorted(classes[(order, refl)], key=lambda t: (t[0], t[1]["name"]))
+        kind = 'with reflections' if refl else 'chiral'
+        parts.append(f'<h2>order {order}, {kind} &mdash; '
+                     f'{len(rows_)} built nets</h2>')
+        parts.append(grid([item(r, f'v={v}') for v, r in rows_[:8]]))
+    gallery('symmetry.html', 'Symmetry',
+            'One class per automorphism-group order and chirality, over '
+            'the nets built in this atlas (combinatorial automorphisms; '
+            'by uniqueness of the realization these act as isometries of '
+            'the solid). Up to 8 exemplars per class, smallest first. '
+            'Rotation-only groups are marked chiral.',
+            ''.join(parts))
+
+    byname_pre = {r["name"]: r for r in recs.values()}
+    # -- all-recognized-angles gallery (data lands from
+    # recognize_sweep.py; criterion v1, PD: every bend a construction
+    # angle, at least one icosahedral atom I) -------------------------
+    rpath = os.path.join(TOP, "data", "recognized_v30.tsv")
+    if os.path.exists(rpath):
+        rrows = []
+        for ln in open(rpath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            if len(t) >= 4 and t[2] == '1' and int(t[3]) > 0:
+                V = int(t[1])
+                r = byname_pre.get(f"v{V}{t[0]}")
+                if r:
+                    rrows.append((V, int(t[3]), r))
+        rrows.sort(key=lambda x: (x[0], x[2]["name"]))
+        gallery('recognized.html', 'All angles recognized',
+                'Nets whose every bend is a recognized construction angle '
+                '(the library of notes/bend_recognize.py: platonic atoms, '
+                'polygon-pyramid and antiprism dihedrals; |b| matched to '
+                '1e-7 against solver-emitted bends), with at least one '
+                'icosahedral atom I = &pi; &minus; acos(&minus;&radic;5/3). '
+                'Criterion v1 &mdash; to be tinkered with.',
+                grid([item(r, f'v={v} &middot; {k}&times;I')
+                      for v, k, r in rrows]))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
@@ -331,12 +398,6 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="about.html">More &rarr;</a>
 </p>
 
-<h2>Quick links by size</h2>
-<div class="gallery-links">
-{quick}</div>
-<div class="gallery-links" style="font-size:.85em">
-{more}</div>
-
 <h2>Themed galleries</h2>
 <div class="gallery-links">
 <a href="gallery/small.html">Small (v&le;12)</a>
@@ -346,6 +407,8 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/buried.html">Hull-buried</a>
 <a href="gallery/pancakes.html">Pancakes</a>
 <a href="gallery/floppy.html">Floppy</a>
+<a href="gallery/symmetry.html">Symmetry</a>
+<a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
@@ -355,15 +418,13 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/nonprime.html">Non-prime</a>
 <a href="gallery/flops.html">Tough cases</a>
 </div>
-
 <h2>Example</h2>
 <div class="example-row">
   <div class="blurb">
     Each neoplatonic has its own page &mdash; the Euclidean solid, the
     morph from the ideal limit in the Poincar&eacute; and Klein models,
     the ideal net, and the CLERS triangulation. <strong>Click the CLERS
-    code under the model to the right</strong> to open its page; an
-    embedded copy is shown below.
+    code under the model to the right</strong> to open its page.
   </div>
   <div class="thumb">
     <model-viewer src="nets/{ex}/rb.glb"
@@ -371,13 +432,19 @@ with equilateral triangle faces, meeting at most six to a vertex.
     <div class="label"><a href="nets/{ex}/">{ex}</a></div>
   </div>
 </div>
-<iframe class="example-full" src="nets/{ex}/" loading="lazy" title="per-net page preview"></iframe>
-
+<h2>Quick links by size</h2>
+<div class="gallery-links">
+{quick}</div>
+<div class="gallery-links" style="font-size:.85em">
+{more}</div>
 <h2>Find a net</h2>
 <div class="search">
 <input id=q placeholder="CLERS name, e.g. CCCACACACACAAE">
 <button onclick="go()">go</button>
 <div id="search-msg"></div>
+
+
+
 </div>
 <script>
 function go() {{

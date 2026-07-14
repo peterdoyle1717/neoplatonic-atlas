@@ -165,7 +165,9 @@ mirror sector below the axis. Reflections are lumped, so the two
 half-sectors show the same nets; for a chiral unit they would be
 distinct. Solid dots are built (click to open); pale dots are not
 built yet. T is not injective: e.g. (7,0) and (5,3) are different nets
-with T = 49.</p>
+with T = 49. Subdivisions are computed with
+<a href="https://www.antiprism.com/">Antiprism</a> (Adrian Rossiter&rsquo;s
+<code>geodesic</code>).</p>
 <div class=legend>
 <span><i style="background:#c33"></i>this net</span>
 <span><i style="background:#2255aa"></i>ancestors</span>
