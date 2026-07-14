@@ -140,12 +140,14 @@ def ideal_net_svg(nc, faces):
 
 
 def glb_hero(name, faces, V, pos, outdir):
-    """red-black + CLERS GLBs from given coordinates (Klein model for
-    degree-7 nets at alpha_max)."""
+    """blue-black + CLERS GLBs from given coordinates (Klein model for
+    degree-7 nets at alpha_max; blue is the hyperbolic color, matching
+    the morph viewer's BLUE 0.25,0.55,0.85)."""
     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
-    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats,
+                    center_color=[0.25, 0.55, 0.85])
     groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
     for L, rgb in RGB.items():
         gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]

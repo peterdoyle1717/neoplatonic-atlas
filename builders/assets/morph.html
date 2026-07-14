@@ -122,7 +122,7 @@ let playing = 0;
 function applyState(newU) {
   u = Math.max(0, Math.min(1, newU));
   if (mixer && clip) mixer.setTime(Math.min(u, 0.999) * clip.duration);
-  const color = u >= 1.0 ? RED : BLUE;
+  const color = (u >= 1.0 && !labq) ? RED : BLUE;
   for (const mat of meshMaterials) mat.color.copy(color);
   slider.value = Math.round(u * 1000);
   const n = rhos.length;

@@ -517,8 +517,11 @@ def main():
                 f'v = {v}</h1><p class=desc>{len(rows)} nets{note}</p>',
                 grid([item(r, f'v={v}'
                            + (' non-prime' if 'nonprime' in r.get("themes", [])
+                              else '')
+                           + (f' deg {r["maxdeg"]}' if r.get("maxdeg", 6) > 6
                               else '')) for r in
-                      sorted(rows, key=lambda r: r["name"])]),
+                      sorted(rows, key=lambda r: (r.get("maxdeg", 6) > 6,
+                                                  r["name"]))]),
                 '</body></html>']
         with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
             f.write('\n'.join(body))
