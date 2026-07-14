@@ -355,6 +355,34 @@ def main():
                            + (f' &middot; {dn}' if dn else ''))
                       for v, ns, np_, r, dn in drows2]))
 
+    # -- icosahedral-relatives gallery (icorel_sweep.py) ----------------
+    ipath = os.path.join(TOP, "data", "icorel_v30.tsv")
+    if os.path.exists(ipath):
+        RELNAME = {"dod": "dodecahedron", "ico": "icosahedron",
+                   "idd": "icosidodecahedron", "rid1": "rhombicosidodeca (3-4)",
+                   "rid2": "rhombicosidodeca (4-5)", "snub1": "snub dodeca (3-3)",
+                   "snub2": "snub dodeca (3-4)"}
+        irows = []
+        for ln in open(ipath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            if len(t) >= 9 and t[2]:
+                V = int(t[1])
+                r = byname_pre.get(f"v{V}{t[0]}")
+                if r:
+                    cap = ', '.join(f"{RELNAME.get(h.split(':')[0], h)}&times;{h.split(':')[1]}"
+                                    for h in t[2].split(','))
+                    irows.append((V, cap, r))
+        irows.sort(key=lambda x: (x[0], x[2]["name"]))
+        gallery('icorel.html', 'Icosahedral relatives',
+                'Nets sharing a bend with an icosahedral-family solid '
+                '(dodecahedron, icosahedron, icosidodecahedron, '
+                'rhombicosidodecahedron, snub dodecahedron; dihedrals '
+                'measured from Antiprism models, matched at 1e-7 against '
+                'solver-emitted Euclidean bends). Only '
+                f'{len(irows)} prime nets v &le; 30 qualify; no net below '
+                'v = 30 carries the icosidodecahedral or snub values.',
+                grid([item(r, f'v={v} &middot; {cap}') for v, cap, r in irows]))
+
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
     if os.path.exists(cxpath):
@@ -496,6 +524,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
+<a href="gallery/icorel.html">Icosahedral relatives</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
