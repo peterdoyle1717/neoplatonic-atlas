@@ -386,10 +386,13 @@ def main():
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
     if os.path.exists(cxpath):
-        seenc, crows = set(), []
+        seenc, crows, nonnet = set(), [], []
         for ln in open(cxpath).read().splitlines()[1:]:
             t = ln.split('\t')
             V = int(t[3])
+            if len(t) > 4 and t[4] == '0':
+                nonnet.append(t[1])
+                continue
             nm = f"v{V}{t[2]}"
             if nm in seenc:
                 for c in crows:
@@ -410,7 +413,11 @@ def main():
                 'and share its cell.',
                 grid([item(r, f'v={v} &middot; ' + '; '.join(names[:2])
                            + ('&hellip;' if len(names) > 2 else ''))
-                      for v, names, r in crows]))
+                      for v, names, r in crows])
+                + ('<p class=desc><b>Not neoplatonizable</b> (capping '
+                   'forces a vertex of degree 7, hence negative curvature, '
+                   'outside the 6-net universe): '
+                   + ', '.join(sorted(set(nonnet))) + '.</p>' if nonnet else ''))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
