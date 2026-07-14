@@ -71,6 +71,8 @@ def flag_line(rec):
                     f'(depth {fl.get("buried_depth", 0):.3f})')
     if fl.get("floppy"):
         bits.append("floppy")
+    if fl.get("conway") and fl.get("conway") != '1':
+        bits.append(f'symmetry {fl["conway"]}')
     if rec.get("maxdeg", 6) > 6:
         bits.append(f'max degree {rec["maxdeg"]} &mdash; no Euclidean '
                     f'realization; hyperbolic up to '

@@ -80,6 +80,12 @@ def stamp(recs):
     if os.path.exists(epath):
         for r in csv.DictReader(open(epath), delimiter='\t'):
             eis[r['name']] = r
+    conway = {}
+    cwpath = os.path.join(TOP, "data", "conway.tsv")
+    if os.path.exists(cwpath):
+        for ln in open(cwpath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            conway[t[0]] = t[1]
     sym = {}
     spath = os.path.join(TOP, "data", "symmetry.tsv")
     if os.path.exists(spath):
@@ -123,6 +129,10 @@ def stamp(recs):
                    or rec.get("flags", {}).get("sym_refl") != (sy[2] > 0)):
             rec.setdefault("flags", {})["sym_order"] = sy[0]
             rec["flags"]["sym_refl"] = sy[2] > 0
+            changed = True
+        cwv = conway.get(d)
+        if cwv and rec.get("flags", {}).get("conway") != cwv:
+            rec.setdefault("flags", {})["conway"] = cwv
             changed = True
         t = themes.get(rec.get("name", d))
         if t is not None and rec.get("themes") != t:
@@ -194,6 +204,12 @@ def main():
     stamp(recs)
     recs = load_records()
     cn = census_counts()
+    conway = {}
+    cwpath = os.path.join(TOP, "data", "conway.tsv")
+    if os.path.exists(cwpath):
+        for ln in open(cwpath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            conway[t[0]] = t[1]
 
     # -- galleries ---------------------------------------------------
     buried = sorted((r for r in recs.values() if r["flags"].get("buried")),
@@ -271,24 +287,35 @@ def main():
             t = ln.split('\t')
             r = recs.get(t[0])
             if r:
-                symrows.append((int(t[3]), int(t[5]) > 0, int(t[2]), r))
+                symrows.append((int(t[3]), int(t[5]) > 0, int(t[2]), r,
+                                conway.get(t[0], '?')))
     classes = {}
-    for order, refl, v, r in symrows:
-        classes.setdefault((order, refl), []).append((v, r))
+    for order, refl, v, r, cwv in symrows:
+        classes.setdefault((order, refl, cwv), []).append((v, r))
     parts = []
-    for (order, refl) in sorted(classes, key=lambda k: (-k[0], k[1])):
-        rows_ = sorted(classes[(order, refl)], key=lambda t: (t[0], t[1]["name"]))
+    for (order, refl, cwv) in sorted(classes, key=lambda k: (-k[0], k[1], k[2])):
+        rows_ = sorted(classes[(order, refl, cwv)],
+                       key=lambda t: (t[0], t[1]["name"]))
         kind = 'with reflections' if refl else 'chiral'
-        parts.append(f'<h2>order {order}, {kind} &mdash; '
+        parts.append(f'<h2>{cwv} &mdash; order {order}, {kind} &mdash; '
                      f'{len(rows_)} built nets</h2>')
         parts.append(grid([item(r, f'v={v}') for v, r in rows_[:8]]))
     gallery('symmetry.html', 'Symmetry',
-            'One class per automorphism-group order and chirality, over '
-            'the nets built in this atlas (combinatorial automorphisms; '
-            'by uniqueness of the realization these act as isometries of '
-            'the solid). Up to 8 exemplars per class, smallest first. '
-            'Rotation-only groups are marked chiral.',
+            'One class per symmetry group, labeled by Conway orbifold '
+            'symbol (digits ascending: 235 and *235 for the chiral and '
+            'full icosahedral groups), computed from the combinatorial '
+            'automorphisms, which act as isometries by uniqueness of the '
+            'realization. Up to 8 exemplars per class, smallest first.',
             ''.join(parts))
+
+    # icosahedral symmetry gallery (235 / *235)
+    isym = sorted(((v, cwv, r) for order, refl, v, r, cwv in symrows
+                   if cwv in ('235', '*235')), key=lambda t: (t[0], t[2]["name"]))
+    gallery('icosym.html', 'Icosahedral symmetry',
+            'Nets with 60-fold or 120-fold symmetry &mdash; Conway 235 '
+            '(chiral) or *235 (full). The geodesic domes live here, '
+            'joined by the capped icosahedral classics.',
+            grid([item(r, f'v={v} &middot; {cwv}') for v, cwv, r in isym]))
 
     byname_pre = {r["name"]: r for r in recs.values()}
     # -- all-recognized-angles gallery (data lands from
@@ -354,87 +381,6 @@ def main():
                 grid([item(r, f'v={v} &middot; {ns} sq, {np_} pent'
                            + (f' &middot; {dn}' if dn else ''))
                       for v, ns, np_, r, dn in drows2]))
-
-    # -- icosahedral-relatives gallery (icorel_sweep.py) ----------------
-    ipath = os.path.join(TOP, "data", "icorel_v30.tsv")
-    if os.path.exists(ipath):
-        RELNAME = {"dod": "dodecahedron", "ico": "icosahedron",
-                   "idd": "icosidodecahedron", "rid1": "rhombicosidodeca (3-4)",
-                   "rid2": "rhombicosidodeca (4-5)", "snub1": "snub dodeca (3-3)",
-                   "snub2": "snub dodeca (3-4)"}
-        irows = []
-        for ln in open(ipath).read().splitlines()[1:]:
-            t = ln.split('\t')
-            if len(t) >= 9 and t[2]:
-                V = int(t[1])
-                r = byname_pre.get(f"v{V}{t[0]}")
-                if r:
-                    cap = ', '.join(f"{RELNAME.get(h.split(':')[0], h)}&times;{h.split(':')[1]}"
-                                    for h in t[2].split(','))
-                    irows.append((V, cap, r))
-        irows.sort(key=lambda x: (x[0], x[2]["name"]))
-        gallery('icorel.html', 'Icosahedral relatives',
-                'Nets sharing a bend with an icosahedral-family solid '
-                '(dodecahedron, icosahedron, icosidodecahedron, '
-                'rhombicosidodecahedron, snub dodecahedron; dihedrals '
-                'measured from Antiprism models, matched at 1e-7 against '
-                'solver-emitted Euclidean bends). Only '
-                f'{len(irows)} prime nets v &le; 30 qualify; no net below '
-                'v = 30 carries the icosidodecahedral or snub values.',
-                grid([item(r, f'v={v} &middot; {cap}') for v, cap, r in irows]))
-
-    # -- degree-7 classics, hyperbolically -------------------------------
-    d7path = os.path.join(TOP, "data", "theme_deg7.txt")
-    if os.path.exists(d7path):
-        d7rows = []
-        cxnames = {}
-        for ln in open(os.path.join(TOP, "data", "classics.tsv")).read().splitlines()[1:]:
-            t = ln.split('\t')
-            if t[4] == '0':
-                cxnames.setdefault(t[2], []).append(t[1])
-        for nm in open(d7path).read().split():
-            V = (len(nm) + 4) // 2
-            r = byname_pre.get(f"v{V}{nm}")
-            if r:
-                d7rows.append((V, '; '.join(dict.fromkeys(cxnames.get(nm, [])))[:60], r))
-        d7rows.sort(key=lambda x: (x[1].startswith('j'), x[0], x[2]["name"]))
-        gallery('deg7.html', 'Degree-7 classics, hyperbolically',
-                'Classics whose capping forces a degree-7 vertex have no '
-                'Euclidean neoplatonic form (7 unit triangles = 420&deg;), '
-                'but they exist as ideal polyhedra and as equilateral '
-                'hyperbolic polyhedra for corner angles up to '
-                '&alpha; = 360/7 &asymp; 51.43&deg;, where the degree-7 '
-                'vertices go flat. Hero models show the Klein-ball view at '
-                '&alpha; = 360/7; morphs run from the ideal end up to it.',
-                grid([item(r, f'v={v} &middot; {names}') for v, names, r in d7rows]))
-
-    # -- geodesic domes: the icosahedron's Eisenstein family -------------
-    geo = []
-    epath2 = os.path.join(TOP, "data", "eisenstein.tsv")
-    if os.path.exists(epath2):
-        for r in csv.DictReader(open(epath2), delimiter='\t'):
-            if r['family'] != 'ico':
-                continue
-            name = r['name']
-            i = 1
-            while i < len(name) and name[i].isdigit():
-                i += 1
-            V, cl = int(name[1:i]), name[i:]
-            rec = byname_pre.get(name)
-            if rec:
-                geo.append((int(r['T']), int(r['a']), int(r['b']), V, rec))
-    geo.sort()
-    gallery('geodesic.html', 'Geodesic domes',
-            'Eisenstein subdivisions of the icosahedron &mdash; the '
-            'geodesic domes. Any neoplatonic can be Eisenstein-subdivided '
-            '(the (a,b) subdivision multiplies the face count by '
-            'T = a&sup2;+ab+b&sup2;), and the atlas builds seven families '
-            'out (see <a href="subdiv.html">Eisenstein subdivisions</a> '
-            'and the per-family lattice maps); the icosahedron&rsquo;s '
-            'family is the famous one. '
-            '<a href="../eisenmap/ico.html">Lattice map</a>.',
-            grid([item(rec, f'T={T} ({a},{b}) &middot; v={V}')
-                  for T, a, b, V, rec in geo]))
 
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
@@ -622,7 +568,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
 <a href="gallery/oddsends.html">Odds and ends</a>
-<a href="gallery/icorel.html">Icosahedral relatives</a>
+<a href="gallery/icosym.html">Icosahedral symmetry</a>
 <a href="gallery/deg7.html">Degree-7 classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
