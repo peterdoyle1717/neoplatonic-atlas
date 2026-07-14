@@ -305,6 +305,21 @@ def main():
     # cap-replaced convex gallery (decap_search.py)
     dpath2 = os.path.join(TOP, "data", "decap_v30.tsv")
     if os.path.exists(dpath2):
+        JNAME = {"j1": "square pyramid", "j14": "elong. tri. bipyramid",
+                 "j26": "gyrobifastigium", "j27": "tri. orthobicupola",
+                 "j44": "elong. tri. gyrobicupola",
+                 "j50": "biaug. triangular prism",
+                 "j85": "snub square antiprism", "j86": "sphenocorona",
+                 "j88": "sphenomegacorona", "j89": "hebesphenomegacorona",
+                 "ico": "icosahedron", "pri3": "triangular prism",
+                 "ant4": "square antiprism", "cube,pri4": "cube",
+                 "cuboctahedron,j27": "cubocta / tri. orthobicupola"}
+        dnames = {}
+        npath = os.path.join(TOP, "data", "decap_names.tsv")
+        if os.path.exists(npath):
+            for ln in open(npath).read().splitlines()[1:]:
+                t = ln.split('\t')
+                dnames[t[0]] = JNAME.get(t[4], t[4] if t[4] != '-' else '')
         drows2 = []
         for ln in open(dpath2).read().splitlines()[1:]:
             t = ln.split('\t')
@@ -312,7 +327,8 @@ def main():
                 V = int(t[1])
                 r = byname_pre.get(f"v{V}{t[0]}")
                 if r:
-                    drows2.append((V, int(t[2]), int(t[3]), r))
+                    drows2.append((V, int(t[2]), int(t[3]), r,
+                                   dnames.get(t[0], '')))
         drows2.sort(key=lambda x: (x[0], x[3]["name"]))
         gallery('decap.html', 'Cap-replaced convex',
                 f'Nets whose realization carries exact square or pentagon '
@@ -321,8 +337,9 @@ def main():
                 f'replaced by its flat polygon &mdash; all '
                 f'{len(drows2)} such prime nets v &le; 30 '
                 f'(decap_search.py over the census coordinates).',
-                grid([item(r, f'v={v} &middot; {ns} sq, {np_} pent')
-                      for v, ns, np_, r in drows2]))
+                grid([item(r, f'v={v} &middot; {ns} sq, {np_} pent'
+                           + (f' &middot; {dn}' if dn else ''))
+                      for v, ns, np_, r, dn in drows2]))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}

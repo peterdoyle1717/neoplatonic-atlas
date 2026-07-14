@@ -127,6 +127,10 @@ def render_page(netdir):
     if art.get("clers_layout"):
         body.append(cell_svg('clers_layout.svg', 'CLERS layout'))
     body.append('</div>')
+    # freeform notes from the record (PD: comments on personal pages)
+    if rec.get("notes"):
+        body.append(f'<p class=info style="margin-top:.8em">'
+                    f'<b>Notes.</b> {rec["notes"]}</p>')
     # Eisenstein lattice, embedded inline for nets with a built ancestor
     # or descendant (eismap.svg written by eisenmap.py; inline so the
     # dot links work)
