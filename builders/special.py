@@ -397,7 +397,7 @@ def main():
             r = byname_pre.get(f"v{V}{nm}")
             if r:
                 d7rows.append((V, '; '.join(dict.fromkeys(cxnames.get(nm, [])))[:60], r))
-        d7rows.sort(key=lambda x: (x[0], x[2]["name"]))
+        d7rows.sort(key=lambda x: (x[1].startswith('j'), x[0], x[2]["name"]))
         gallery('deg7.html', 'Degree-7 classics, hyperbolically',
                 'Classics whose capping forces a degree-7 vertex have no '
                 'Euclidean neoplatonic form (7 unit triangles = 420&deg;), '
@@ -428,6 +428,31 @@ def main():
             r = byname_pre.get(nm)
             if r:
                 crows.append([V, [t[1]], r])
+        def rank_of(names):
+            first = names[0]
+            if first in ('tetrahedron', 'cube', 'octahedron', 'icosahedron',
+                         'dodecahedron'):
+                return 0
+            if not first.startswith(('j', 'pri', 'ant')):
+                return 1
+            if first.startswith(('pri', 'ant')):
+                return 2
+            return 3
+        SECT = {0: 'Platonic', 1: 'Archimedean', 2: 'Prisms and antiprisms',
+                3: 'Johnson solids'}
+        parts = []
+        for rank in (0, 1, 2, 3):
+            sel = [(v, names, r) for v, names, r in crows
+                   if rank_of(names) == rank]
+            if not sel:
+                continue
+            note = (' &mdash; a ragtag bunch, in the cheap seats'
+                    if rank == 3 else '')
+            parts.append(f'<h2>{SECT[rank]}{note}</h2>')
+            parts.append(grid([item(r, f'v={v} &middot; '
+                                    + '; '.join(names[:2])
+                                    + ('&hellip;' if len(names) > 2 else ''))
+                               for v, names, r in sel]))
         gallery('classics.html', 'The classics, neoplatonized',
                 'Named solids in their neoplatonic reading: triangle faces '
                 'kept, squares and pentagons capped by unit pyramids, '
@@ -436,12 +461,10 @@ def main():
                 '(builders/classics.py); distinct diminished/augmented/'
                 'gyrate variants of one solid collapse to the same net '
                 'and share its cell.',
-                grid([item(r, f'v={v} &middot; ' + '; '.join(names[:2])
-                           + ('&hellip;' if len(names) > 2 else ''))
-                      for v, names, r in crows])
+                ''.join(parts)
                 + ('<p class=desc><b>Not neoplatonizable</b> (capping '
                    'forces a vertex of degree 7, hence negative curvature, '
-                   'outside the 6-net universe): '
+                   'outside the 6-net universe; see the degree-7 annex): '
                    + ', '.join(sorted(set(nonnet))) + '.</p>' if nonnet else ''))
 
     # -- themed galleries from the old atlas ---------------------------
