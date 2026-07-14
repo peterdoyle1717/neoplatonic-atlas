@@ -383,6 +383,31 @@ def main():
                 'v = 30 carries the icosidodecahedral or snub values.',
                 grid([item(r, f'v={v} &middot; {cap}') for v, cap, r in irows]))
 
+    # -- degree-7 classics, hyperbolically -------------------------------
+    d7path = os.path.join(TOP, "data", "theme_deg7.txt")
+    if os.path.exists(d7path):
+        d7rows = []
+        cxnames = {}
+        for ln in open(os.path.join(TOP, "data", "classics.tsv")).read().splitlines()[1:]:
+            t = ln.split('\t')
+            if t[4] == '0':
+                cxnames.setdefault(t[2], []).append(t[1])
+        for nm in open(d7path).read().split():
+            V = (len(nm) + 4) // 2
+            r = byname_pre.get(f"v{V}{nm}")
+            if r:
+                d7rows.append((V, '; '.join(dict.fromkeys(cxnames.get(nm, [])))[:60], r))
+        d7rows.sort(key=lambda x: (x[0], x[2]["name"]))
+        gallery('deg7.html', 'Degree-7 classics, hyperbolically',
+                'Classics whose capping forces a degree-7 vertex have no '
+                'Euclidean neoplatonic form (7 unit triangles = 420&deg;), '
+                'but they exist as ideal polyhedra and as equilateral '
+                'hyperbolic polyhedra for corner angles up to '
+                '&alpha; = 360/7 &asymp; 51.43&deg;, where the degree-7 '
+                'vertices go flat. Hero models show the Klein-ball view at '
+                '&alpha; = 360/7; morphs run from the ideal end up to it.',
+                grid([item(r, f'v={v} &middot; {names}') for v, names, r in d7rows]))
+
     # -- classics gallery ----------------------------------------------
     cxpath = os.path.join(TOP, "data", "classics.tsv")
     if os.path.exists(cxpath):
@@ -532,6 +557,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
 <a href="gallery/icorel.html">Icosahedral relatives</a>
+<a href="gallery/deg7.html">Degree-7 classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>

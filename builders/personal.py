@@ -13,6 +13,7 @@ GLBs under site/personal/glb/.
 """
 import math, os, subprocess, sys
 from multiprocessing import Pool
+import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
@@ -138,6 +139,21 @@ def ideal_net_svg(nc, faces):
     return make_svg(positions, sorted(edges))
 
 
+def glb_hero(name, faces, V, pos, outdir):
+    """red-black + CLERS GLBs from given coordinates (Klein model for
+    degree-7 nets at alpha_max)."""
+    verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+    v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
+    groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
+    for L, rgb in RGB.items():
+        gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
+        if gf:
+            groups.append((rgb, gf))
+    write_gltf_groups(os.path.join(outdir, "clers.glb"), v2, groups)
+
+
 def glb_euclid(name, faces, V, bends, outdir):
     pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
@@ -227,12 +243,14 @@ def align_frames(frames):
     return [[tuple(v) for v in F] for F in out]
 
 
-def glb_movies(name, faces, V, nc, outdir):
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True):
     """two animated morph GLBs (Poincare, Klein): ideal end first,
-    exact Euclidean solid last, every frame filling the window."""
+    then either the exact Euclidean solid (alpha_max = 60) or the
+    hyperbolic realization at the final rung (degree-7 nets:
+    alpha_max = 360/maxdeg)."""
     grid = bary_grid(SUBDIV)
     fp, fk, tris = [], [], None
-    for a in MORPH_ALPHAS:
+    for a in (alphas or MORPH_ALPHAS):
         bends = solve_alpha(nc, a)
         if bends is None:
             return 0
@@ -241,14 +259,15 @@ def glb_movies(name, faces, V, nc, outdir):
         vk, tris = subdivided_frame(faces, klein(pos), grid)
         fk.append(vk)
         fp.append(klein_to_poincare(vk))
-    bends60 = solve_prove_60(nc)
-    if bends60 is None:
-        return 0
-    pos60, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends60.items()})
-    ctr = sum(pos60.values()) / len(pos60)
-    ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
-    fp.append(ve)
-    fk.append(ve)
+    if euclid_end:
+        bends60 = solve_prove_60(nc)
+        if bends60 is None:
+            return 0
+        pos60, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends60.items()})
+        ctr = sum(pos60.values()) / len(pos60)
+        ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+        fp.append(ve)
+        fk.append(ve)
     fp = align_frames(fp)
     fk = align_frames(fk)
     write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
@@ -269,17 +288,35 @@ def build_net(job):
     nid = net_id(V, name)
     netdir = os.path.join(OUT, "nets", nid)
     os.makedirs(netdir, exist_ok=True)
+    deg = {}
+    for f in faces:
+        for x in f:
+            deg[x] = deg.get(x, 0) + 1
+    maxdeg = max(deg.values())
+    amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+    alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+              [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
     if not (os.path.exists(os.path.join(netdir, "rb.glb"))
             and os.path.exists(os.path.join(netdir, "clers.glb"))):
-        bends = solve_prove_60(nc)
-        if bends is None:
-            return (vname, "SOLVE-FAIL")
-        glb_euclid(name, faces, V, bends, netdir)
+        if maxdeg <= 6:
+            bends = solve_prove_60(nc)
+            if bends is None:
+                return (vname, "SOLVE-FAIL")
+            glb_euclid(name, faces, V, bends, netdir)
+        else:
+            bends = solve_alpha(nc, amax)
+            if bends is None:
+                return (vname, "SOLVE-FAIL")
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            pos = center(develop_h(faces, bd, math.radians(amax))[0])
+            K = klein(pos)
+            glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir)
     if (os.path.exists(os.path.join(netdir, "morph_p.glb"))
             and os.path.exists(os.path.join(netdir, "morph_k.glb"))):
         built = "reused"
     else:
-        nframes = glb_movies(name, faces, V, nc, netdir)
+        nframes = glb_movies(name, faces, V, nc, netdir,
+                             alphas=alphas, euclid_end=(maxdeg <= 6))
         built = f"built {nframes} frames"
     inet_path = os.path.join(netdir, "ideal_net.svg")
     if not os.path.exists(inet_path):
@@ -299,7 +336,11 @@ def build_net(job):
     recpath = os.path.join(netdir, "net.json")
     rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
     rec.update({"id": nid, "name": vname, "clers": name, "v": V, "E": E,
-                "F": len(faces), "netcode": nc, "artifacts": have})
+                "F": len(faces), "netcode": nc, "artifacts": have,
+                "maxdeg": maxdeg})
+    if maxdeg > 6:
+        rec["alpha_max"] = amax
+        rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
     rec.setdefault("flags", {})
     rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
     with open(recpath, "w") as f:

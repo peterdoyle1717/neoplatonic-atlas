@@ -71,6 +71,10 @@ def flag_line(rec):
                     f'(depth {fl.get("buried_depth", 0):.3f})')
     if fl.get("floppy"):
         bits.append("floppy")
+    if rec.get("maxdeg", 6) > 6:
+        bits.append(f'max degree {rec["maxdeg"]} &mdash; no Euclidean '
+                    f'realization; hyperbolic up to '
+                    f'&alpha; = 360/{rec["maxdeg"]}')
     ei = rec.get("eisenstein", {})
     if ei.get("family"):
         nid = rec.get("id", rec.get("name", ""))
@@ -107,16 +111,24 @@ def render_page(netdir):
             + (f'<p class=flags>{flags}</p>' if flags else '')
             + '<p class=hint>Models can be manipulated.</p>',
             '<div class=pair>']
+    amax = rec.get("alpha_max")
     if art.get("rb"):
         body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/rb.glb',
-                                'Euclidean'))
+                                'Euclidean' if not amax else
+                                f'hyperbolic, Klein model, '
+                                f'&alpha;={amax:.2f}&deg;'))
     # 2x2 block:  Euclidean | Poincare morph
     #             Klein morph | ideal net
     if art.get("morph_p"):
-        body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb',
-                             'ideal to Euclidean, Poincar&eacute;'),
-                 cell_iframe(f'../../morph.html?file=nets/{nid}/morph_k.glb',
-                             'ideal to Euclidean, Klein')]
+        lab = ''
+        end = 'Euclidean'
+        if amax:
+            lab = '&labels=' + ','.join(rec.get("morph_labels", []))
+            end = f'&alpha;={amax:.2f}&deg;'
+        body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb{lab}',
+                             f'ideal to {end}, Poincar&eacute;'),
+                 cell_iframe(f'../../morph.html?file=nets/{nid}/morph_k.glb{lab}',
+                             f'ideal to {end}, Klein')]
     if art.get("ideal_net"):
         body.append(cell_svg('ideal_net.svg', 'ideal net'))
     body.append('</div>')
