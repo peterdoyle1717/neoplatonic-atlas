@@ -86,6 +86,13 @@ def stamp(recs):
         for ln in open(spath).read().splitlines()[1:]:
             t = ln.split('\t')
             sym[t[0]] = (int(t[3]), int(t[4]), int(t[5]))
+    classics = {}
+    cxpath = os.path.join(TOP, "data", "classics.tsv")
+    if os.path.exists(cxpath):
+        for ln in open(cxpath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            V = int(t[3])
+            classics.setdefault(f"v{V}{t[2]}", []).append(t[1])
     themes = {}
     tpath = os.path.join(TOP, "data", "themes.tsv")
     if os.path.exists(tpath):
@@ -103,6 +110,13 @@ def stamp(recs):
                      "floppy": bool(int(c['floppy']))}
             if rec.get("flags") != flags:
                 rec["flags"] = flags
+                changed = True
+        cx = classics.get(rec.get("name", d))
+        if cx:
+            tag = ("The neoplatonic (capped/fanned) form of: "
+                   + "; ".join(dict.fromkeys(cx)) + ".")
+            if tag not in rec.get("notes", ""):
+                rec["notes"] = (rec.get("notes", "") + " " + tag).strip()
                 changed = True
         sy = sym.get(d)
         if sy and (rec.get("flags", {}).get("sym_order") != sy[0]
@@ -341,6 +355,35 @@ def main():
                            + (f' &middot; {dn}' if dn else ''))
                       for v, ns, np_, r, dn in drows2]))
 
+    # -- classics gallery ----------------------------------------------
+    cxpath = os.path.join(TOP, "data", "classics.tsv")
+    if os.path.exists(cxpath):
+        seenc, crows = set(), []
+        for ln in open(cxpath).read().splitlines()[1:]:
+            t = ln.split('\t')
+            V = int(t[3])
+            nm = f"v{V}{t[2]}"
+            if nm in seenc:
+                for c in crows:
+                    if c[2]["name"] == nm and t[1] not in c[1]:
+                        c[1].append(t[1])
+                continue
+            seenc.add(nm)
+            r = byname_pre.get(nm)
+            if r:
+                crows.append([V, [t[1]], r])
+        gallery('classics.html', 'The classics, neoplatonized',
+                'Named solids in their neoplatonic reading: triangle faces '
+                'kept, squares and pentagons capped by unit pyramids, '
+                'hexagons filled by flat unit fans (faces are in the eye '
+                'of the beholder). Generated from Antiprism models '
+                '(builders/classics.py); distinct diminished/augmented/'
+                'gyrate variants of one solid collapse to the same net '
+                'and share its cell.',
+                grid([item(r, f'v={v} &middot; ' + '; '.join(names[:2])
+                           + ('&hellip;' if len(names) > 2 else ''))
+                      for v, names, r in crows]))
+
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
     dpath = os.path.join(TOP, "data", "theme_desc.tsv")
@@ -452,6 +495,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/symmetry.html">Symmetry</a>
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
+<a href="gallery/classics.html">Classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
