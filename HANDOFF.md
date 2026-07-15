@@ -87,11 +87,11 @@ Public repos: github.com/peterdoyle1717/neoplatonic-atlas (this repo:
 builders + data, MIT, README points at the DOI) and
 github.com/peterdoyle1717/idealprover (boundary-cert scripts +
 reports, copied from bendq_sandbox — originals untouched);
-bendprover pushed current (ae6f915). Deployed:
-math.dartmouth.edu/~doyle/docs/atlas2/personal/ (4.2G on gauss;
-front page + GLB fetch both HTTP 200). OLD atlas (131G,
-gauss docs/atlas) still up — paper's five links point there; retire
-only after link rewrite or redirect. Local cleanup: retirees in
+bendprover pushed current (ae6f915). Deployed to gauss docs/atlas2,
+then SWAPPED to docs/atlas (see Distribution above); OLD atlas (131G)
+parked at gauss docs/atlas_old pending final retirement — its
+downloads/ tarballs are superseded by the record's primes_v4-60
+(objs tarballs still unique there). Local cleanup: retirees in
 neo/_trash-20260715/ (5.9G; fleet pushed and/or tarballed first),
 full-tree tarballs in neo/retired/ (310M, 14 tarballs).
 
