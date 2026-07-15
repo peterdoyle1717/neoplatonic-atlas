@@ -1,0 +1,269 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-016_hkfi.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed: none; staged diff is empty
+Checks run: git diff --cached --stat; git diff --cached --name-only; git diff --cached --check; staged Lean grep; git status --short; git rev-parse HEAD^{tree}
+Blocking issues: .git/claude-commit-evidence.md is missing. Also staged tree equals HEAD tree, so the proposed commit message claims changes that are not present in the staged diff.
+Warnings: TEAMWORK.md reported missing in gate input; no build was run.
+Recommendation: Do not commit; stage the intended files and provide the required committer evidence file, then rerun the gate.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f60fe-dfe7-7a23-a1b5-38ad11f95c4f
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4
+
+Proposed command:
+python3 - <<'EOF'
+s = open('builders/special.py').read()
+s = s.replace('''    # -- themed galleries from the old atlas ---------------------------''',
+'''    # -- all-recognized-angles gallery (data lands from
+    # recognize_sweep.py; criterion v1, PD: every bend a construction
+    # angle, at least one icosahedral atom I) -------------------------
+    rpath = os.path.join(TOP, "data", "recognized_v30.tsv")
+    if os.path.exists(rpath):
+        rrows = []
+        for ln in open(rpath).read().splitlines()[1:]:
+            t = ln.split('\\t')
+            if len(t) >= 4 and t[2] == '1' and int(t[3]) > 0:
+                V = int(t[1])
+                r = byname_pre.get(f"v{V}{t[0]}")
+                if r:
+                    rrows.append((V, int(t[3]), r))
+        rrows.sort(key=lambda x: (x[0], x[2]["name"]))
+        gallery('recognized.html', 'All angles recognized',
+                'Nets whose every bend is a recognized construction angle '
+                '(the library of notes/bend_recognize.py: platonic atoms, '
+                'polygon-pyramid and antiprism dihedrals; |b| matched to '
+                '1e-7 against solver-emitted bends), with at least one '
+                'icosahedral atom I = &pi; &minus; acos(&minus;&radic;5/3). '
+                'Criterion v1 &mdash; to be tinkered with.',
+                grid([item(r, f'v={v} &middot; {k}&times;I')
+                      for v, k, r in rrows]))
+
+    # -- themed galleries from the old atlas ---------------------------''')
+s = s.replace('''    byname = {r["name"]: r for r in recs.values()}''',
+'''    byname = {r["name"]: r for r in recs.values()}''')
+# byname is defined AFTER the recognized block runs; define byname_pre before it
+s = s.replace('''    # -- all-recognized-angles gallery''',
+'''    byname_pre = {r["name"]: r for r in recs.values()}
+    # -- all-recognized-angles gallery''')
+s = s.replace('<a href="gallery/symmetry.html">Symmetry</a>',
+              '<a href="gallery/symmetry.html">Symmetry</a>\n<a href="gallery/recognized.html">All angles recognized</a>')
+open('builders/special.py','w').write(s)
+print('recognized gallery wired')
+EOF
+python3 -c "import ast; ast.parse(open('builders/special.py').read()); print('parses')" && git add builders/special.py builders/eisenmap.py builders/symmetry.py builders/recognize_sweep.py regen_personal.sh data/symmetry.tsv && git commit -q -m "front reorder; Antiprism credit; symmetry gallery; recognition sweep
+
+Front page order per PD: themed galleries, example (embedded page
+iframe dropped - the thumbnail and link remain), quick links, search.
+Subdiv gallery and eisenmap pages credit Adrian Rossiter's Antiprism
+(geodesic) with a link.
+
+Symmetry gallery: automorphism groups of all 2,133 built nets computed
+combinatorially with orientation split (builders/symmetry.py, cached
+in data/symmetry.tsv; by uniqueness these act as isometries). 19
+classes, from order 120 with reflections (6 nets) and order 60 chiral
+(2) down to 1,385 asymmetric; up to 8 exemplars per class, records
+stamped sym_order/sym_refl.
+
+recognize_sweep.py: all primes v<=30, solver-EMITTED bends (never
+coord recovery) matched at 1e-7 against the bend_recognize.py
+construction library (52 angles); the all-recognized + >=1 icosahedral
+atom gallery is wired and generates when the sweep's TSV lands.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+ M builders/eisenmap.py
+ M builders/special.py
+ M regen_personal.sh
+?? builders/recognize_sweep.py
+?? builders/symmetry.py
+?? data/recognized_v30.tsv
+?? data/symmetry.tsv
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+?? notes/codex-consults/2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+?? notes/codex-consults/2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+?? notes/codex-consults/2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+?? notes/codex-consults/2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+?? notes/codex-consults/2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+?? notes/codex-consults/2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+?? notes/codex-consults/2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+?? notes/codex-consults/2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+?? notes/codex-consults/2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+?? notes/codex-consults/2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+?? notes/codex-consults/2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+</stdin>
+codex
+I’ll inspect the staged tree directly and keep the gate focused on the requested veto conditions.
+exec
+/bin/zsh -lc 'git diff --cached --stat' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --name-only' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc "git diff --cached --name-only -- '*.lean' | xargs -r rg -n 'sorry|admit|axiom|native_decide'" in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --check' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ succeeded in 0ms:
+ succeeded in 0ms:
+ succeeded in 0ms:
+codex
+The local index currently shows no staged paths, which differs from the proposed commit context in the prompt. I’m checking whether the supplied staged tree hash contains the intended diff so the verdict matches the gate input rather than unstaged work.
+exec
+/bin/zsh -lc 'git status --short' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ M builders/eisenmap.py
+ M builders/special.py
+ M regen_personal.sh
+?? builders/recognize_sweep.py
+?? builders/symmetry.py
+?? data/recognized_v30.tsv
+?? data/symmetry.tsv
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+?? notes/codex-consults/2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+?? notes/codex-consults/2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+?? notes/codex-consults/2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+?? notes/codex-consults/2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+?? notes/codex-consults/2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+?? notes/codex-consults/2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+?? notes/codex-consults/2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+?? notes/codex-consults/2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+?? notes/codex-consults/2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+?? notes/codex-consults/2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+?? notes/codex-consults/2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+
+exec
+/bin/zsh -lc "test -f .git/claude-commit-evidence.md && sed -n '1,220p' .git/claude-commit-evidence.md || true" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+exec
+/bin/zsh -lc 'git diff --stat HEAD 1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --name-only HEAD 1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ succeeded in 0ms:
+codex
+The supplied staged tree hash resolves to the current HEAD tree, so the staged diff for this gate is empty. I’m only treating the missing evidence file as a trust-base input failure if the gate requirements make it mandatory independent of diff content.
+exec
+/bin/zsh -lc "find .git -maxdepth 1 -name 'claude-commit-evidence.md' -type f -print" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+exec
+/bin/zsh -lc 'git show --stat --oneline --no-renames 1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4 --' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --name-status --find-renames' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git rev-parse HEAD''^{tree} HEAD' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ succeeded in 0ms:
+1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4
+74cc2748e78a79f3cd47a99285ca46ceb667aa7e
+
+ succeeded in 0ms:
+tree 1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4
+
+.DS_Store
+.gitignore
+README.md
+build.py
+builders/
+data/
+notes/
+regen_personal.sh
+
+codex
+BLOCK
+Files reviewed: none; staged diff is empty
+Checks run: git diff --cached --stat; git diff --cached --name-only; git diff --cached --check; staged Lean grep; git status --short; git rev-parse HEAD^{tree}
+Blocking issues: .git/claude-commit-evidence.md is missing. Also staged tree equals HEAD tree, so the proposed commit message claims changes that are not present in the staged diff.
+Warnings: TEAMWORK.md reported missing in gate input; no build was run.
+Recommendation: Do not commit; stage the intended files and provide the required committer evidence file, then rerun the gate.
+tokens used
+26,648
+BLOCK
+Files reviewed: none; staged diff is empty
+Checks run: git diff --cached --stat; git diff --cached --name-only; git diff --cached --check; staged Lean grep; git status --short; git rev-parse HEAD^{tree}
+Blocking issues: .git/claude-commit-evidence.md is missing. Also staged tree equals HEAD tree, so the proposed commit message claims changes that are not present in the staged diff.
+Warnings: TEAMWORK.md reported missing in gate input; no build was run.
+Recommendation: Do not commit; stage the intended files and provide the required committer evidence file, then rerun the gate.

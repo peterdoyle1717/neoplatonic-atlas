@@ -1,0 +1,101 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 2c2054c45668c2e37c080674661457b831236f05
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-jw27h8o9.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed: staged diff metadata only; no file diff content was included
+Checks run: wrapper-provided grep: no staged `.lean` matches for `sorry|admit|axiom|native_decide`
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this blocks the commit
+Warnings: `TEAMWORK.md` live baton is missing; staged diff/stat content was not provided, so file-level review could not be completed
+Recommendation: do not commit until the committer evidence file is present and the gate is rerun with the staged diff available
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f531c-0a7e-7c10-973b-91896935f7fe
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+2c2054c45668c2e37c080674661457b831236f05
+
+Proposed command:
+cd /Users/doyle/Dropbox/neo/atlas2 && git add builders/glb.py builders/personal.py data/nets_v4_14.txt site/personal && git commit -q -m "personal pages v2: clean five-artifact pipeline, all prime nets v<=14
+
+builders/personal.py: red-black GLB, Poincare morph, Klein morph,
+CLERS-colored GLB (new write_gltf_groups in glb.py: one primitive per
+color), CLERS layout SVG inline. Input data/nets_v4_14.txt (138 nets,
+the v<=14 slice of the census prime universe from doob input.txt);
+all bends solved seedlessly in-pipeline. 138/138 built with 24 morph
+rungs each (6900 GLBs); indexes per v + master.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+ M builders/glb.py
+?? builders/personal.py
+?? data/nets_v4_14.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+</stdin>
+codex
+BLOCK
+Files reviewed: staged diff metadata only; no file diff content was included
+Checks run: wrapper-provided grep: no staged `.lean` matches for `sorry|admit|axiom|native_decide`
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this blocks the commit
+Warnings: `TEAMWORK.md` live baton is missing; staged diff/stat content was not provided, so file-level review could not be completed
+Recommendation: do not commit until the committer evidence file is present and the gate is rerun with the staged diff available
+tokens used
+3,858
+BLOCK
+Files reviewed: staged diff metadata only; no file diff content was included
+Checks run: wrapper-provided grep: no staged `.lean` matches for `sorry|admit|axiom|native_decide`
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this blocks the commit
+Warnings: `TEAMWORK.md` live baton is missing; staged diff/stat content was not provided, so file-level review could not be completed
+Recommendation: do not commit until the committer evidence file is present and the gate is rerun with the staged diff available

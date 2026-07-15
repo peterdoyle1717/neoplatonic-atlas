@@ -1,0 +1,148 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 9b7889eb84a5737bc2997564680076c97bd5f479
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-i4mw5fwg.txt
+codex exit: 0
+
+final message:
+BLOCK
+
+Files reviewed:
+No staged files; proposed commit command would add `builders/glb.py`, `builders/personal.py`, `site/personal/morph.html`, `site/personal/turntable.html`.
+
+Checks run:
+`git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --check`, evidence/TEAMWORK existence checks, staged Lean grep for `sorry|admit|axiom|native_decide`.
+
+Blocking issues:
+Proposed command commits files that are not currently staged, so the commit content was not reviewed as the staged diff. `.git/claude-commit-evidence.md` is missing, which is a trust-base veto under the gate rules.
+
+Warnings:
+`TEAMWORK.md` is also missing from the bundle. No staged Lean matches found.
+
+Recommendation:
+Stage the intended files, provide the committer evidence file, then rerun the gate on the actual staged diff.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f5333-495b-73e2-a590-ebac56ea8fbe
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+9b7889eb84a5737bc2997564680076c97bd5f479
+
+Proposed command:
+cd /Users/doyle/Dropbox/neo/atlas2 && V14=$(ls site/personal/14/*.html | grep -v index | head -1 | xargs -n1 basename | sed 's/.html//'); for u in "personal/index.html" "personal/14/$V14.html" "personal/glb/${V14}_rb.glb" "personal/glb/${V14}_morph_p.glb" "personal/glb/${V14}_morph_k.glb" "personal/glb/${V14}_clers.glb"; do printf '%s: ' "$u"; curl -s -o /dev/null -w "%{http_code}\n" "http://localhost:8765/atlas2/$u"; done && git add builders/glb.py builders/personal.py site/personal/morph.html site/personal/turntable.html 2>/dev/null; git add -f site/personal/morph.html site/personal/turntable.html 2>/dev/null; git commit -q -m "personal pages: old-atlas model with two morph movies
+
+Page skeleton and wrappers follow the deployed atlas (turntable.html
+verbatim; morph.html with alpha labels replacing rho). Morphs are now
+single animated GLBs (write_gltf_morph: morph targets + weights
+animation, ideal to Euclidean) in Poincare and Klein, replacing the
+slider frame stacks. Rows: Euclidean red-black; two movies; CLERS
+colored + CLERS layout. Rebuilt 138/138 with 24 rungs each (552 GLBs).
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+ M builders/glb.py
+ M builders/personal.py
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+</stdin>
+codex
+I’ll verify the staged tree directly so the gate result is based on the actual index, not just the wrapper summary.
+exec
+/bin/zsh -lc "git diff --cached -- builders/glb.py builders/personal.py site/personal/morph.html site/personal/turntable.html | sed -n '1,240p'" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+exec
+/bin/zsh -lc 'test -f .git/claude-commit-evidence.md; echo evidence:$?; test -f TEAMWORK.md; echo teamwork:$?; git diff --cached -- '"'*.lean' | rg -n 'sorry|admit|axiom|native_decide' || true" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+evidence:1
+teamwork:1
+
+exec
+/bin/zsh -lc 'git diff --cached --stat && git diff --cached --name-only && git diff --cached --check' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+codex
+BLOCK
+
+Files reviewed:
+No staged files; proposed commit command would add `builders/glb.py`, `builders/personal.py`, `site/personal/morph.html`, `site/personal/turntable.html`.
+
+Checks run:
+`git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --check`, evidence/TEAMWORK existence checks, staged Lean grep for `sorry|admit|axiom|native_decide`.
+
+Blocking issues:
+Proposed command commits files that are not currently staged, so the commit content was not reviewed as the staged diff. `.git/claude-commit-evidence.md` is missing, which is a trust-base veto under the gate rules.
+
+Warnings:
+`TEAMWORK.md` is also missing from the bundle. No staged Lean matches found.
+
+Recommendation:
+Stage the intended files, provide the committer evidence file, then rerun the gate on the actual staged diff.
+tokens used
+5,761
+BLOCK
+
+Files reviewed:
+No staged files; proposed commit command would add `builders/glb.py`, `builders/personal.py`, `site/personal/morph.html`, `site/personal/turntable.html`.
+
+Checks run:
+`git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --check`, evidence/TEAMWORK existence checks, staged Lean grep for `sorry|admit|axiom|native_decide`.
+
+Blocking issues:
+Proposed command commits files that are not currently staged, so the commit content was not reviewed as the staged diff. `.git/claude-commit-evidence.md` is missing, which is a trust-base veto under the gate rules.
+
+Warnings:
+`TEAMWORK.md` is also missing from the bundle. No staged Lean matches found.
+
+Recommendation:
+Stage the intended files, provide the committer evidence file, then rerun the gate on the actual staged diff.

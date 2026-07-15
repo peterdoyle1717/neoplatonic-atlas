@@ -1,0 +1,169 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-2hp3yplr.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed:
+builders/personal.py; regen_personal.sh; builders/assets/morph.html rename; builders/assets/turntable.html rename
+Checks run:
+Reviewed supplied staged diff and wrapper metadata; no additional commands run.
+Blocking issues:
+Committer evidence file is missing: .git/claude-commit-evidence.md. The gate explicitly requires this file and says to BLOCK if it is missing.
+Warnings:
+TEAMWORK.md live baton is reported missing in the trust-base bundle. No staged Lean files and mechanical grep reports no sorry/admit/axiom/native_decide matches.
+Recommendation:
+Do not commit yet. Add the required committer evidence file, including build/test evidence for the regeneration claims in the commit message.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f5351-12e0-7d90-9d1d-241393c81bd0
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6
+
+Proposed command:
+cd /Users/doyle/Dropbox/neo/atlas2 && for u in "personal/index.html" "personal/10/CCCACACACACACAAE.html" "personal/glb/CCCACACACACACAAE_morph_p.glb" "personal/morph.html"; do printf '%s: ' "$u"; curl -s -o /dev/null -w "%{http_code}\n" "http://localhost:8765/atlas2/$u"; done; grep -L "ideal net" site/personal/*/*.html | grep -v index | wc -l | tr -d ' '; git commit -q -m "regen_personal.sh: tested from-scratch regeneration of the personal pages
+
+Wrappers moved to builders/assets (installed by personal.py), so
+rm -rf site/personal is safe. Script builds euclid_lm_mp and horoz_c
+if missing, wipes, rebuilds. Test run: wipe + full rebuild completed,
+138 x 'OK 24 frames', 552 GLBs, wrappers present, pages serving.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+R  site/personal/morph.html -> builders/assets/morph.html
+R  site/personal/turntable.html -> builders/assets/turntable.html
+M  builders/personal.py
+A  regen_personal.sh
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+
+
+Staged diff stat:
+ {site/personal => builders/assets}/morph.html     |  0
+ {site/personal => builders/assets}/turntable.html |  0
+ builders/personal.py                              |  4 ++++
+ regen_personal.sh                                 | 12 ++++++++++++
+ 4 files changed, 16 insertions(+)
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+diff --git a/site/personal/morph.html b/builders/assets/morph.html
+similarity index 100%
+rename from site/personal/morph.html
+rename to builders/assets/morph.html
+diff --git a/site/personal/turntable.html b/builders/assets/turntable.html
+similarity index 100%
+rename from site/personal/turntable.html
+rename to builders/assets/turntable.html
+diff --git a/builders/personal.py b/builders/personal.py
+index f9a9304..aa6827e 100644
+--- a/builders/personal.py
++++ b/builders/personal.py
+@@ -237,6 +237,10 @@ def build_net(job):
+ 
+ def main():
+     os.makedirs(os.path.join(OUT, "glb"), exist_ok=True)
++    # viewer wrappers: source of truth is builders/assets/
++    import shutil
++    for w in ("morph.html", "turntable.html"):
++        shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
+     jobs = []
+     with open(os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
+         for ln in f:
+diff --git a/regen_personal.sh b/regen_personal.sh
+new file mode 100755
+index 0000000..422014c
+--- /dev/null
++++ b/regen_personal.sh
+@@ -0,0 +1,12 @@
++#!/bin/bash
++# Regenerate the personal pages from scratch. Everything is derived from
++# builders/ + data/nets_v4_14.txt; solver binaries are built if missing.
++set -u
++cd "$(dirname "$0")"
++NEO="$(cd .. && pwd)"
++
++[ -x "$NEO/bendprover/csrc/euclid_lm_mp" ] || make -C "$NEO/bendprover/csrc" euclid_lm_mp
++[ -x "$NEO/ideal/src/horoz_c" ] || make -C "$NEO/ideal" src/horoz_c
++
++/bin/rm -rf site/personal
++python3 builders/personal.py
+</stdin>
+codex
+BLOCK
+Files reviewed:
+builders/personal.py; regen_personal.sh; builders/assets/morph.html rename; builders/assets/turntable.html rename
+Checks run:
+Reviewed supplied staged diff and wrapper metadata; no additional commands run.
+Blocking issues:
+Committer evidence file is missing: .git/claude-commit-evidence.md. The gate explicitly requires this file and says to BLOCK if it is missing.
+Warnings:
+TEAMWORK.md live baton is reported missing in the trust-base bundle. No staged Lean files and mechanical grep reports no sorry/admit/axiom/native_decide matches.
+Recommendation:
+Do not commit yet. Add the required committer evidence file, including build/test evidence for the regeneration claims in the commit message.
+tokens used
+2,303
+BLOCK
+Files reviewed:
+builders/personal.py; regen_personal.sh; builders/assets/morph.html rename; builders/assets/turntable.html rename
+Checks run:
+Reviewed supplied staged diff and wrapper metadata; no additional commands run.
+Blocking issues:
+Committer evidence file is missing: .git/claude-commit-evidence.md. The gate explicitly requires this file and says to BLOCK if it is missing.
+Warnings:
+TEAMWORK.md live baton is reported missing in the trust-base bundle. No staged Lean files and mechanical grep reports no sorry/admit/axiom/native_decide matches.
+Recommendation:
+Do not commit yet. Add the required committer evidence file, including build/test evidence for the regeneration claims in the commit message.

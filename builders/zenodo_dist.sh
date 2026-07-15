@@ -4,7 +4,9 @@
 set -e
 ATLAS=/Users/doyle/Dropbox/neo/atlas2
 STAGE="${ATLAS}/dist"
-/bin/rm -rf "$STAGE"; mkdir -p "$STAGE"
+# clear staging but keep the big site tarball (step 3 skips re-tarring it)
+mkdir -p "$STAGE"
+find "$STAGE" -mindepth 1 -maxdepth 1 ! -name 'neoplatonic-atlas.tar.gz' -exec /bin/rm -rf {} +
 
 # 1. aggregate records
 python3 - <<'PYEOF'
@@ -32,9 +34,11 @@ themed galleries. Fully self-contained (viewer scripts vendored).
 
 To browse: the 3D viewers need HTTP (browsers block local-file model
 loading), so run ONE of:
-  ./serve.sh            # any system with python3
+  ./serve.sh            # Linux/macOS terminal (needs python3)
   serve.command         # macOS: double-click
-then open http://localhost:8901/personal/
+  serve.bat             # Windows: double-click
+It picks a free local port, prints the address, and opens your
+browser at http://127.0.0.1:<port>/personal/ automatically.
 
 atlas_records.jsonl is the database: one JSON record per net
 (identity, netcode, classification flags, symmetry, Eisenstein
@@ -96,8 +100,8 @@ DBMD5=$(md5 -q "$STAGE/neoplatonic-atlas-database.tar.gz")
 ls -la "$STAGE/neoplatonic-atlas-database.tar.gz" | awk '{print "db tarball bytes:", $5}'
 echo "db md5: $DBMD5"
 
-# 4. Zenodo draft + reserved DOI (token stays in env)
-TOKEN=$(cat ~/.zshrc ~/.zshenv ~/.zprofile 2>/dev/null | grep -i 'zenodo' | grep -oE '=["'"'"']?[A-Za-z0-9._-]+' | head -1 | tr -d '="'"'"'')
+# 4. Zenodo draft + reserved DOI (token from ~/.config/zenodo/token)
+TOKEN=$(cat ~/.config/zenodo/token 2>/dev/null)
 if [ -z "$TOKEN" ]; then echo "NO ZENODO TOKEN FOUND"; exit 1; fi
 DEP=$(curl -s -X POST "https://zenodo.org/api/deposit/depositions" \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
@@ -107,11 +111,12 @@ DOI=$(echo "$DEP" | python3 -c "import json,sys; print(json.load(sys.stdin)['met
 BUCKET=$(echo "$DEP" | python3 -c "import json,sys; print(json.load(sys.stdin)['links']['bucket'])")
 echo "deposition: $DEPID"
 echo "RESERVED DOI: $DOI"
+echo "bucket: $BUCKET"
 
 # 5. metadata
 curl -s -X PUT "https://zenodo.org/api/deposit/depositions/$DEPID" \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  -d '{"metadata": {"title": "The Neoplatonic Atlas", "upload_type": "dataset", "description": "Interactive atlas of neoplatonic solids: unit-equilateral-triangle polyhedra (6-nets), their ideal and hyperbolic forms, Eisenstein subdivision families, classifications, Conway symmetry symbols, and themed galleries. Self-contained: unpack and run serve.sh, then open http://localhost:8901/personal/. atlas_records.jsonl is the per-net database.", "creators": [{"name": "Doyle, Peter"}, {"name": "Ellison, Matthew"}], "license": "cc-zero", "keywords": ["polyhedra", "equilateral triangles", "hyperbolic geometry", "ideal polyhedra", "triangulations"], "prereserve_doi": true}}' > /dev/null
+  -d '{"metadata": {"title": "The Neoplatonic Atlas", "upload_type": "dataset", "description": "Interactive atlas of neoplatonic solids: unit-equilateral-triangle polyhedra (6-nets), their ideal and hyperbolic forms, Eisenstein subdivision families, classifications, Conway symmetry symbols, and themed galleries. Self-contained: unpack and run serve.sh (macOS: serve.command; Windows: serve.bat), which serves the atlas on a free local port and opens your browser. atlas_records.jsonl is the per-net database.", "creators": [{"name": "Doyle, Peter"}, {"name": "Ellison, Matthew"}], "license": "cc-zero", "keywords": ["polyhedra", "equilateral triangles", "hyperbolic geometry", "ideal polyhedra", "triangulations"], "prereserve_doi": true}}' > /dev/null
 echo "metadata set"
 
 # 6. upload (big)

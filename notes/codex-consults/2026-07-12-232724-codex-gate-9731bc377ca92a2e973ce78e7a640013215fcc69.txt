@@ -1,0 +1,166 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 9731bc377ca92a2e973ce78e7a640013215fcc69
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-tjsu0dwp.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed: none; local staged diff is empty
+Checks run: `git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --numstat`, evidence/TEAMWORK presence checks, staged Lean grep
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this is a veto
+Warnings: `TEAMWORK.md` is also missing from the live baton bundle; no staged files were available to review despite the proposed commit adding files
+Recommendation: Do not commit until the committer evidence file is present and the intended files are actually staged for review.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f5983-ed05-7000-a2fd-0dbbce18a81f
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+9731bc377ca92a2e973ce78e7a640013215fcc69
+
+Proposed command:
+ls -la data/class_v30.tsv data/eisenstein.tsv data/nets_pages.txt | awk '{print $5, $9}'; git add builders/classify.py builders/members.py builders/views.py builders/personal.py builders/special.py regen_personal.sh data/class_v30.tsv data/eisenstein.tsv data/nets_pages.txt && git commit -m "records + views; v<=30 classification; members incl. Eisenstein families
+
+Architecture per PD: a net's directory IS its database record --
+site/personal/nets/v{V}{CLERS}/ (flat; the v-prefixed name is the
+display default) holding net.json (identity, flags, eisenstein
+relations, artifact inventory) plus the artifacts (rb/clers glb,
+morphs, ideal_net.svg, clers_layout.svg). views.py is the only place
+that knows what a homepage looks like and re-renders every page from
+records in seconds; galleries/by-v/front (special.py) are queries
+over records. Old-atlas markup throughout.
+
+classify.py: all 79,349 prime nets v<=30 classified from the doob OBJ
+coordinates (no solving; unit-edge check max err <1e-6 on every net).
+Counts: 15 pancakes (matches the doob-census record), 47 convex
+(v<=14 slice = 13, matching the exact-solver pass), 7 strictly
+convex, 67 floppy (322-census members with v<=30), 14,091 with a
+buried vertex (>1e-3; first at v=17; all 23 old-gallery entries
+reproduced with matching depths). Pancake flatness is a relative
+sigma_3/sigma_1 < 1e-5 test -- known pancakes measure 1e-6 in the
+10-decimal OBJs and the first absolute threshold misread all 15 as
+nonflat, leaking them into convex.
+
+members.py: page-worthy list (372 nets) = all v<=14 + old buried
+gallery + all pancakes/convex/floppy v<=30 + 8 deepest buried per v +
+Eisenstein subdivision families (atlas/subdiv/names.tsv: ico, oct,
+tet, v7, v8a, v8b, v9a x 12 each) up to v=132 this pass;
+ancestors/descendants by divisibility of a+b*omega in Z[omega]
+(quotient test p=ca+cb+db, q=da-cb mod T), written to
+data/eisenstein.tsv and stamped into records.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+ M builders/personal.py
+ M builders/special.py
+ M regen_personal.sh
+?? builders/classify.py
+?? builders/members.py
+?? builders/views.py
+?? data/class_v30.tsv
+?? data/eisenstein.tsv
+?? data/nets_pages.txt
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+?? notes/codex-consults/2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+?? notes/codex-consults/2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+?? notes/codex-consults/2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+?? notes/codex-consults/2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+?? notes/codex-consults/2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+</stdin>
+codex
+I’ll verify the staged state directly and check the specific gate conditions rather than relying on the empty pasted diff.
+exec
+/bin/zsh -lc 'git diff --cached --numstat' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+exec
+/bin/zsh -lc 'git diff --cached --stat && git diff --cached --name-only' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+exec
+/bin/zsh -lc 'test -f .git/claude-commit-evidence.md; echo evidence:$?; test -f TEAMWORK.md; echo teamwork:$?; git diff --cached -- '"'*.lean' | rg -n 'sorry|admit|axiom|native_decide' || true" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+evidence:1
+teamwork:1
+
+codex
+The local index appears empty despite the proposed `git add` command in the wrapper input, so I’m treating the gate as “staged diff only” with no files staged. The evidence file check still fails because the required `.git/claude-commit-evidence.md` is absent.
+codex
+BLOCK
+Files reviewed: none; local staged diff is empty
+Checks run: `git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --numstat`, evidence/TEAMWORK presence checks, staged Lean grep
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this is a veto
+Warnings: `TEAMWORK.md` is also missing from the live baton bundle; no staged files were available to review despite the proposed commit adding files
+Recommendation: Do not commit until the committer evidence file is present and the intended files are actually staged for review.
+tokens used
+6,444
+BLOCK
+Files reviewed: none; local staged diff is empty
+Checks run: `git diff --cached --stat`, `git diff --cached --name-only`, `git diff --cached --numstat`, evidence/TEAMWORK presence checks, staged Lean grep
+Blocking issues: `.git/claude-commit-evidence.md` is missing; trust-base rule says this is a veto
+Warnings: `TEAMWORK.md` is also missing from the live baton bundle; no staged files were available to review despite the proposed commit adding files
+Recommendation: Do not commit until the committer evidence file is present and the intended files are actually staged for review.

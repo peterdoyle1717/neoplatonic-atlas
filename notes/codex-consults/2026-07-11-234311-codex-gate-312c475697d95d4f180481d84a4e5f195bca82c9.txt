@@ -1,0 +1,166 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 312c475697d95d4f180481d84a4e5f195bca82c9
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-a43wh6_7.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed:
+None; `git diff --cached` is empty.
+Checks run:
+`git diff --cached --stat`; `git diff --cached -- builders/glb.py builders/personal.py builders/assets/morph.html`; `git status --short`; evidence-file presence check.
+Blocking issues:
+`.git/claude-commit-evidence.md` is missing, which is an explicit trust-base veto under the provided rules.
+Warnings:
+The named files are modified but not staged in the current index, so the staged diff does not match the proposed commit command’s intended content.
+Recommendation:
+Do not commit until the evidence file is present and the intended files are actually staged for review.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f546c-02e5-7430-860c-0f0f65b603a9
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+312c475697d95d4f180481d84a4e5f195bca82c9
+
+Proposed command:
+curl -s http://localhost:8765/atlas2/personal/morph.html | grep -o "const rhos = .*" | head -1; curl -s -o /dev/null -w "page: %{http_code}\n" "http://localhost:8765/atlas2/personal/10/CCCACACACACACAAE.html"; git add builders/glb.py builders/personal.py builders/assets/morph.html && git commit -m "fix morph movies: ideal->Euclidean, per-frame scale, curved faces
+
+The morphs were playing backwards and blowing out of the window: the
+frame ladder ran 57.65->2.1 degrees (its comment claimed the reverse)
+while only the base frame was normalized, so the near-Euclidean base
+(Poincare radius 0.29) set a 3.2x scale that sent later frames to
+r=3.19 (P) / 1.76 (K) - matching the measured GLBs exactly - and P vs
+K was invisible because all in-window frames were near-Euclidean.
+
+Now matched to the deployed old-atlas morph (measured from its
+morph_glb/10/CCCACACACACACAAE.glb): every frame independently
+normalized to max radius 0.95, one second per transition, n=10
+barycentric face subdivision sampled linearly in Klein (chords are
+geodesics there) so faces curve in Poincare, per-frame smooth normals
+as morph NORMAL deltas, frames ideal->Euclidean ending on the exact
+Euclidean solid (P/K final frames agree to 1e-7). Old-vs-new endpoint
+radii ranges for the same net: [0.269,0.950] both.
+
+All 322 morph GLBs rebuilt and checked (9 frames, max r 0.950 each).
+Viewer labels updated to the 9-frame ladder.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1
+
+Status:
+ M builders/assets/morph.html
+ M builders/glb.py
+ M builders/personal.py
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+?? notes/codex-consults/2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+</stdin>
+codex
+I’ll inspect the staged tree directly and keep this to the gate criteria only.
+exec
+/bin/zsh -lc "test -f .git/claude-commit-evidence.md && sed -n '1,220p' .git/claude-commit-evidence.md || printf 'MISSING\\n'" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+MISSING
+
+exec
+/bin/zsh -lc 'git diff --cached -- builders/glb.py builders/personal.py builders/assets/morph.html' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --stat' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git status --short' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ succeeded in 0ms:
+ succeeded in 0ms:
+ M builders/assets/morph.html
+ M builders/glb.py
+ M builders/personal.py
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+?? notes/codex-consults/2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+?? notes/codex-consults/2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+?? notes/codex-consults/2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+?? notes/codex-consults/2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+
+codex
+BLOCK
+Files reviewed:
+None; `git diff --cached` is empty.
+Checks run:
+`git diff --cached --stat`; `git diff --cached -- builders/glb.py builders/personal.py builders/assets/morph.html`; `git status --short`; evidence-file presence check.
+Blocking issues:
+`.git/claude-commit-evidence.md` is missing, which is an explicit trust-base veto under the provided rules.
+Warnings:
+The named files are modified but not staged in the current index, so the staged diff does not match the proposed commit command’s intended content.
+Recommendation:
+Do not commit until the evidence file is present and the intended files are actually staged for review.
+tokens used
+6,143
+BLOCK
+Files reviewed:
+None; `git diff --cached` is empty.
+Checks run:
+`git diff --cached --stat`; `git diff --cached -- builders/glb.py builders/personal.py builders/assets/morph.html`; `git status --short`; evidence-file presence check.
+Blocking issues:
+`.git/claude-commit-evidence.md` is missing, which is an explicit trust-base veto under the provided rules.
+Warnings:
+The named files are modified but not staged in the current index, so the staged diff does not match the proposed commit command’s intended content.
+Recommendation:
+Do not commit until the evidence file is present and the intended files are actually staged for review.

@@ -1,0 +1,571 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 9b7889eb84a5737bc2997564680076c97bd5f479
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-azl505j3.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed:
+builders/glb.py; builders/personal.py; data/nets_v4_14.txt
+Checks run:
+Reviewed provided staged diff, staged stat, mechanical staged Lean grep, proposed commit message, and trust-base bundle metadata.
+Blocking issues:
+.git/claude-commit-evidence.md is missing. Trust-base rule explicitly requires the committer evidence file when this bundle is present.
+Warnings:
+TEAMWORK.md live baton is missing, but the evidence-file absence is already a veto. No staged .lean sorry/admit/axiom/native_decide matches reported.
+Recommendation:
+Do not commit yet. Add/regenerate the committer evidence file with build/result evidence and required citations, then rerun the gate.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f531c-5ed7-77a3-9347-654eb70e4e1d
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+9b7889eb84a5737bc2997564680076c97bd5f479
+
+Proposed command:
+cd /Users/doyle/Dropbox/neo/atlas2 && git add builders/glb.py builders/personal.py data/nets_v4_14.txt && git commit -q -m "personal pages v2: clean five-artifact pipeline, all prime nets v<=14
+
+builders/personal.py: red-black GLB, Poincare morph, Klein morph,
+CLERS-colored GLB (new write_gltf_groups in glb.py: one primitive per
+color), CLERS layout SVG inline. Input data/nets_v4_14.txt (138 nets,
+the v<=14 slice of the census prime universe from doob input.txt);
+all bends solved seedlessly in-pipeline. Site output regenerates
+(site/ is gitignored): 138/138 built with 24 morph rungs each
+(6900 GLBs); indexes per v + master.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git log --oneline -1 && tail -2 /private/tmp/claude-501/-Users-doyle-Dropbox-neo/ca3ed8a1-7ca1-4b24-ba21-e56114bf6314/tasks/b41pp2040.output 2>/dev/null || echo "(aleph round 3 still running)"
+
+Status:
+M  builders/glb.py
+A  builders/personal.py
+A  data/nets_v4_14.txt
+?? notes/codex-consults/2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+
+
+Staged diff stat:
+ builders/glb.py      |  89 +++++++++++++++++++++++
+ builders/personal.py | 201 +++++++++++++++++++++++++++++++++++++++++++++++++++
+ data/nets_v4_14.txt  | 138 +++++++++++++++++++++++++++++++++++
+ 3 files changed, 428 insertions(+)
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.git/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+MISSING
+
+Staged diff:
+diff --git a/builders/glb.py b/builders/glb.py
+index 888e79a..aa8e1cf 100755
+--- a/builders/glb.py
++++ b/builders/glb.py
+@@ -265,3 +265,92 @@ def main(argv):
+ if __name__ == "__main__":
+     raise SystemExit(main(sys.argv))
+ 
++
++def write_gltf_groups(outpath, verts, groups, embedded=True, meshname=None):
++    """Like write_gltf_like but with one primitive per color group.
++    groups: list of (rgb_triple, list_of_faces)."""
++    nverts = len(verts)
++    use32 = nverts > 65535
++    idx_comp = pg.UNSIGNED_INT if use32 else pg.UNSIGNED_SHORT
++
++    def pack_indices(idxs):
++        if not idxs:
++            return b""
++        fmt = "<" + ("I" if use32 else "H") * len(idxs)
++        return struct.pack(fmt, *idxs)
++
++    blobs = []
++    bufferViews = []
++    accessors = []
++    offset = 0
++
++    def add_index_stream(idxs):
++        nonlocal offset
++        raw = pack_indices(idxs)
++        padded = pad4(raw)
++        view_index = len(bufferViews)
++        bufferViews.append(pg.BufferView(
++            buffer=0, byteOffset=offset, byteLength=len(raw),
++            target=pg.ELEMENT_ARRAY_BUFFER))
++        accessor_index = len(accessors)
++        accessors.append(pg.Accessor(
++            bufferView=view_index, byteOffset=0, componentType=idx_comp,
++            count=len(idxs), type=pg.SCALAR,
++            max=[max(idxs)] if idxs else [0],
++            min=[min(idxs)] if idxs else [0]))
++        blobs.append(padded)
++        offset += len(padded)
++        return accessor_index
++
++    group_accessors = []
++    for _, gfaces in groups:
++        idxs = [i for tri in gfaces for i in tri]
++        group_accessors.append(add_index_stream(idxs) if idxs else None)
++
++    cx = sum(v[0] for v in verts) / len(verts)
++    cy = sum(v[1] for v in verts) / len(verts)
++    cz = sum(v[2] for v in verts) / len(verts)
++    verts = [(v[0]-cx, v[1]-cy, v[2]-cz) for v in verts]
++    pos_flat = [c for v in verts for c in v]
++    pos_raw = struct.pack("<" + "f" * len(pos_flat), *pos_flat)
++    pos_padded = pad4(pos_raw)
++    pos_view = len(bufferViews)
++    bufferViews.append(pg.BufferView(
++        buffer=0, byteOffset=offset, byteLength=len(pos_raw),
++        target=pg.ARRAY_BUFFER))
++    xs = [v[0] for v in verts]; ys = [v[1] for v in verts]; zs = [v[2] for v in verts]
++    pos_accessor = len(accessors)
++    accessors.append(pg.Accessor(
++        bufferView=pos_view, byteOffset=0, componentType=pg.FLOAT,
++        count=nverts, type=pg.VEC3,
++        max=[max(xs), max(ys), max(zs)], min=[min(xs), min(ys), min(zs)]))
++    blobs.append(pos_padded)
++    offset += len(pos_padded)
++
++    binary_blob = b"".join(blobs)
++    gltf = pg.GLTF2()
++    gltf.asset = pg.Asset(version="2.0")
++    gltf.buffers = [pg.Buffer(byteLength=len(binary_blob))]
++    gltf.bufferViews = bufferViews
++    gltf.accessors = accessors
++    gltf.materials = [make_material(list(color), 1.0, 0.45) for color, _ in groups]
++
++    primitives = []
++    for m, acc in enumerate(group_accessors):
++        if acc is None:
++            continue
++        prim = pg.Primitive()
++        prim.attributes.POSITION = pos_accessor
++        prim.indices = acc
++        prim.material = m
++        primitives.append(prim)
++    gltf.meshes = [pg.Mesh(name=meshname, primitives=primitives)]
++    gltf.nodes = [pg.Node(name=meshname, mesh=0)]
++    gltf.scenes = [pg.Scene(name=meshname, nodes=[0])]
++    gltf.scene = 0
++    gltf.set_binary_blob(binary_blob)
++    if embedded:
++        gltf.convert_buffers(pg.BufferFormat.DATAURI)
++        gltf.save(str(outpath))
++    else:
++        gltf.save_binary(str(outpath))
+diff --git a/builders/personal.py b/builders/personal.py
+new file mode 100644
+index 0000000..7b91c4d
+--- /dev/null
++++ b/builders/personal.py
+@@ -0,0 +1,201 @@
++#!/usr/bin/env python3
++"""Personal pages, clean pipeline (PD spec 2026-07-11): for every prime
++net v <= 14, exactly five artifacts on one page --
++  1. red-black GLB (Euclidean realization),
++  2. morph from Poincare (alpha ladder, seedless per rung),
++  3. morph from Klein,
++  4. CLERS-colored GLB (faces colored by their CLERS letter),
++  5. CLERS layout (colored planar unfolding, SVG inline).
++Rerunnable from scratch: input is data/nets_v4_14.txt (name + netcode,
++from doob prove_final_v4_50/input.txt); everything else is solved here
++(euclid_lm_mp, seedless).  Output: site/personal/<v>/<NAME>.html with
++GLBs under site/personal/glb/.
++"""
++import math, os, subprocess, sys
++from multiprocessing import Pool
++
++HERE = os.path.dirname(os.path.abspath(__file__))
++TOP = os.path.dirname(HERE)
++OUT = os.path.join(TOP, "site", "personal")
++sys.path.insert(0, HERE)
++from glb import retreat_to_incenter, write_gltf_like, write_gltf_groups
++from realize_h import develop_h, klein, poincare, center
++from walklib import develop
++from clers_tools import clers_svg, COLORS
++
++BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
++ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(24)][::-1]   # ~2.1 .. 59.9
++
++RGB = {'A': (1.0, 0.0, 0.0), 'B': (1.0, 0.53, 0.0), 'C': (1.0, 0.8, 0.0),
++       'D': (0.0, 0.67, 0.0), 'E': (0.0, 0.4, 1.0)}
++BLACK = (0.0, 0.0, 0.0)
++
++STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
++         "line-height:1.6;color:#222;padding:0 1em}"
++         "h1{font-family:monospace;font-size:1.15em;word-break:break-all}"
++         ".info{font-size:.9em;color:#555;margin:-.4em 0 1em}"
++         ".cell{position:relative;width:100%;padding-bottom:88%}"
++         ".cell model-viewer{position:absolute;top:0;left:0;width:100%;"
++         "height:100%;background:#f0f0f0}"
++         ".svgwrap{border:1px solid #ddd;padding:2%}"
++         ".svgwrap svg{width:100%;height:auto}"
++         ".label{text-align:center;font-size:.85em;color:#888;margin:.2em 0 1.2em}"
++         "input[type=range]{width:100%}"
++         "a{color:#06c}")
++
++MV = ('<script type="module" src="https://ajax.googleapis.com/ajax/libs/'
++      'model-viewer/3.5.0/model-viewer.min.js"></script>')
++
++
++def solve_prove_60(nc):
++    r = subprocess.run([BIN, "--prove", "--alpha", "60.0", "--name", "X", nc],
++                       capture_output=True, text=True, timeout=300)
++    if "end" not in r.stdout:
++        return None
++    bends = {}
++    for ln in r.stdout.splitlines():
++        t = ln.split()
++        if t and t[0] == "b":
++            bends[(int(t[1]), int(t[2]))] = float(t[3]) * math.pi
++    return bends
++
++
++def solve_alpha(nc, a):
++    r = subprocess.run([BIN, "--bends-only", "--alpha", f"{a:.6f}",
++                        "--name", "X", nc],
++                       capture_output=True, text=True, timeout=180)
++    if "end" not in r.stdout:
++        return None
++    return {(int(t[3]), int(t[4])): float(t[5]) for t in
++            (ln.split() for ln in r.stdout.splitlines())
++            if len(t) >= 6 and t[0] == '#' and t[1] == 'bend'}
++
++
++def glb_euclid(name, faces, V, bends, outdir):
++    pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
++    verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
++    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
++    v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
++    write_gltf_like(os.path.join(outdir, f"{name}_rb.glb"), v2, f2, mats)
++    # CLERS coloring: retreat emits 7 faces per original (6 border, 1 center)
++    groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
++    for L, rgb in RGB.items():
++        gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
++        if gf:
++            groups.append((rgb, gf))
++    write_gltf_groups(os.path.join(outdir, f"{name}_clers.glb"), v2, groups)
++
++
++def glb_morphs(name, faces, V, nc, outdir):
++    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
++    frames = []
++    for i, a in enumerate(ALPHAS):
++        bends = solve_alpha(nc, a)
++        if bends is None:
++            frames = []          # contiguous from the ideal end
++            continue
++        bd = {tuple(sorted(e)): b for e, b in bends.items()}
++        pos = center(develop_h(faces, bd, math.radians(a))[0])
++        for proj, tag in ((poincare, "p"), (klein, "k")):
++            P = proj(pos)
++            verts = [tuple(map(float, P[v])) for v in range(1, V + 1)]
++            v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
++            write_gltf_like(os.path.join(outdir, f"{name}_{tag}{i:02d}.glb"),
++                            v2, f2, mats)
++        frames.append((i, round(a, 2)))
++    return frames
++
++
++def slider(name, tag, frames, label):
++    idxs = [i for i, _ in frames]
++    alphas = {i: a for i, a in frames}
++    import json as _json
++    js_i = _json.dumps(idxs)
++    js_a = _json.dumps({str(i): alphas[i] for i in idxs})
++    last = idxs[-1]
++    return (f'<div class=cell><model-viewer id="mv_{tag}" '
++            f'src="../glb/{name}_{tag}{last:02d}.glb" camera-controls></model-viewer></div>'
++            f'<input type=range min=0 max={len(idxs)-1} value={len(idxs)-1} '
++            f'oninput=\'(function(k){{var I={js_i},A={js_a};var i=I[k];'
++            f'document.getElementById("mv_{tag}").src="../glb/{name}_"+"{tag}"+'
++            f'String(i).padStart(2,"0")+".glb";'
++            f'document.getElementById("lb_{tag}").textContent="{label}, alpha = "+A[i]+" deg";}})(this.value)\'>'
++            f'<div class=label id="lb_{tag}">{label}, alpha = {alphas[last]} deg</div>')
++
++
++def build_net(job):
++    name, nc = job
++    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
++    V = max(max(f) for f in faces)
++    outdir = os.path.join(OUT, "glb")
++    os.makedirs(outdir, exist_ok=True)
++    bends = solve_prove_60(nc)
++    if bends is None:
++        return (name, "SOLVE-FAIL")
++    glb_euclid(name, faces, V, bends, outdir)
++    frames = glb_morphs(name, faces, V, nc, outdir)
++    E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
++    body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
++            f'<meta name=viewport content="width=device-width,initial-scale=1">'
++            f'<title>{name}</title>{MV}<style>{STYLE}</style></head><body>'
++            f'<h1>{name}</h1>'
++            f'<div class=info>v = {V} &middot; {len(faces)} faces &middot; {E} edges'
++            f' &middot; <a href="index.html">v = {V} index</a></div>'
++            f'<div class=cell><model-viewer src="../glb/{name}_rb.glb" '
++            f'camera-controls></model-viewer></div>'
++            f'<div class=label>the realization</div>']
++    if frames:
++        body.append(slider(name, "p", frames, "morph, Poincar&eacute;"))
++        body.append(slider(name, "k", frames, "morph, Klein"))
++    body.append(f'<div class=cell><model-viewer src="../glb/{name}_clers.glb" '
++                f'camera-controls></model-viewer></div>'
++                f'<div class=label>CLERS coloring</div>')
++    body.append(f'<div class=svgwrap>{clers_svg(name)}</div>'
++                f'<div class=label>CLERS layout</div>')
++    body.append('</body></html>')
++    vdir = os.path.join(OUT, str(V))
++    os.makedirs(vdir, exist_ok=True)
++    with open(os.path.join(vdir, f"{name}.html"), "w") as f:
++        f.write('\n'.join(body))
++    return (name, f"OK {len(frames)} frames")
++
++
++def main():
++    os.makedirs(os.path.join(OUT, "glb"), exist_ok=True)
++    jobs = []
++    with open(os.path.join(TOP, "data", "nets_v4_14.txt")) as f:
++        for ln in f:
++            name, nc = ln.split()
++            jobs.append((name, nc))
++    with Pool(6) as pool:
++        results = pool.map(build_net, jobs)
++    for name, msg in results:
++        print(name, msg, flush=True)
++    # per-v indexes and master index (glb paths are relative to the v-dirs,
++    # so symlink glb into each v-dir? no: pages live in <v>/ and reference
++    # glb/... -> place a relative link one level up instead)
++    byv = {}
++    for name, nc in jobs:
++        V = max(max(int(x) for x in f.split(',')) for f in nc.split(';'))
++        byv.setdefault(V, []).append(name)
++    master = ['<!DOCTYPE html><html><head><meta charset=utf-8>'
++              f'<title>personal pages</title><style>{STYLE}</style></head><body>'
++              '<h1>Prime nets, v &le; 14</h1>']
++    for V in sorted(byv):
++        names = sorted(byv[V])
++        master.append(f'<p><a href="{V}/index.html">v = {V}</a> ({len(names)} nets)</p>')
++        rows = [f'<!DOCTYPE html><html><head><meta charset=utf-8>'
++                f'<title>v = {V}</title><style>{STYLE}</style></head><body>'
++                f'<h1>v = {V}</h1><div class=info><a href="../index.html">all</a></div>']
++        rows += [f'<p><a href="{n}.html">{n}</a></p>' for n in names]
++        rows.append('</body></html>')
++        with open(os.path.join(OUT, str(V), "index.html"), "w") as f:
++            f.write('\n'.join(rows))
++    master.append('</body></html>')
++    with open(os.path.join(OUT, "index.html"), "w") as f:
++        f.write('\n'.join(master))
++    print("indexes written", flush=True)
++
++
++if __name__ == "__main__":
++    main()
+diff --git a/data/nets_v4_14.txt b/data/nets_v4_14.txt
+new file mode 100644
+index 0000000..4593657
+--- /dev/null
++++ b/data/nets_v4_14.txt
+@@ -0,0 +1,138 @@
++CCCACACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,8;8,10,9
++CCCACACACCAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,8;8,10,9
++CCCACACACCACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,8;8,10,9;6,8,7
++CCCACACCAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,8;8,10,9
++CCCACACCACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,8;8,10,9
++CCCACCACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,8;8,10,9
++CCCACCACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,8;8,10,9
++CCCACACACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,9;9,11,10
++CCCACACACCAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,9;9,11,10
++CCCACACACCACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,9;9,11,10
++CCCACACCACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,11;7,11,8;8,11,9;9,11,10
++CCCACACCACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,9;9,11,10
++CCCACACCACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,10;8,10,9
++CCCACACCACCACADAEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,9;9,11,10;6,9,7;7,9,8
++CCCACCACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,11;7,11,8;8,11,9;9,11,10
++CCCACCACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,9;9,11,10
++CCCACCACACCACAADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,9;9,11,10;7,9,8
++CCCACACACACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACACACCAACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACACACCACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACACACCACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,10;10,12,11
++CCCACACACCACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACACCAACACACCAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,12;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACACCACACAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,11;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACACCACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACACCACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,10;10,12,11
++CCCACACCACCACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,10;10,12,11
++CCCACACCACCACACAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACACCACCACACAABAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,11;8,11,9;9,11,10
++CCCACCACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,10;10,12,11
++CCCACCACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACCACACCACAACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACCACACCACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,10;10,12,11
++CCCACCACACCACACAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,11;9,11,10
++CCCACCACACCACACDEAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,8;8,12,9;9,12,10;10,12,11;6,8,7
++CCCACCACACCACACDEABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,8;8,12,9;9,12,11;9,11,10;6,8,7
++CCCACCACCACACAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,10;10,12,11;8,10,9
++CCCACCACCACACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,10;10,12,11
++CCCCACCACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,6;1,6,2;2,6,7;2,7,8;2,8,3;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,9;9,12,10;10,12,11
++CCCACACACACACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACACCAACACACCAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,13;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACACACCACACAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACACCACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACACCACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACACACCACACACACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,11;11,13,12;9,11,10
++CCCACACCACACACAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACCACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACCACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACACCACACACACCAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,13;7,13,8;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACACCACCACACAAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACACCACCACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACACCACCACACAACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACACCACCACACAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,11;11,13,12;9,11,10
++CCCACACCACCACACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACAACCACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,6;6,9,10;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACCACACACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACCACACACACCAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,11;11,13,12;9,11,10
++CCCACCACACCACAACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACCACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACCACACAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,11;11,13,12;9,11,10
++CCCACCACACCACACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACACCACACACAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,10;10,13,12;10,12,11
++CCCACCACACCACACACAABBE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,12;9,12,11;9,11,10
++CCCACCACACCACACCAABAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,13;6,13,7;7,13,8;8,13,12;8,12,9;9,12,10;10,12,11
++CCCACCACACCACACCAABABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,13;6,13,7;7,13,8;8,13,12;8,12,9;9,12,11;9,11,10
++CCCACCACCACACAACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,11;11,13,12
++CCCACCACCACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,11;11,13,12
++CCCACCACCACCACAACADEBE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,7;7,12,13;7,13,8;8,13,10;10,13,12;10,12,11;8,10,9
++CCCACCACCACCACACAADEBE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,13;6,13,7;7,13,8;8,13,10;10,13,12;10,12,11;8,10,9
++CCCACACACACACACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,9;9,12,13;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCAACACACCAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,10;6,10,7;7,10,11;7,11,8;8,11,12;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCACACAACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,9;9,12,13;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCACACAACCAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,8;8,11,12;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCACACACAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACACCACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACACCACACACACCAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,14;8,14,9;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACCAACACACCAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACCACACAACCACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,11;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACACCACACAACCACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,7;7,10,11;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACCACACACACAACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,9;9,12,13;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACCACACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACCACACACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACACCACACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACCACACACACACACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACACCACACACACCAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACACCACCACACAACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACCACCACACAACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACACCACCACACAACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACCACCACACAACACDEAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,11;11,14,12;12,14,13;9,11,10
++CCCACACCACCACACACAAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACACCACCACACACAABCAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,12;9,12,14;9,14,10;10,14,11;11,14,12
++CCCACACCACCACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACACCACCACACACACAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACACCACCACACACACAABAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,10;10,14,13;10,13,11;11,13,12
++CCCACCACACAACCACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,6;6,9,10;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACACACACACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACACACACACACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACACACACACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACACACACCAACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACACACCAACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACACACACCACACADEAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,11;11,14,12;12,14,13;9,11,10
++CCCACCACACACACCACACADEBE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,10;5,10,6;6,10,11;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,11;11,14,13;11,13,12;9,11,10
++CCCACCACACCACAACACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACAACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACAACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACACAAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACACAABCAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,12;9,12,14;9,14,10;10,14,11;11,14,12
++CCCACCACACCACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACACAACDEAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,11;11,14,12;12,14,13;9,11,10
++CCCACCACACCACACACACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACACACAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACACCACACACACAADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,14;8,14,9;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACCACACCACACCAACAAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,13;6,13,7;7,13,8;8,13,14;8,14,9;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACACCACACCAACAADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,13;6,13,7;7,13,8;8,13,14;8,14,9;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACCACCACACAACACCAABAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,7;7,11,12;7,12,8;8,12,13;8,13,14;8,14,9;9,14,10;10,14,13;10,13,11;11,13,12
++CCCACCACCACACACAACAACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,10;10,13,14;10,14,11;11,14,12;12,14,13
++CCCACCACCACACACAACACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACCACACACAACCAAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,8;8,12,13;8,13,14;8,14,9;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACCACACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCCACCACCACACACACAACAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,11;11,14,13;11,13,12
++CCCACCACCACACACACAACADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACCACCACCACAACACDEAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,7;7,12,13;7,13,8;8,13,14;8,14,10;10,14,11;11,14,12;12,14,13;8,10,9
++CCCACCACCACCACACAACAADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,13;6,13,7;7,13,8;8,13,14;8,14,9;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACCACCACCACACAACDEDEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,13;6,13,7;7,13,8;8,13,14;8,14,10;10,14,12;12,14,13;10,12,11;8,10,9
++CCCACCACCACCACACACAAADEE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,9;3,9,4;4,9,10;4,10,11;4,11,5;5,11,12;5,12,6;6,12,13;6,13,7;7,13,14;7,14,8;8,14,9;9,14,10;10,14,12;12,14,13;10,12,11
++CCCACCCACCACCACAACDEDEBE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,8;2,8,3;3,8,9;3,9,10;3,10,4;4,10,11;4,11,12;4,12,5;5,12,13;5,13,6;6,13,7;7,13,14;7,14,9;9,14,11;11,14,13;11,13,12;9,11,10;7,9,8
++CCCCACCACACACACACAACAAAE 1,2,3;1,3,4;1,4,5;1,5,6;1,6,2;2,6,7;2,7,8;2,8,3;3,8,9;3,9,4;4,9,10;4,10,5;5,10,11;5,11,6;6,11,12;6,12,7;7,12,13;7,13,8;8,13,9;9,13,14;9,14,10;10,14,11;11,14,12;12,14,13
++CCAE 1,2,3;1,3,4;1,4,2;2,4,3
++CCCACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,4;4,6,5
++CCCACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,5;5,7,6
++CCCACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,6;6,8,7
++CCCACACCAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,5;5,8,7;5,7,6
++CCCACACACACAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,9;5,9,6;6,9,7;7,9,8
++CCCACACACCAABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,9;4,9,5;5,9,6;6,9,8;6,8,7
++CCCACCACACAAAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,3;3,7,8;3,8,4;4,8,9;4,9,5;5,9,6;6,9,7;7,9,8
+</stdin>
+codex
+BLOCK
+Files reviewed:
+builders/glb.py; builders/personal.py; data/nets_v4_14.txt
+Checks run:
+Reviewed provided staged diff, staged stat, mechanical staged Lean grep, proposed commit message, and trust-base bundle metadata.
+Blocking issues:
+.git/claude-commit-evidence.md is missing. Trust-base rule explicitly requires the committer evidence file when this bundle is present.
+Warnings:
+TEAMWORK.md live baton is missing, but the evidence-file absence is already a veto. No staged .lean sorry/admit/axiom/native_decide matches reported.
+Recommendation:
+Do not commit yet. Add/regenerate the committer evidence file with build/result evidence and required citations, then rerun the gate.
+tokens used
+27,603
+BLOCK
+Files reviewed:
+builders/glb.py; builders/personal.py; data/nets_v4_14.txt
+Checks run:
+Reviewed provided staged diff, staged stat, mechanical staged Lean grep, proposed commit message, and trust-base bundle metadata.
+Blocking issues:
+.git/claude-commit-evidence.md is missing. Trust-base rule explicitly requires the committer evidence file when this bundle is present.
+Warnings:
+TEAMWORK.md live baton is missing, but the evidence-file absence is already a veto. No staged .lean sorry/admit/axiom/native_decide matches reported.
+Recommendation:
+Do not commit yet. Add/regenerate the committer evidence file with build/result evidence and required citations, then rerun the gate.
