@@ -3,3 +3,4 @@ data/clers_glb/
 data/ideal_glb/
 __pycache__/
 dist/
+.session/

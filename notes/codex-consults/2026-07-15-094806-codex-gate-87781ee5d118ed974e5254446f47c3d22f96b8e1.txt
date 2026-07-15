@@ -1,0 +1,174 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/neo/atlas2
+staged tree: 87781ee5d118ed974e5254446f47c3d22f96b8e1
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-aeh60u_b.txt
+codex exit: 0
+
+final message:
+BLOCK
+Files reviewed: none; staged diff is empty.
+Checks run: `git diff --cached --name-only`; `git diff --cached --stat`; `git diff --cached --check`; staged Lean grep for new `sorry|admit|axiom|native_decide`.
+Blocking issues: Proposed command runs `git add HANDOFF.md` after this gate, so the actual commit would include unreviewed content. Current staged diff is empty, which also does not support the commit message claim about `HANDOFF`.
+Warnings: none.
+Recommendation: Stage `HANDOFF.md` first, rerun this gate on the staged diff, then commit without changing the index inside the commit command.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/neo/atlas2
+model: gpt-5.5
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: none
+reasoning summaries: none
+session id: 019f6608-e348-7882-bbe8-cd218f03487a
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/neo/atlas2
+
+Staged tree:
+87781ee5d118ed974e5254446f47c3d22f96b8e1
+
+Proposed command:
+cd /Users/doyle/Dropbox/neo/atlas2 && git add HANDOFF.md && git commit -q -m "HANDOFF: freeze + deploy state (repos, gauss, trash staging)
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>" && git push 2>&1 | tail -1
+
+Status:
+ M HANDOFF.md
+?? .session/
+?? notes/codex-consults/2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+2026-07-14-101901-codex-gate-1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4.txt
+2026-07-14-103502-codex-gate-f2fbd863bdd15acccd0bfda262f544637f04d3b8.txt
+2026-07-14-125406-codex-gate-060357cfb98d78330737aca087486f00a7735032.txt
+2026-07-14-132309-codex-gate-50b403ea027bb716b1eaa98db5085a0ed6904b5f.txt
+2026-07-14-133540-codex-gate-fc8d1f6da60dd5b343355c8f61c721c3793a9950.txt
+2026-07-14-134813-codex-gate-93b9d2ec3683d2ba10c2cf0acbfa246f08402c1f.txt
+2026-07-14-152756-codex-gate-122f9d9c38e05751ba3a6842bb2fc8f86e2253eb.txt
+2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt
+2026-07-14-161259-codex-gate-66d65fd3278505edb5d721e97fc7aea6b3ffaee6.txt
+2026-07-14-170958-codex-gate-b605d697b3dbffada21fb08eb97f7eb2cbe22bb9.txt
+2026-07-14-171239-codex-gate-fe3d2dbb95df6b62212d9894f98fe6c875afc1c7.txt
+2026-07-14-172154-codex-gate-1093cbe3bd01aeae93a536fc3b6e923fde88b2bf.txt
+2026-07-14-173029-codex-gate-7c69e7c0e04dbe81732e9649f27e5a35501a4f2b.txt
+2026-07-14-180614-codex-gate-90636b018737efd42f87e55774625919cdd74952.txt
+2026-07-14-183507-codex-gate-00cd11020f300d3cd29523693b057178c1027a2a.txt
+2026-07-14-185544-codex-gate-566d79c294fb5b392c5546570a7ad58e4fb3db6e.txt
+2026-07-14-192549-codex-gate-78924caa5c65110828884bb69282f57972927f6c.txt
+2026-07-14-223200-codex-gate-9efb20903c8b49d889bb8d7e084696009b104d91.txt
+2026-07-14-223658-codex-gate-b15c90098b5e9ff31c01c81b923fa5a325d1cbb5.txt
+2026-07-14-224857-codex-gate-2b36da1c069db914d9aeaa39754a399e380ce884.txt
+2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — README rewrite + LICENSE for publication
+
+## What this commit contains
+
+1. `README.md` — rewritten front page for the public repo. The old
+   text described the retired dent-walk era ("dentings" module,
+   build.py, "old atlas stays untouched") — stale on all three
+   counts. New text: what the atlas is, the Zenodo DOI for site +
+   database tarballs (10.5281/zenodo.21367250, deposition created
+   and verified this session), the builders/data layout, the
+   regeneration chain (matches builders/ contents), bendprover and
+   Antiprism credits (Antiprism credit per Peter's standing
+   instruction from the Eisenstein work).
+2. `LICENSE` — MIT, copied verbatim from bendprover/LICENSE
+   (header checked this session: "MIT License / Copyright (c) 2026
+   Peter Doyle"). Per Peter's distribution discipline: MIT and
+   nothing else, no citation asks.
+
+## Context
+
+Peter (this session): "what i want is bendprover and ideal prover
+and atlas preserved so anyone can use or recover them... suggest
+whatever you please." This commit readies atlas2 for `gh repo create
+peterdoyle1717/neoplatonic-atlas --public --source . --push`.
+Repo weight check this session: `git count-objects -vH` = 473
+objects, size-pack 0 (site/, dist/, glb caches gitignored).
+
+No new conventions, encodings, or invariants; prose + license only.
+
+
+Staged diff:
+</stdin>
+codex
+I’ll verify the index directly so the gate is based on the actual staged contents, not the proposed `git add` step.
+exec
+/bin/zsh -lc 'git diff --cached --check' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --name-only' in /Users/doyle/Dropbox/neo/atlas2
+exec
+/bin/zsh -lc 'git diff --cached --stat' in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+ succeeded in 0ms:
+ succeeded in 0ms:
+exec
+/bin/zsh -lc "git diff --cached -- '*.lean' | rg -n '("'^'"\\+.*\\b(sorry|admit|axiom|native_decide)\\b)' || true" in /Users/doyle/Dropbox/neo/atlas2
+ succeeded in 0ms:
+codex
+BLOCK
+Files reviewed: none; staged diff is empty.
+Checks run: `git diff --cached --name-only`; `git diff --cached --stat`; `git diff --cached --check`; staged Lean grep for new `sorry|admit|axiom|native_decide`.
+Blocking issues: Proposed command runs `git add HANDOFF.md` after this gate, so the actual commit would include unreviewed content. Current staged diff is empty, which also does not support the commit message claim about `HANDOFF`.
+Warnings: none.
+Recommendation: Stage `HANDOFF.md` first, rerun this gate on the staged diff, then commit without changing the index inside the commit command.
+tokens used
+17,450
+BLOCK
+Files reviewed: none; staged diff is empty.
+Checks run: `git diff --cached --name-only`; `git diff --cached --stat`; `git diff --cached --check`; staged Lean grep for new `sorry|admit|axiom|native_decide`.
+Blocking issues: Proposed command runs `git add HANDOFF.md` after this gate, so the actual commit would include unreviewed content. Current staged diff is empty, which also does not support the commit message claim about `HANDOFF`.
+Warnings: none.
+Recommendation: Stage `HANDOFF.md` first, rerun this gate on the staged diff, then commit without changing the index inside the commit command.
