@@ -42,28 +42,59 @@ relations, names, notes, artifact inventory).
 
 Regeneration: github.com/peterdoyle1717 (bendprover + atlas builders).
 REOF
+/bin/cp "$ATLAS/builders/assets/serve.py" "$STAGE/serve.py"
 cat > "$STAGE/serve.sh" <<'SEOF'
 #!/bin/sh
-cd "$(dirname "$0")" && echo "open http://localhost:8901/personal/" && python3 -m http.server 8901
+cd "$(dirname "$0")" && exec python3 serve.py
 SEOF
-cat > "$STAGE/serve.command" <<'CEOF'
-#!/bin/sh
-cd "$(dirname "$0")" && echo "open http://localhost:8901/personal/" && python3 -m http.server 8901
-CEOF
-chmod +x "$STAGE/serve.sh" "$STAGE/serve.command"
+/bin/cp "$STAGE/serve.sh" "$STAGE/serve.command"
+cat > "$STAGE/serve.bat" <<'BEOF'
+@echo off
+cd /d %~dp0
+py serve.py || python serve.py
+BEOF
+chmod +x "$STAGE/serve.sh" "$STAGE/serve.command" "$STAGE/serve.py"
 /bin/cp "$ATLAS/data/atlas_records.jsonl" "$STAGE/"
 
 # 3. tarball (site copied in via tar to keep the 'personal/' root)
 if [ -f "$STAGE/neoplatonic-atlas.tar.gz" ]; then echo "tarball exists, keeping"; else
 echo "tarring..."
 tar -C "$ATLAS/site" -cf "$STAGE/_site.tar" personal
-tar -C "$STAGE" -rf "$STAGE/_site.tar" README.md serve.sh serve.command atlas_records.jsonl
+tar -C "$STAGE" -rf "$STAGE/_site.tar" README.md serve.py serve.sh serve.command serve.bat atlas_records.jsonl
 gzip -1 -c "$STAGE/_site.tar" > "$STAGE/neoplatonic-atlas.tar.gz"
 /bin/rm "$STAGE/_site.tar"
 fi
 ls -la "$STAGE/neoplatonic-atlas.tar.gz" | awk '{print "tarball bytes:", $5}'
 MD5=$(md5 -q "$STAGE/neoplatonic-atlas.tar.gz")
 echo "local md5: $MD5"
+
+# database tarball: the primary object (records + tables), tiny
+DB="$STAGE/db"; /bin/rm -rf "$DB"; mkdir -p "$DB"
+/bin/cp "$ATLAS/data/atlas_records.jsonl" "$DB/"
+for t in class_v30 symmetry conway eisenstein themes recognized_v30 icorel_v30 decap_v30 decap_names classics theme_desc; do
+  [ -f "$ATLAS/data/$t.tsv" ] && /bin/cp "$ATLAS/data/$t.tsv" "$DB/"
+done
+/bin/cp "$ATLAS/data/nets_pages.txt" "$DB/" 2>/dev/null || true
+cat > "$DB/README.md" <<'DBEOF'
+# Neoplatonic Atlas: the database
+
+This is the atlas's primary object: everything the atlas asserts, with
+no presentation attached. atlas_records.jsonl holds one JSON record
+per net (identity, CLERS name, netcode/face list, classification
+flags, Conway symmetry symbol, Eisenstein family relations, common
+names, notes, artifact inventory). The TSVs are the census-level
+tables the records were stamped from (classification over all 79,349
+primes v<=30, symmetry, Conway symbols, Eisenstein lattices, angle
+recognition, cap-replacement results, the neoplatonized classics).
+
+The companion site tarball is ONE presentation of this database;
+anyone can build another. Regeneration/builders: see the code
+repository referenced by the Zenodo record.
+DBEOF
+tar -C "$STAGE" -czf "$STAGE/neoplatonic-atlas-database.tar.gz" db
+DBMD5=$(md5 -q "$STAGE/neoplatonic-atlas-database.tar.gz")
+ls -la "$STAGE/neoplatonic-atlas-database.tar.gz" | awk '{print "db tarball bytes:", $5}'
+echo "db md5: $DBMD5"
 
 # 4. Zenodo draft + reserved DOI (token stays in env)
 TOKEN=$(cat ~/.zshrc ~/.zshenv ~/.zprofile 2>/dev/null | grep -i 'zenodo' | grep -oE '=["'"'"']?[A-Za-z0-9._-]+' | head -1 | tr -d '="'"'"'')
@@ -89,9 +120,9 @@ curl -s -o /dev/null -w "upload http %{http_code}, %{size_upload} bytes, %{time_
   -H "Authorization: Bearer $TOKEN" \
   --upload-file "$STAGE/neoplatonic-atlas.tar.gz" \
   "$BUCKET/neoplatonic-atlas.tar.gz"
-curl -s -o /dev/null -w "records upload http %{http_code}\n" \
+curl -s -o /dev/null -w "db upload http %{http_code}\n" \
   -H "Authorization: Bearer $TOKEN" \
-  --upload-file "$STAGE/atlas_records.jsonl" "$BUCKET/atlas_records.jsonl"
+  --upload-file "$STAGE/neoplatonic-atlas-database.tar.gz" "$BUCKET/neoplatonic-atlas-database.tar.gz"
 
 # 7. verify checksums server-side
 curl -s -H "Authorization: Bearer $TOKEN" \
