@@ -61,6 +61,35 @@ carried over with their descriptions (data/theme_desc.tsv).
   Dartmouth redirects; next arXiv version).
 - Buried wholesale (13k more classified nets could get pages).
 
+## Distribution (2026-07-15, commit e95d48f)
+
+Zenodo DRAFT deposition 21367250, DOI 10.5281/zenodo.21367250
+reserved (live once Peter publishes). Two verified artifacts (site
+tarball three-way md5 local = doob = Zenodo; db tarball two-way,
+local = Zenodo — it was uploaded from home, small enough):
+- neoplatonic-atlas.tar.gz 2,614,014,412 B, d57df591ef9dd03654da1a4db521b609
+- neoplatonic-atlas-database.tar.gz 3,664,510 B, e526e00459623f6d2b7f0a45011f6b2d
+Pipeline: builders/zenodo_dist.sh (token: ~/.config/zenodo/token —
+also copied to doob; multi-GB PUTs from home failed repeatedly
+(502s/resets), from doob succeeded first try in ~1 min — upload big
+files from doob). Paper cites the DOI (neo.tex:209, compile-checked).
+Remaining: Peter reviews + publishes; arXiv comments line; Dartmouth
+forwarding when the atlas moves.
+
+## Freeze + deploy (2026-07-15)
+
+Public repos: github.com/peterdoyle1717/neoplatonic-atlas (this repo:
+builders + data, MIT, README points at the DOI) and
+github.com/peterdoyle1717/idealprover (boundary-cert scripts +
+reports, copied from bendq_sandbox — originals untouched);
+bendprover pushed current (ae6f915). Deployed:
+math.dartmouth.edu/~doyle/docs/atlas2/personal/ (4.2G on gauss;
+front page + GLB fetch both HTTP 200). OLD atlas (131G,
+gauss docs/atlas) still up — paper's five links point there; retire
+only after link rewrite or redirect. Local cleanup: retirees in
+neo/_trash-20260715/ (5.9G; fleet pushed and/or tarballed first),
+full-tree tarballs in neo/retired/ (310M, 14 tarballs).
+
 ## Conventions
 
 Evidence discipline per user CLAUDE.md; link nets by their personal
