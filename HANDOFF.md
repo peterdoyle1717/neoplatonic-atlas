@@ -73,8 +73,13 @@ Pipeline: builders/zenodo_dist.sh (token: ~/.config/zenodo/token —
 also copied to doob; multi-GB PUTs from home failed repeatedly
 (502s/resets), from doob succeeded first try in ~1 min — upload big
 files from doob). Paper cites the DOI (neo.tex:209, compile-checked).
-Remaining: Peter reviews + publishes; arXiv comments line; Dartmouth
-forwarding when the atlas moves.
+Remaining: Peter reviews + publishes; arXiv comments line.
+2026-07-15 later: gauss SWAPPED (docs/atlas = new atlas, old at
+docs/atlas_old; web/<v>/<NAME>.html 301-redirects via .htaccess;
+all 5 paper URLs verified 200). primes_v4-60.tar.gz (208,670,491 B,
+md5 a1a2b6a9...) added to the record — 3 files total, all
+checksum-verified. Paper: bipyramid href canonicalized; zzz now
+packages figures (compiled clean standalone on doob).
 
 ## Freeze + deploy (2026-07-15)
 
