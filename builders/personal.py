@@ -47,8 +47,8 @@ STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
          ".label{text-align:center;font-size:.8em;color:#888;margin-top:.2em}"
          "a{color:#2255aa}")
 
-MV = ('<script type="module" src="https://ajax.googleapis.com/ajax/libs/'
-      'model-viewer/3.5.0/model-viewer.min.js"></script>')
+MV = ('<script type="module" src="../vendor/model-viewer.min.js">'
+      '</script>')   # 1-deep pages (gallery/, by-v/); front page swaps to vendor/
 
 
 def solve_prove_60(nc):
@@ -360,6 +360,9 @@ def main(input_path=None):
     import shutil
     for w in ("morph.html", "turntable.html"):
         shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
+    vsrc = os.path.join(HERE, "assets", "vendor")
+    if os.path.isdir(vsrc):
+        shutil.copytree(vsrc, os.path.join(OUT, "vendor"), dirs_exist_ok=True)
     jobs = []
     with open(input_path or os.path.join(TOP, "data", "nets_pages.txt")) as f:
         for ln in f:

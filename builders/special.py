@@ -553,7 +553,7 @@ def main():
         ex = sorted(recs)[0]
     front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>Neoplatonic Solids</title><style>{FRONT_CSS}</style>{MV}</head><body>
+<title>Neoplatonic Solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
 <h1>Neoplatonic Solids</h1>
 <p class="authors">Peter Doyle, Matthew Ellison</p>
 <p>
