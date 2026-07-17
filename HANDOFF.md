@@ -95,6 +95,23 @@ downloads/ tarballs are superseded by the record's primes_v4-60
 neo/_trash-20260715/ (5.9G; fleet pushed and/or tarballed first),
 full-tree tarballs in neo/retired/ (310M, 14 tarballs).
 
+## Tinkering round (2026-07-17, commits 9e9f4b4..af142c8)
+
+Site now 2,215 nets. Tet rays: (1,0) to T=225, (2,1) to T=252
+(V=506), (1,1) to T=192, (3,1) to T=208 -- built via the alpha-walk
+fallback in solve_prove_60 (canonical -> walk 59.9/59/57/54 seeded ->
+relabel retries). tri2 family = cut double-covered triangles (exact
+pancakes; uncut is unrepresentable: doubled corner edges, measured
+build_topology failure). smooth.glb on every net (welded, no borders,
+no normals). Galleries: primes-labeled links; fullerene/icosym/
+geodesic/deg7 pages gone; classics+deg7 merged; eisenstein after
+symmetry; hyperbolics only in classics/oddsends/by-v(marked).
+Ray-limit measurements (flat ray exactly tet at T64/T121; (2,1)-ray
+corner-collar/flat-core profile): bendq_sandbox/ray_limit/REPORT.md.
+Zenodo draft REFRESHED (site a1e44da7..., db b41a39f0..., 3-way md5
+verified) -- same deposition 21367250. gauss redeployed (old at
+docs/atlas_pretinker, legacy at docs/atlas_old); 6 URL checks 200/301.
+
 ## Conventions
 
 Evidence discipline per user CLAUDE.md; link nets by their personal
