@@ -98,7 +98,7 @@ def main():
 
     # Eisenstein subdivision families
     fam = []
-    for src in (os.path.join(NEO, "atlas", "subdiv", "names.tsv"),
+    for src in (os.path.join(TOP, "data", "subdiv_base.tsv"),
                 os.path.join(TOP, "data", "subdiv_extra.tsv")):
         if not os.path.exists(src):
             continue

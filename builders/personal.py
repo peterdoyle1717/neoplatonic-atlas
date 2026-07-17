@@ -25,7 +25,8 @@ from walklib import develop
 from clers_tools import clers_svg, COLORS
 
 BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
-HOROZ = os.environ.get("HOROZ_BIN", "/Users/doyle/Dropbox/neo/ideal/src/horoz_c")
+HOROZ = os.environ.get("HOROZ_BIN", os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "horoz_c"))
 RGB = {'A': (1.0, 0.0, 0.0), 'B': (1.0, 0.53, 0.0), 'C': (1.0, 0.8, 0.0),
        'D': (0.0, 0.67, 0.0), 'E': (0.0, 0.4, 1.0)}
 BLACK = (0.0, 0.0, 0.0)
@@ -51,7 +52,7 @@ MV = ('<script type="module" src="../vendor/model-viewer.min.js">'
       '</script>')   # 1-deep pages (gallery/, by-v/); front page swaps to vendor/
 
 
-def solve_prove_60(nc):
+def _prove_60_once(nc):
     r = subprocess.run([BIN, "--prove", "--alpha", "60.0", "--name", "X", nc],
                        capture_output=True, text=True, timeout=1800)
     if "end" not in r.stdout:
@@ -62,6 +63,33 @@ def solve_prove_60(nc):
         if t and t[0] == "b":
             bends[(int(t[1]), int(t[2]))] = float(t[3]) * math.pi
     return bends
+
+
+def solve_prove_60(nc, tries=8):
+    """seedless dent-gated LM; on non-convergence retry under random
+    relabelings (LM's path is labeling-dependent -- the canonical
+    labeling stranded the big tet-ray subdivisions; measured: T81
+    failed canonically, solved on the first shuffle). Bends are mapped
+    back through the inverse permutation."""
+    bends = _prove_60_once(nc)
+    if bends is not None:
+        return bends
+    import random
+    tris = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+    V = max(max(f) for f in tris)
+    for k in range(tries):
+        rng = random.Random(1717 + k)
+        perm = list(range(1, V + 1))
+        rng.shuffle(perm)
+        m = {i + 1: perm[i] for i in range(V)}
+        inv = {v: u for u, v in m.items()}
+        tt = [(m[a], m[b], m[c]) for a, b, c in tris]
+        rng.shuffle(tt)
+        rb = _prove_60_once(';'.join(f'{a},{b},{c}' for a, b, c in tt))
+        if rb is not None:
+            return {tuple(sorted((inv[i], inv[j]))): v
+                    for (i, j), v in rb.items()}
+    return None
 
 
 def solve_alpha(nc, a):
@@ -148,6 +176,10 @@ def glb_hero(name, faces, V, pos, outdir):
     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
     write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats,
                     center_color=[0.25, 0.55, 0.85])
+    # smooth view: original shared vertices, no borders, no normals
+    # (viewer computes smooth vertex normals) -- the conemanifold look
+    write_gltf_like(os.path.join(outdir, "smooth.glb"), verts, fidx,
+                    solid_color=[0.25, 0.55, 0.85])
     groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
     for L, rgb in RGB.items():
         gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
@@ -162,6 +194,7 @@ def glb_euclid(name, faces, V, bends, outdir):
     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
     write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
+    write_gltf_like(os.path.join(outdir, "smooth.glb"), verts, fidx)
     # CLERS coloring: retreat emits 7 faces per original (6 border, 1 center)
     groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
     for L, rgb in RGB.items():

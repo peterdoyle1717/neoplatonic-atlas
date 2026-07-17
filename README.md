@@ -29,4 +29,9 @@ Regeneration chain: `classify → members → personal → fetch_dents →
 symmetry → special`; `views.py` re-renders every page from the
 records. Solving uses bendprover
 (github.com/peterdoyle1717/bendprover). Eisenstein subdivision uses
-Adrian Rossiter's Antiprism (www.antiprism.com).
+Adrian Rossiter's Antiprism (www.antiprism.com): every row of
+`data/subdiv_base.tsv` / `data/subdiv_extra.tsv` is reproducible by
+`builders/gen_ray.py BASE a,b` (BASE an Antiprism builtin like `tet`
+or any .obj/.off realization of the base net). The ideal-net
+placement tool is vendored (`builders/horoz_c.c`; built by
+`regen_personal.sh`).

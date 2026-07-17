@@ -294,7 +294,7 @@ def main():
         for ln in open(spath).read().splitlines()[1:]:
             t = ln.split('\t')
             r = recs.get(t[0])
-            if r:
+            if r and r.get("maxdeg", 6) <= 6:  # hyperbolics: classics only
                 symrows.append((int(t[3]), int(t[5]) > 0, int(t[2]), r,
                                 conway.get(t[0], '?')))
     classes = {}
@@ -315,15 +315,6 @@ def main():
             'automorphisms, which act as isometries by uniqueness of the '
             'realization. Up to 8 exemplars per class, smallest first.',
             ''.join(parts))
-
-    # icosahedral symmetry gallery (235 / *235)
-    isym = sorted(((v, cwv, r) for order, refl, v, r, cwv in symrows
-                   if cwv in ('532', '*532')), key=lambda t: (t[0], t[2]["name"]))
-    gallery('icosym.html', 'Icosahedral symmetry',
-            'Nets with 60-fold or 120-fold symmetry &mdash; Conway 532 '
-            '(chiral) or *532 (full). The geodesic domes live here, '
-            'joined by the capped icosahedral classics.',
-            grid([item(r, f'v={v} &middot; {cwv}') for v, cwv, r in isym]))
 
     byname_pre = {r["name"]: r for r in recs.values()}
     # -- all-recognized-angles gallery (data lands from
@@ -444,7 +435,7 @@ def main():
                 '(builders/classics.py); variants that collapse to the '
                 'same net share a cell. Blue models are the degree-7 '
                 'members: no Euclidean form, realized hyperbolically up '
-                'to &alpha; = 360/7 (see the degree-7 annex). Johnson '
+                'to &alpha; = 360/7. Johnson '
                 'solids have their own gallery, Odds and ends.',
                 ''.join(parts))
 
@@ -476,25 +467,14 @@ def main():
                     out.append(r)
         return out
 
-    for tag in ("bucky", "phyllo31", "phyllo22", "phyllo41", "phyllo51",
+    for tag in ("phyllo31", "phyllo22", "phyllo41", "phyllo51",
                 "flops", "nonprime", "preapproved", "small"):
         rows = theme_list(tag)
         title, desc = tdesc.get(tag, (tag, ""))
-        fname = f'{tag}.html'
-        if tag == "bucky":
-            fname, title = 'fullerene.html', 'Fullerene duals'
-        if tag == "bucky":
-            parts = []
-            byvv = {}
-            for r in rows:
-                byvv.setdefault(r["v"], []).append(r)
-            for vv in sorted(byvv):
-                parts.append(f'<h2>v = {vv}</h2>')
-                parts.append(grid([item(r, f'v={vv}') for r in byvv[vv]]))
-            body_html = ''.join(parts)
-        else:
-            body_html = grid([item(r, f'v={r["v"]}') for r in rows])
-        gallery(fname, title, desc, body_html)
+        if tag == "small":
+            title = 'Primes v &le; 12'
+        gallery(f'{tag}.html', title, desc,
+                grid([item(r, f'v={r["v"]}') for r in rows]))
 
     # dented: old-atlas dent GLBs living in the owning nets' dirs,
     # thumbnails linking through to the (undented) net page
@@ -527,10 +507,14 @@ def main():
     for v, rows in sorted(byv.items()):
         note = ('' if v <= 14 else
                 ' &middot; exemplars only, not the full set at this size')
+        n_other = sum(1 for r in rows if 'nonprime' in r.get("themes", [])
+                      or r.get("maxdeg", 6) > 6)
+        counts = (f'{len(rows) - n_other} primes'
+                  + (f' + {n_other} marked others' if n_other else ''))
         body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
                 f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
                 f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
-                f'v = {v}</h1><p class=desc>{len(rows)} nets{note}</p>',
+                f'v = {v}</h1><p class=desc>{counts}{note}</p>',
                 grid([item(r, f'v={v}'
                            + (' non-prime' if 'nonprime' in r.get("themes", [])
                               else '')
@@ -564,26 +548,24 @@ with equilateral triangle faces, meeting at most six to a vertex.
 
 <h2>Themed galleries</h2>
 <div class="gallery-links">
-<a href="gallery/small.html">Small (v&le;12)</a>
-<a href="gallery/fullerene.html">Fullerene duals</a>
+<a href="gallery/small.html">Primes v&le;12</a>
+<a href="by-v/13.html">Primes v=13</a>
+<a href="by-v/14.html">Primes v=14</a>
 <a href="gallery/convex.html">Convex</a>
 <a href="gallery/dented.html">Dented</a>
 <a href="gallery/buried.html">Hull-buried</a>
 <a href="gallery/pancakes.html">Pancakes</a>
 <a href="gallery/floppy.html">Floppy</a>
 <a href="gallery/symmetry.html">Symmetry</a>
+<a href="gallery/subdiv.html">Eisenstein subdivisions</a>
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
 <a href="gallery/oddsends.html">Odds and ends</a>
-<a href="gallery/icosym.html">Icosahedral symmetry</a>
-<a href="gallery/deg7.html">Degree-7 classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
 <a href="gallery/phyllo51.html">(5,1)</a>
-<a href="gallery/geodesic.html">Geodesic domes</a>
-<a href="gallery/subdiv.html">Eisenstein subdivisions</a>
 <a href="gallery/preapproved.html">Preapproved</a>
 <a href="gallery/nonprime.html">Non-prime</a>
 <a href="gallery/flops.html">Tough cases</a>

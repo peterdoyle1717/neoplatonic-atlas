@@ -155,6 +155,9 @@ def render_page(netdir):
         body.append(cell_svg('ideal_net.svg', 'ideal net'))
     body.append('</div>')
     body.append('<div class=pair>')
+    if os.path.exists(os.path.join(netdir, "smooth.glb")):
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/smooth.glb',
+                                'smooth shading (no edges)'))
     if art.get("clers_glb"):
         body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/clers.glb',
                                 'CLERS colored'))

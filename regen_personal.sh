@@ -6,7 +6,7 @@ cd "$(dirname "$0")"
 NEO="$(cd .. && pwd)"
 
 [ -x "$NEO/bendprover/csrc/euclid_lm_mp" ] || make -C "$NEO/bendprover/csrc" euclid_lm_mp
-[ -x "$NEO/ideal/src/horoz_c" ] || make -C "$NEO/ideal" src/horoz_c
+[ -x builders/horoz_c ] || cc -O2 -o builders/horoz_c builders/horoz_c.c -lm
 
 /bin/rm -rf site/personal
 # classification sweep (from neo/data/objs, ~2 min) and the page-worthy
