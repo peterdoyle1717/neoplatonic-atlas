@@ -10,19 +10,19 @@ from multiprocessing import Pool
 import numpy as np
 import ideal_limit as IL
 
-BIN = "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp"
+BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, 'failure_frames')
 os.makedirs(OUT, exist_ok=True)
 
 name_of = {}
-for blk in open('/Users/doyle/Dropbox/neo/atlas2/data/records.bends').read().split('net ')[1:]:
+for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
     nm = blk.split()[0]
     for ln in blk.splitlines():
         if ln.startswith('faces '): name_of[ln[6:].strip()] = nm
 
 walks = {}
-for f in glob.glob('/Users/doyle/Dropbox/neo/atlas2/data/walks/*.json'):
+for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
     d = json.load(open(f))
     walks[d['netcode']] = d
 

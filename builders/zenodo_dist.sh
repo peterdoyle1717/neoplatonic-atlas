@@ -2,7 +2,7 @@
 # Package the atlas + create a Zenodo DRAFT with reserved DOI + upload.
 # NEVER prints the token. Does NOT publish.
 set -e
-ATLAS=/Users/doyle/Dropbox/neo/atlas2
+ATLAS=/Users/doyle/Dropbox/projects/neo/atlas2
 STAGE="${ATLAS}/dist"
 # clear staging but keep the big site tarball (step 3 skips re-tarring it)
 mkdir -p "$STAGE"
@@ -11,8 +11,8 @@ find "$STAGE" -mindepth 1 -maxdepth 1 ! -name 'neoplatonic-atlas.tar.gz' -exec /
 # 1. aggregate records
 python3 - <<'PYEOF'
 import json, os
-NETS = "/Users/doyle/Dropbox/neo/atlas2/site/personal/nets"
-out = "/Users/doyle/Dropbox/neo/atlas2/data/atlas_records.jsonl"
+NETS = "/Users/doyle/Dropbox/projects/neo/atlas2/site/personal/nets"
+out = "/Users/doyle/Dropbox/projects/neo/atlas2/data/atlas_records.jsonl"
 n = 0
 with open(out, "w") as f:
     for d in sorted(os.listdir(NETS)):

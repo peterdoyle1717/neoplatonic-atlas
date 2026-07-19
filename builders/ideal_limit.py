@@ -14,8 +14,8 @@ Ideal root = zero of R(b) = (Delta_v, Re T_v, Im T_v)_v  (3V eqns, 3V-6 unknowns
 import json, glob, math, cmath, subprocess, sys
 import numpy as np
 
-BIN = "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp"
-REC = "/Users/doyle/Dropbox/neo/atlas2/data/records.bends"
+BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+REC = "/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends"
 TWO_PI = 2 * math.pi
 
 

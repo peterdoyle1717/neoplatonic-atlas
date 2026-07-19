@@ -24,7 +24,7 @@ from realize_h import develop_h, klein, poincare, center
 from walklib import develop
 from clers_tools import clers_svg, COLORS
 
-BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
+BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp")
 HOROZ = os.environ.get("HOROZ_BIN", os.path.join(
     os.path.dirname(os.path.abspath(__file__)), "horoz_c"))
 RGB = {'A': (1.0, 0.0, 0.0), 'B': (1.0, 0.53, 0.0), 'C': (1.0, 0.8, 0.0),

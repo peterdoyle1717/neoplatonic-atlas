@@ -21,7 +21,7 @@ from glb import retreat_to_incenter, write_gltf_like
 from walklib import automorphisms, develop, clearance, NAMES, STYLE
 from realize_h import develop_h, klein, poincare, center
 
-BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp")
+BIN = os.environ.get("DW_BIN", "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp")
 ALPHAS = [60.0 - 57.9 * (0.87 ** i) for i in range(24)][::-1]   # ~2.1 .. 59.9
 
 PAGE_STYLE = """body{font-family:Georgia,serif;max-width:680px;margin:2em auto;line-height:1.6;color:#222;padding:0 1em}h1{font-family:monospace;font-size:1.2em;word-break:break-all}h1 a{color:inherit;text-decoration:none}.info{font-size:.9em;color:#555;margin:-.5em 0 .5em}.hint{font-size:.8em;color:#aaa;font-style:italic;margin-bottom:1em}.pair{display:grid;grid-template-columns:1fr 1fr;gap:.8em;margin-bottom:1em}.cell{position:relative;width:100%;padding-bottom:100%}.cell model-viewer{position:absolute;top:0;left:0;width:100%;height:100%;background:#f0f0f0}.cell .svgwrap{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;border:1px solid #ddd;box-sizing:border-box}.cell .svgwrap svg{max-width:90%;max-height:90%}.label{text-align:center;font-size:.8em;color:#888;margin-top:.2em}input[type=range]{width:100%}.dent{margin-top:1.5em;border-top:1px solid #ddd;padding-top:.6em}.dent h3{font-family:monospace;font-size:.95em;margin:.2em 0}.code{font-family:monospace;font-size:.85em;word-break:break-all;color:#444;margin-top:2em;border-top:1px solid #ddd;padding-top:1em}"""

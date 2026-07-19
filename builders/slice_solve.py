@@ -83,7 +83,7 @@ def lm_slice(y0, b_wish, N, V, cyc, edges, itmax=400):
 
 def attack(name, dent_key, restarts=60, seed=0):
     nc = None
-    for blk in open('/Users/doyle/Dropbox/neo/atlas2/data/records.bends').read().split('net ')[1:]:
+    for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
         if blk.split()[0] == name:
             for ln in blk.splitlines():
                 if ln.startswith('faces '):

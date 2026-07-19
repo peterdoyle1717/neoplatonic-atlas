@@ -8,12 +8,12 @@ from multiprocessing import Pool
 import numpy as np
 import ideal_limit as IL
 
-BIN = "/Users/doyle/Dropbox/neo/bendprover/csrc/euclid_lm_mp"
-EMB = "/Users/doyle/Dropbox/neo/bendprover/csrc/embcheck_mp"
+BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+EMB = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/embcheck_mp"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 CASES = []
-for f in sorted(glob.glob('/Users/doyle/Dropbox/neo/atlas2/data/walks/*.json')):
+for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
     d = json.load(open(f))
     for key, bends in d['atlas'].items():
         if key:

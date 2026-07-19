@@ -6,8 +6,8 @@ import json, glob, math, os, sys
 import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-BUILDERS = '/Users/doyle/Dropbox/neo/atlas2/builders'
-SITE = '/Users/doyle/Dropbox/neo/atlas2/site/failures'
+BUILDERS = '/Users/doyle/Dropbox/projects/neo/atlas2/builders'
+SITE = '/Users/doyle/Dropbox/projects/neo/atlas2/site/failures'
 sys.path.insert(0, BUILDERS)
 sys.path.insert(0, HERE)
 import ideal_limit as IL
@@ -70,7 +70,7 @@ for f in glob.glob(os.path.join(HERE, 'failure_frames', '*.json')):
     runs.setdefault((d['name'], d['key']), {})[d['kind']] = d
 
 walks = {}
-for f in glob.glob('/Users/doyle/Dropbox/neo/atlas2/data/walks/*.json'):
+for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
     d = json.load(open(f))
     walks[d['netcode']] = d
 
