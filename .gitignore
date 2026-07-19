@@ -5,3 +5,4 @@ __pycache__/
 dist/
 .session/
 builders/horoz_c
+.DS_Store
