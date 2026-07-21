@@ -52,13 +52,20 @@ MV = ('<script type="module" src="../vendor/model-viewer.min.js">'
       '</script>')   # 1-deep pages (gallery/, by-v/); front page swaps to vendor/
 
 
-def _prove_60_once(nc, seed=None):
-    cmd = [BIN, "--prove", "--alpha", "60.0", "--name", "X"]
-    if seed:
-        cmd += ["--seed", seed]
+def solve_prove_60(nc):
+    """seedless dent-gated LM via the binary's --walk fallback (rung
+    ladder 59.9/59/57/54, within-member seeding only, no
+    randomization -- the relabel retries were removed 2026-07-21;
+    swept: 2245-row nets_pages, 2209 direct + 11 walk + 25
+    hyperbolic-skip, 0 failures). Route logged to stderr per net."""
+    import sys
+    cmd = [BIN, "--prove", "--alpha", "60.0", "--walk", "--name", "X"]
     r = subprocess.run(cmd + [nc], capture_output=True, text=True, timeout=1800)
     if "end" not in r.stdout:
         return None
+    route = next((ln[2:].strip() for ln in r.stdout.splitlines()
+                  if ln.startswith("# route")), "route ?")
+    print(f"  {route}", file=sys.stderr, flush=True)
     bends = {}
     for ln in r.stdout.splitlines():
         t = ln.split()
@@ -78,69 +85,6 @@ def _bends_alpha_raw(nc, a, seed=None):
     return {(int(t[3]), int(t[4])): t[5] for t in
             (ln.split() for ln in r.stdout.splitlines())
             if len(t) >= 6 and t[0] == '#' and t[1] == 'bend'}
-
-
-def _walk_up_60(nc):
-    """PD: 'walk it down from ideal' -- hyperbolic solves converge where
-    the seedless Euclidean solve stalls (measured: T121 at alpha=59.9,
-    4s seedless; the seeded 60.0 solve then landed in 18s). Find the
-    highest seedless rung, climb back up seeding each hop, finish with
-    the seeded --prove at 60."""
-    import tempfile
-    rungs = [59.9, 59.0, 57.0, 54.0]
-
-    def seedfile(b):
-        f = tempfile.NamedTemporaryFile('w', suffix='.seed', delete=False)
-        for (i, j), v in b.items():
-            f.write(f'{i} {j} {v}\n')
-        f.close()
-        return f.name
-
-    for k, a0 in enumerate(rungs):
-        b = _bends_alpha_raw(nc, a0)
-        if b is None:
-            continue
-        for a in rungs[:k][::-1]:
-            sf = seedfile(b)
-            b = _bends_alpha_raw(nc, a, sf)
-            os.unlink(sf)
-            if b is None:
-                return None
-        sf = seedfile(b)
-        out = _prove_60_once(nc, seed=sf)
-        os.unlink(sf)
-        return out
-    return None
-
-
-def solve_prove_60(nc, tries=8):
-    """seedless dent-gated LM; on non-convergence retry under random
-    relabelings (LM's path is labeling-dependent -- the canonical
-    labeling stranded the big tet-ray subdivisions; measured: T81
-    failed canonically, solved on the first shuffle). Bends are mapped
-    back through the inverse permutation."""
-    bends = _prove_60_once(nc)
-    if bends is not None:
-        return bends
-    bends = _walk_up_60(nc)
-    if bends is not None:
-        return bends
-    import random
-    tris = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
-    V = max(max(f) for f in tris)
-    for k in range(tries):
-        rng = random.Random(1717 + k)
-        perm = list(range(1, V + 1))
-        rng.shuffle(perm)
-        m = {i + 1: perm[i] for i in range(V)}
-        inv = {v: u for u, v in m.items()}
-        tt = [(m[a], m[b], m[c]) for a, b, c in tris]
-        rng.shuffle(tt)
-        rb = _prove_60_once(';'.join(f'{a},{b},{c}' for a, b, c in tt))
-        if rb is not None:
-            return {tuple(sorted((inv[i], inv[j]))): v
-                    for (i, j), v in rb.items()}
-    return None
 
 
 def solve_alpha(nc, a):
