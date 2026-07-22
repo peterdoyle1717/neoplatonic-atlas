@@ -1,0 +1,110 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8b96-886f-7df0-9ecf-21dfc2361d54
+--------
+user
+G1 round 6 (atlas display gates). Round-5 findings: stale-morph deletion ordered too late; q<=1->0 clamp accepting impossible discrepancies. Bundle shows: deletion-first (with executed stale-survival test), and the materiality threshold made SCALE-AWARE after a fixed 1e-9 was measured to false-trip every deepest rung via eps*s^2 Minkowski cancellation -- rejection and closure-floor applied symmetrically, per-edge metric unchanged (m>>1), production catches re-verified caught, zero-failure confirmation sweep. Audit ONLY: are the round-5 findings resolved and does the scale-aware threshold introduce defects. First line exactly one of: APPROVE / REVISE / BLOCK. Max 12 lines.
+
+<stdin>
+=== G1 ROUND 6: round-5 residual resolution + zero-state ===
+Round-5 findings: (a) stale-morph deletion ordered after store/solve/hero work; (b) q<=1->0 clamp accepts impossible discrepancies.
+Fixes:
+(a) deletion moved to IMMEDIATELY after netdir creation, before any store parsing / solving / hero work. Executed test: pre-planted stale morph GLBs + corrupt-store FAILING build => GLBs deleted (remaining=[]).
+(b) reject q materially below 1. Verification exposed a numerics reality: a fixed 1e-9 materiality FALSE-TRIPPED every net's deepest rung (Minkowski products cancel at coordinate scale s with absolute error ~eps*s^2, ~1e-2 at s=1e7). Threshold now scale-aware: tol_q = max(1e-9, 32*eps*s^2), applied symmetrically -- q < 1-tol_q rejects (corruption), closure excess below tol_q counts as closed (indistinguishable from exact). Per-edge metric keeps the strict bound (m ~ cosh(ell) >> 1 cannot be noise-pushed below 1). Honest limit recorded in the baton: at s~1e7 the closure noise floor approaches the 1% bound; those frames already fail the edge gates.
+
+--- build_net head (deletion-first) ---
+    os.makedirs(netdir, exist_ok=True)
+    # stale morph GLBs never survive a build (G1 r5: deleted FIRST, before
+    # store parsing / solving / hero work -- any failure return or raise
+    # after this point cannot leave old uncertified morphs advertised)
+    for fn in ("morph_p.glb", "morph_k.glb"):
+        try:
+            os.remove(os.path.join(netdir, fn))
+        except FileNotFoundError:
+            pass
+    deg = {}
+    for f in faces:
+        for x in f:
+            deg[x] = deg.get(x, 0) + 1
+    maxdeg = max(deg.values())
+    amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+    alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+              [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
+    # consumer mode: committed bends (data/bends/<nid>.json) supply every
+    # solved quantity; the solver runs only for rungs the store lacks.
+    store = None
+    spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
+    if os.path.exists(spath):
+        st = json.load(open(spath))
+        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
+                          for k, v in st["hero"].items()},
+                 "morph": {round(m["alpha"], 6):
+                           {tuple(int(x) for x in k.split(',')): float(v)
+                            for k, v in m["bends"].items()}
+                           for m in st["morph"]}}
+    # Displayed artifacts are ALWAYS regenerated through the gates from
+    # the committed bends (G1 r3): certifying a reconstruction while
+    # reusing on-disk GLBs proves nothing about the bytes actually
+    # served, and regeneration is deterministic (measured byte-stable),
+    # so no reuse optimization is worth that hole. Store present =>
+    # store-only; no store => producer mode (solve + persist).
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+--- per-event closure with scale-aware materiality ---
+        for d, D in events:
+            qd, qp = -mdot(D, D), -mdot(raw[d], raw[d])
+            if not (math.isfinite(qd) and math.isfinite(qp)
+                    and qd > 0.0 and qp > 0.0
+                    and float(D[3]) > 0.0 and float(raw[d][3]) > 0.0):
+                return None, float('inf'), False
+            q = -mdot(D, raw[d]) / math.sqrt(qd * qp)
+            # for unit timelike lifts q >= 1 exactly; materially below 1
+            # is numerical corruption (G1 r5). Materiality is SCALE-AWARE:
+            # the Minkowski products cancel at coordinate scale s with
+            # absolute error ~ eps*s^2 (measured: a fixed 1e-9 false-trips
+            # every net's deepest rung), so the noise floor is
+            # tol_q = max(1e-9, 32*eps*s^2). Closure below the same floor
+            # is indistinguishable from exact and counts as closed.
+            s = max(float(np.max(np.abs(D))), float(np.max(np.abs(raw[d]))))
+            tol_q = max(1e-9, 32 * 2.22e-16 * s * s)
+            if not math.isfinite(q) or q < 1.0 - tol_q:
+                return None, float('inf'), False
+            dcl = math.acosh(q) if q - 1.0 > tol_q else 0.0
+            if dcl / ell > EDGE_LEN_TOL:
+                return None, dcl / ell, False
+        posh = center(raw)
+
+--- EXECUTED VERIFICATION ---
+spot suite: v12/v13/v34 'built 11 frames' (the fixed 1e-9 had false-tripped all three at alpha=2.1/1.8 -- measured, then fixed).
+production catches re-verified under the scale-aware clamp: v30 err=5.534e-02 ok=False, v28 err=1.947e-02 ok=False -- STILL CAUGHT.
+corrupt-store t1: BUILD-FAIL (closure 5.58e-01); stale-morph ordering test: remaining=[] after failing build.
+confirmation sweep, all 2245 stores: hero closure max 8.971e-14, 0 hero failures; morph-carrying failures: 0.
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+REVISE
+Deletion-first resolves the stale-morph finding; the failing-build test directly exercises it.
+The scale-aware clamp recreates the acceptance hole: at `s=1e7`, `tol_q = 0.7104`.
+Thus `q=0.5` passes corruption rejection, while even `q=1.5` is assigned `dcl=0` despite `acosh(1.5)≈0.962`.
+A numerical uncertainty must not become a closure allowance: reject when it consumes the permitted closure budget, or certify using a conservative upper bound such as `acosh(max(1,q+tol_q))/ell`.
+The two caught corruptions and zero-failure sweep do not exercise this threshold-sized adversarial discrepancy.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+9,770
+REVISE
+Deletion-first resolves the stale-morph finding; the failing-build test directly exercises it.
+The scale-aware clamp recreates the acceptance hole: at `s=1e7`, `tol_q = 0.7104`.
+Thus `q=0.5` passes corruption rejection, while even `q=1.5` is assigned `dcl=0` despite `acosh(1.5)≈0.962`.
+A numerical uncertainty must not become a closure allowance: reject when it consumes the permitted closure budget, or certify using a conservative upper bound such as `acosh(max(1,q+tol_q))/ell`.
+The two caught corruptions and zero-failure sweep do not exercise this threshold-sized adversarial discrepancy.

@@ -80,6 +80,7 @@ def develop_h(faces, bend, alpha):
     seen = {fkey((a0, b0, c0))}
     dq = deque([(a0, b0, c0)])
     resid = 0.0
+    events = []          # closure events: (vertex, second-path placement)
     while dq:
         f0 = dq.popleft()
         for i in range(3):
@@ -90,10 +91,11 @@ def develop_h(faces, bend, alpha):
             D = place(pos[x], pos[y], pos[f0[(i + 2) % 3]], th)
             if fkey(f1) in seen:
                 resid = max(resid, float(np.max(np.abs(D - pos[d]))))
+                events.append((d, D))
                 continue
             pos[d] = D
             seen.add(fkey(f1)); dq.append(f1)
-    return pos, resid
+    return pos, resid, events
 
 def klein(pos):
     return {v: x[:3] / x[3] for v, x in pos.items()}

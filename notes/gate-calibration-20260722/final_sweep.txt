@@ -1,0 +1,13 @@
+hero euclid closure: max 8.971e-14 over 2220 nets; hero gate failures: 0
+morph-carrying nets that now FAIL: 1
+   v=28 v28CCCACACCAACACACCAACACACCAACACACCA gate at alpha=2.10 (1.49e-02)
+--- after rebuilding the caught v28 (and previously v30): confirmation sweep ---
+hero euclid closure: max 8.971e-14 over 2220 nets; hero gate failures: 0
+morph-carrying nets that now FAIL: 0
+=== zero-state confirmation under the r5-final gates (scale-aware closure clamp) ===
+hero euclid closure: max 8.971e-14 over 2220 nets; hero gate failures: 0
+morph-carrying nets that now FAIL: 0
+=== history: per-event closure sweep caught v28 (1.49e-2) after v30 (5.53e-2); both rebuilt+omitted; catches re-verified under scale-aware clamp (v30 5.534e-02, v28 1.947e-02) ===
+=== zero-state under certify-where-resolvable (PD ruling), C_CLOSURE=128 measured ===
+hero euclid closure: max 8.971e-14 over 2220 nets; hero gate failures: 0
+morph-carrying nets that now FAIL: 0

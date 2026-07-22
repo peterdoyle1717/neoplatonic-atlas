@@ -1,0 +1,289 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8b84-6210-7722-a695-27068bf95bc6
+--------
+user
+G1 round 3 (atlas display gates). Round 2 found: (3-residual) missing bend treated as flat; (5a) storeless GLB reuse rendered uncertified; (5b) write=False fell back to the solver on incomplete stores; (new) reused heroes bypassed the hero gates; (6) exit logic not shown. The bundle shows each fix and the previously-missing exit code, plus spot verification. Audit ONLY whether these residuals are correctly resolved and whether the fixes introduce new defects. First line exactly one of: APPROVE / REVISE / BLOCK. Max 20 lines.
+
+<stdin>
+=== G1 ROUND 3: round-2 residual fixes ===
+Round-2 residuals and their fixes, each with code below:
+3': missing bend => uncertified (bends.get(e) is None => flat_ok False).
+5a': storeless GLB reuse eliminated -- rebuilt through the gates in producer mode (never rendered uncertified).
+5b': store-only rule -- when a store exists, glb_movies NEVER calls the solver (build or certify mode); missing rung => 'store incomplete', morphs stay unbuilt.
+new-defect': reused rb.glb/clers.glb heroes now recertified from the committed bends (edge + dent gates; failure raises => BUILD-FAIL).
+6 (verification gap): backstop wrapper + main() exit code included below.
+
+--- display_min_turn (missing-bend fix) ---
+def display_min_turn(pos, rings, bends=None):
+    """(min_turn, bad) over the displayed positions. min_turn is the
+    minimum link turning over non-degenerate vertices (+inf if none).
+
+    G1 revision (consult 2026-07-22-161343): a coplanar-degenerate vertex
+    (all |B.(AxC)| < COPLANAR_NUM_TOL, where the atan2 branch is noise)
+    is SKIPPED only when its flatness is independently certified by the
+    solved bends -- every incident bend within FLAT_BEND_TOL of 0 or
+    +-pi, the doubled-flat/pancake signature. A coplanar link WITHOUT
+    that certificate may hide a near-flat dent, so bad=True and the
+    caller must reject the frame. Nonfinite coordinates or turning sums
+    also set bad=True.
+    """
+    mt, bad = float('inf'), False
+    for v, ring in rings.items():
+        k = len(ring)
+        if k < 3:
+            continue
+        dirs = []
+        for nb in ring:
+            d = np.asarray(pos[nb], float) - np.asarray(pos[v], float)
+            n = float(np.linalg.norm(d))
+            if not math.isfinite(n):
+                bad = True
+                break
+            dirs.append(d / (n if n > 1e-15 else 1e-15))
+        else:
+            nums, dens = [], []
+            for i in range(k):
+                A, B, C = dirs[(i - 1) % k], dirs[i], dirs[(i + 1) % k]
+                nums.append(float(np.dot(B, np.cross(A, C))))
+                dens.append(float(np.dot(A, B) * np.dot(B, C) - np.dot(A, C)))
+            if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+                flat_ok = bends is not None
+                if flat_ok:
+                    for nb in ring:
+                        b = bends.get(tuple(sorted((v, nb))))
+                        # a MISSING bend is uncertified, never flat (G1 r2)
+                        if b is None or not (abs(b) < FLAT_BEND_TOL
+                                             or abs(abs(b) - math.pi) < FLAT_BEND_TOL):
+                            flat_ok = False
+                            break
+                if not flat_ok:
+                    bad = True       # degenerate link, flatness uncertified
+                continue
+            t = sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens))
+            if not math.isfinite(t):
+                bad = True
+                continue
+            mt = min(mt, t)
+            continue
+        break                        # nonfinite direction: stop, frame bad
+    return mt, bad
+
+
+def develop_h_certified(faces, bd, alpha_rad, edges=None):
+    """develop_h -> center -> edge-length gate ON THE CENTERED (displayed)
+    coordinates. Returns (pos_centered, err, ok), err = max relative
+    hyperbolic edge-length error vs ell(alpha).
+
+    G1 revisions (consult 2026-07-22-161343): the distance is the
+    NORMALIZED form d_H = acosh(-mdot(u,v)/sqrt((-mdot(u,u))(-mdot(v,v))))
+    -- the raw acosh(-mdot) is valid only on exact unit timelike vectors
+    and silently mis-measures off-hyperboloid drift; every point must be
+    finite, timelike (-mdot(x,x) > 0), and future (x4 > 0); certification
+    runs after center() so it validates exactly what is rendered.
+
+    A numerical blow-up anywhere (off-hyperboloid sqrt in develop/center,
+    nonfinite coordinates) is a hard rejection (err = inf), never a crash.
+    """
+    from realize_h import mdot, side_length
+    try:
+        posh = center(develop_h(faces, bd, alpha_rad)[0])
+        ell = side_length(alpha_rad)
+        norm2 = {}
+        for v, x in posh.items():
+            q = -mdot(x, x)
+            if not (math.isfinite(q) and q > 0.0 and float(x[3]) > 0.0):
+                return None, float('inf'), False
+            norm2[v] = q
+        err = 0.0
+        for u, v in (edges or _edges_of(faces)):
+            m = -mdot(posh[u], posh[v]) / math.sqrt(norm2[u] * norm2[v])
+            if not math.isfinite(m):
+                return None, float('inf'), False
+            dh = math.acosh(m) if m > 1.0 else 0.0
+            err = max(err, abs(dh - ell) / ell)
+        if not math.isfinite(err):
+            return None, float('inf'), False
+    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
+        return None, float('inf'), False
+    return posh, err, err <= EDGE_LEN_TOL
+
+
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+--- glb_movies rung loop (store-only rule) ---
+    for a in (alphas or MORPH_ALPHAS):
+        bd = (stored or {}).get("morph", {}).get(round(a, 6))
+        if bd is None:
+            if stored is not None:
+                # store present => store-only (G1 r2): never fall back to
+                # the solver, neither in certify-only nor in build mode --
+                # an incomplete store means the morphs stay unbuilt.
+                return 0, f"store incomplete at alpha={a:.2f}", solved
+            bends = solve_alpha(nc, a)
+            if bends is None:
+                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            solved[a] = bd
+        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
+        if not ok:
+            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
+        K = klein(posh)              # posh is already centered (displayed)
+        mt, dbad = display_min_turn(K, rings, bd)
+        if dbad:
+            return 0, f"uncertified degenerate frame at alpha={a:.2f}", solved
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
+        if write:
+            vk, tris = subdivided_frame(faces, K, grid)
+            fk.append(vk)
+            fp.append(klein_to_poincare(vk))
+--- build_net hero recertification + reuse branches ---
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+    if not (os.path.exists(os.path.join(netdir, "rb.glb"))
+            and os.path.exists(os.path.join(netdir, "clers.glb"))):
+        if store:
+            bends = store["hero"]
+        elif maxdeg <= 6:
+            bends = solve_prove_60(nc)
+        else:
+            bends = solve_alpha(nc, amax)
+        if bends is None:
+            return (vname, "SOLVE-FAIL")
+        if not store:
+            hero_bends = bends
+        if maxdeg <= 6:
+            glb_euclid(name, faces, V, bends, netdir)
+        else:
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            pos = center(develop_h(faces, bd, math.radians(amax))[0])
+            K = klein(pos)
+            glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
+                     bends=bd)
+    elif store:
+        # hero artifacts exist: recertify the displayed hero from the
+        # committed bends (G1 r2: legacy rb.glb must not bypass the hero
+        # gates). Failure raises -> BUILD-FAIL via the backstop.
+        rings_h = link_rings(faces)
+        if maxdeg <= 6:
+            hb = store["hero"]
+            pos_h, _ = develop(faces, hb)
+            eerr = max(abs(float(np.linalg.norm(pos_h[u] - pos_h[v])) - 1.0)
+                       for u, v in _edges_of(faces))
+            mt, dbad = display_min_turn(pos_h, rings_h, hb)
+            if not math.isfinite(eerr) or eerr > EDGE_LEN_TOL or dbad \
+                    or mt < -DENT_TURN_TOL:
+                raise RuntimeError(
+                    f"reused hero fails gates (eerr {eerr:.2e}, mt {mt:.2e})")
+        else:
+            hb = store["hero"]
+            posh, herr, hok = develop_h_certified(faces, hb,
+                                                  math.radians(amax))
+            if not hok:
+                raise RuntimeError(f"reused hero fails edge gate ({herr:.2e})")
+            Kh = klein(posh)
+            mt, dbad = display_min_turn(Kh, rings_h, hb)
+            if dbad or mt < -DENT_TURN_TOL:
+                raise RuntimeError(f"reused hero fails dent gate (mt {mt:.2e})")
+    morph_note, morph_bends = None, None
+    both_glbs = (os.path.exists(os.path.join(netdir, "morph_p.glb"))
+                 and os.path.exists(os.path.join(netdir, "morph_k.glb")))
+    if not morphs:
+        built = "skipped (morphs=False)"          # generation-time opt-out
+    elif both_glbs and store:
+        # reuse ONLY through recertification (G1: stale artifacts must not
+        # bypass the gates). Certify-only pass from the committed bends --
+        # develops + gates, no GLB writes, no solver (store-only).
+        _, morph_note, _ = glb_movies(name, faces, V, nc, netdir,
+                                      alphas=alphas, euclid_end=(maxdeg <= 6),
+                                      stored=store, write=False)
+        if morph_note:
+            for fn in ("morph_p.glb", "morph_k.glb"):
+                try:
+                    os.remove(os.path.join(netdir, fn))
+                except FileNotFoundError:
+                    pass
+            built = f"recertify failed -> omitted ({morph_note})"
+        else:
+            built = "reused (recertified)"
+    elif both_glbs:
+        # GLBs but no committed bends: unverifiable -- rebuild through the
+        # gates (producer mode) rather than render uncertified (G1 r2).
+        for fn in ("morph_p.glb", "morph_k.glb"):
+            try:
+                os.remove(os.path.join(netdir, fn))
+            except FileNotFoundError:
+                pass
+        nframes, morph_note, morph_bends = glb_movies(
+            name, faces, V, nc, netdir,
+            alphas=alphas, euclid_end=(maxdeg <= 6), stored=store)
+        built = (f"omitted ({morph_note})" if morph_note
+--- backstop + main tail (finding 6) ---
+def build_net(job, morphs=True):
+    """Backstop wrapper: no single net may crash the whole Pool. Any
+    unexpected exception becomes a BUILD-FAIL result for that net so the
+    rest of the sweep continues (main() reports the FAIL list)."""
+    try:
+        return _build_net(job, morphs)
+    except Exception as e:
+        return (f"v?{job[0]}", f"BUILD-FAIL {type(e).__name__}: {e}")
+
+
+def main(input_path=None):
+724:    return 1 if fails else 0     # G1: a failed net (incl. dented hero) is a
+725-                                 # failed build -- nonzero exit, never silent
+726-
+727-
+730:    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+
+--- spot verification after round-2 fixes ---
+v12 pancake / v13 / v34 deg-7: 'reused (recertified)'; v78 incomplete-store giant: 'omitted (store incomplete at alpha=21.87)' in 0.1s (no solver); hero recertification ran in the same pass.
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+REVISE
+
+3′ is correctly fixed: a missing or nonfinite bend cannot certify flatness.
+
+5a′ is correctly fixed for storeless morph GLBs: they are deleted and rebuilt through the gates.
+
+5b′ holds in the shown rung loop: a present but incomplete store returns before `solve_alpha`.
+
+Hero reuse remains defective in two cases:
+
+- With a store, certification reconstructs coordinates from stored bends but reuses the existing GLB without proving it matches those coordinates. A stale or corrupted GLB can pass.
+- Without a store, existing `rb.glb` and `clers.glb` enter neither the build branch nor `elif store`; they remain completely uncertified.
+
+Stored morph reuse has the same model/artifact mismatch: `write=False` certifies a reconstruction, not the reused GLB. Regenerate the GLBs after certification or inspect and gate their actual geometry.
+
+Finding 6 is not fully established: `return 1 if fails else 0` works only if `BUILD-FAIL` results are added to `fails`; that classification code and a deliberately failing exit-code test are absent.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+10,776
+REVISE
+
+3′ is correctly fixed: a missing or nonfinite bend cannot certify flatness.
+
+5a′ is correctly fixed for storeless morph GLBs: they are deleted and rebuilt through the gates.
+
+5b′ holds in the shown rung loop: a present but incomplete store returns before `solve_alpha`.
+
+Hero reuse remains defective in two cases:
+
+- With a store, certification reconstructs coordinates from stored bends but reuses the existing GLB without proving it matches those coordinates. A stale or corrupted GLB can pass.
+- Without a store, existing `rb.glb` and `clers.glb` enter neither the build branch nor `elif store`; they remain completely uncertified.
+
+Stored morph reuse has the same model/artifact mismatch: `write=False` certifies a reconstruction, not the reused GLB. Regenerate the GLBs after certification or inspect and gate their actual geometry.
+
+Finding 6 is not fully established: `return 1 if fails else 0` works only if `BUILD-FAIL` results are added to `fails`; that classification code and a deliberately failing exit-code test are absent.

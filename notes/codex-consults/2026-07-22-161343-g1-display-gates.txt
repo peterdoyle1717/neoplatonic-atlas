@@ -1,0 +1,2325 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8b76-730e-7212-a483-2c4e67c9774a
+--------
+user
+G1 design audit (atlas repo, display-fidelity gates). Two new validation invariants gate what the atlas DISPLAYS; audit the design before commit. (1) Edge-length gate: every edge of a displayed frame within 1% of exact -- hyperbolic rungs max|d_H(u,v)-ell(alpha)|/ell <= 1e-2 with d_H=acosh(-mdot), ell=side_length(alpha); Euclidean end frame max|len-1| <= 1e-2; develop_h numerical blow-up = hard reject. (2) Undented display gate: dent_index link-turning port run on displayed coordinates (Klein post-center for rungs, raw Euclidean for heroes); vertices with all |B.(AxC)| < 1e-12 skipped as coplanar-degenerate (measured: exact-planar links put atan2 on the branch cut, +-pi by sign of 1e-17 noise); reject frame if min turn < -1e-9; dented hero raises (build failure). Bundle: spec+calibration in MORPH_GATE_TODO.md, gate code, measured calibration over all 2245 committed bend stores, degenerate-case trace, spot builds. Audit for: formula errors, convention traps (ring orientation, sign conventions, Klein vs hyperboloid), tolerance choices vs measured margins (+3.0e-7 tightest genuine, 1e-16 noise), failure modes the gates miss, and whether the coplanar skip could mask a real dent. First line exactly one of: APPROVE / REVISE / BLOCK. Then concise findings, max 40 lines.
+
+<stdin>
+=== G1 BUNDLE: display-fidelity gates (edge-length 1%, dent_index with coplanar skip) ===
+
+--- MORPH_GATE_TODO.md (spec + calibration record) ---
+# Morph gate — RESOLVED 2026-07-22 (supersedes the 2026-07-21 baton)
+
+Original plan was (1) a develop_h residual gate and (2) removing morphs
+for V > 50. Peter's rulings during implementation replaced both:
+
+- No arbitrary v-cap. Pages render morphs iff the record carries them,
+  and morphs enter the record only through the certificate. A giant that
+  certifies keeps its morphs; a small net that fails loses them.
+- Final gate spec (PD, 2026-07-22): every edge of a displayed frame has
+  the length it is supposed to have, within 1 percent.
+  Hyperbolic rungs: max over edges of |d_H(u,v) - ell(alpha)| / ell
+  <= 1e-2 (each face is an equilateral triangle of side ell(alpha), so
+  ground truth is exact and intrinsic). Euclidean end frame:
+  max |len - 1| <= 1e-2. A develop_h numerical blow-up (off-hyperboloid
+  sqrt) is a hard rejection, not a crash. Implemented in
+  builders/personal.py (EDGE_LEN_TOL, develop_h_certified, glb_movies);
+  one failing frame => NO morph GLBs, reason recorded in net.json
+  (morph_note). views.py renders the morph block only when the record
+  has the artifacts.
+- Superseded along the way (measured, then discarded): a relative
+  4-vector closure gate at 1e-6 (mis-calibrated: falsely killed ~572
+  good v<=50 morphs) and a Klein-length closure-witness gate at 1e-3.
+
+Calibration of the final gate, measured from the committed bends
+(notes/gate-calibration-20260722/edge_len.tsv, 2026-07-22): max rel edge error v<=30 = 1.11e-4;
+Euclidean heroes exact to 7.7e-14 over 2220 nets; exactly one v<=50 net
+fails (the v48, edge error ~3e-2 class at deep alpha); diverged giants
+score 0.7-1.0. Verdict deltas vs the deployed morph inventory: zero in
+both directions -- the gate confirms the site as built.
+
+Large-v morphs: no further chase (PD: "nobody will want morphs for
+large v anyway"). The ~121 v>50 nets stay morph-omitted with their
+recorded reasons; the deep-alpha store rungs for 41-58 giants remain
+unsolved and that is accepted. No doob batch.
+
+Related architecture landed with this (see data/bends/): the committed
+bend store -- personal.py persists solver output (producer) and builds
+from committed bends when present (consumer, no solver / neo / network).
+
+## Undented display gate — WIRED 2026-07-22 (PD: "fix the gate")
+
+dent_index link-turning check (port of neo/_trash-20260715/undented/
+undented/src/dent_check.c inner loop -- turning per vertex, NEVER volume
+sign) now runs on the displayed coordinates in builders/personal.py:
+- every morph rung (Klein frame post-center, exactly what renders) and
+  the Euclidean end frame, in glb_movies -- failure => morphs omitted,
+  reason in morph_note ("dented frame at alpha=...");
+- both hero paths (glb_euclid, glb_hero) -- failure raises, surfacing as
+  BUILD-FAIL: a dented hero can never ship silently.
+
+Degenerate-case handling, forced by a measured failure mode (traced on
+the v12 pancake): an exactly-coplanar vertex link makes every triple
+product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+and returns +-pi by the sign of 1e-17 noise, so per-vertex totals
+{-2pi, 0, +2pi} are branch picks, not geometry. Vertices with all
+|B.(AxC)| < COPLANAR_NUM_TOL (1e-12) are therefore skipped -- a dent
+requires non-planarity; flat is the degenerate boundary, already
+certified by the solved bends (all-plus turning system). Gate constants:
+DENT_TURN_TOL = 1e-9, COPLANAR_NUM_TOL = 1e-12. Calibration over all
+2245 stores (notes/gate-calibration-20260722/dent_turn.tsv + the v10-vertex trace): zero
+displayed heroes or morph frames fail; tightest genuine margin +3.0e-7;
+noise floor ~1e-16. Spot-verified through build_net: pancake v12 (all
+vertices skipped, passes), v13, deg-7 j45 (Klein hero + 11 rungs), and
+the v48 (correctly rejected upstream by the edge-length gate, 5.9e-2).
+
+G1 note: the two display invariants (1 percent edge-length,
+dent_index-with-coplanar-skip) are new validation conventions -- cite
+this file + the calibration tsvs in the commit evidence, and run the G1
+consult with the bundle before the batch commits.
+
+--- builders/personal.py: gate code (constants, _edges_of, develop_h_certified, dent block, link_rings, display_min_turn) ---
+# Length-fidelity gate (PD spec 2026-07-22, final): every edge of a
+# displayed frame must have the length it is supposed to have, within 1%.
+# Hyperbolic frames: every edge of every equilateral face has exact
+# hyperbolic length ell(alpha) (realize_h.side_length); the metric is
+# max over edges of |d_H(u,v) - ell| / ell, with d_H = acosh(-mdot).
+# Euclidean end frame: every edge has length 1; max |len - 1|.
+# Accumulated development divergence lands exactly here: edges whose
+# endpoints arrive via different development paths inherit the drift.
+EDGE_LEN_TOL = 1e-2
+
+
+def _edges_of(faces):
+    return {tuple(sorted((a, b))) for f in faces
+            for a, b in zip(f, f[1:] + f[:1])}
+
+
+# Undented display gate (PD 2026-07-22: "make sure what we display is
+# actually undented"). dent_index link-turning check (port of
+# undented/src/dent_check.c inner loop -- turning per vertex, NEVER
+# volume sign) run on the displayed coordinates themselves. Degenerate
+# case, measured 2026-07-22 on the v12 pancake: an exactly-coplanar
+# vertex link makes every triple product B.(AxC) exact-zero, and where
+# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
+# not geometry. Such vertices are excluded: a dent needs non-planarity,
+# and a coplanar link is the flat degenerate boundary (pancakes). Their
+# flatness is already certified by the solved bends (all-plus turning
+# system). Calibration over all 2245 stores (scratch dent_turn.tsv):
+# every displayed hero and morph frame passes; tightest genuine margin
+# +3.0e-7; noise floor ~1e-16.
+DENT_TURN_TOL = 1e-9        # reject a displayed frame if min turn < -this
+COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+
+
+def link_rings(faces):
+    """vertex -> cyclic neighbor ring, from the face structure."""
+    succ = {}
+    for a, b, c in faces:
+        succ.setdefault(a, {})[b] = c
+        succ.setdefault(b, {})[c] = a
+        succ.setdefault(c, {})[a] = b
+    rings = {}
+    for v, nxt in succ.items():
+        start = next(iter(nxt))
+        ring, cur = [start], nxt[start]
+        while cur != start:
+            ring.append(cur)
+            cur = nxt[cur]
+        rings[v] = ring
+    return rings
+
+
+def display_min_turn(pos, rings):
+    """min link turning over non-degenerate vertices of the displayed
+    positions; +inf when every vertex is coplanar-degenerate (pancake)."""
+    mt = float('inf')
+    for v, ring in rings.items():
+        k = len(ring)
+        if k < 3:
+            continue
+        dirs = []
+        for nb in ring:
+            d = np.asarray(pos[nb], float) - np.asarray(pos[v], float)
+            n = float(np.linalg.norm(d))
+            dirs.append(d / (n if n > 1e-15 else 1e-15))
+        nums, dens = [], []
+        for i in range(k):
+            A, B, C = dirs[(i - 1) % k], dirs[i], dirs[(i + 1) % k]
+            nums.append(float(np.dot(B, np.cross(A, C))))
+            dens.append(float(np.dot(A, B) * np.dot(B, C) - np.dot(A, C)))
+        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+            continue        # coplanar link: formula ill-posed, vertex flat
+        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
+    return mt
+
+
+def develop_h_certified(faces, bd, alpha_rad, edges=None):
+    """develop_h plus the edge-length gate. Returns (pos_4vec, err, ok)
+    where err = max relative hyperbolic edge-length error vs ell(alpha).
+
+    A numerical blow-up inside develop_h -- a point leaving the
+    hyperboloid so that mdot(x,x) > 0 and norm_pt does sqrt(<0), raising
+    ValueError: math domain error -- is the extreme of the divergence the
+    gate catches, so it is a hard rejection (err = inf), never a crash.
+    """
+    from realize_h import mdot, side_length
+    try:
+        posh, _, _ = develop_h(faces, bd, alpha_rad)
+        ell = side_length(alpha_rad)
+        err = 0.0
+        for u, v in (edges or _edges_of(faces)):
+            m = -mdot(posh[u], posh[v])
+            dh = math.acosh(m) if m > 1.0 else 0.0
+            err = max(err, abs(dh - ell) / ell)
+    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
+        return None, float('inf'), False
+    return posh, err, err <= EDGE_LEN_TOL
+
+
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+
+--- glb_movies (gated build of morph frames, consumer mode) ---
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+               stored=None):
+    """Two animated morph GLBs (Poincare, Klein): ideal end first, then
+    either the exact Euclidean solid (alpha_max = 60) or the hyperbolic
+    realization at the final rung (degree-7 nets: alpha_max = 360/maxdeg).
+
+    Consumer mode: when `stored` (the data/bends record: {"hero": bd,
+    "morph": {rounded-alpha: bd}}) provides a rung, its bends are used and
+    the solver is never invoked for it -- the deterministic no-solver
+    build path. Missing rungs fall back to the solver (producer mode) and
+    are returned in `solved` for persistence.
+
+    Every develop_h frame is certified (develop_h_certified, Klein-length
+    gate). If any frame fails, NO GLB is written and a reason is returned
+    -- never a partial or silently-broken morph. Returns (nframes, note,
+    solved). The euclidean end frame uses the flat developer
+    (walklib.develop), which the v506 diagnosis exonerated, so it is not
+    gated here.
+    """
+    grid = bary_grid(SUBDIV)
+    fp, fk, tris = [], [], None
+    solved = {}                     # alpha -> bend dict, freshly solved only
+    edges = _edges_of(faces)
+    rings = link_rings(faces)
+    for a in (alphas or MORPH_ALPHAS):
+        bd = (stored or {}).get("morph", {}).get(round(a, 6))
+        if bd is None:
+            bends = solve_alpha(nc, a)
+            if bends is None:
+                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            solved[a] = bd
+        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
+        if not ok:
+            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
+        K = klein(center(posh))
+        mt = display_min_turn(K, rings)
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
+        vk, tris = subdivided_frame(faces, K, grid)
+        fk.append(vk)
+        fp.append(klein_to_poincare(vk))
+    if euclid_end:
+        bd60 = (stored or {}).get("hero")
+        if bd60 is None:
+            bends60 = solve_prove_60(nc)
+            if bends60 is None:
+                return 0, "solve_prove_60 failed (euclidean end frame)", solved
+            bd60 = {tuple(sorted(e)): b for e, b in bends60.items()}
+        pos60, _ = develop(faces, bd60)
+        eerr = max(abs(float(np.linalg.norm(pos60[u] - pos60[v])) - 1.0)
+                   for u, v in edges)
+        if eerr > EDGE_LEN_TOL:
+            return 0, f"euclid edge err {eerr:.2e}", solved
+        mt = display_min_turn(pos60, rings)
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented euclid frame (min turn {mt:.2e})", solved
+        ctr = sum(pos60.values()) / len(pos60)
+        ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+        fp.append(ve)
+        fk.append(ve)
+    fp = align_frames(fp)
+    fk = align_frames(fk)
+    write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
+    return len(fp), None, solved
+
+def _build_net(job, morphs=True):
+
+--- calibration outputs (executable checker results) ---
+[edge_len measure]
+=== top 10 max_rel (all v) ===
+  1.029e+00  v=290  v290h1a2f90bc498c4723
+  9.948e-01  v=418  v418h89ce987010a54cbd
+  9.799e-01  v=236  v236hc60ae96a0a268dcd
+  8.798e-01  v=340  v340hc710a10a3524ab46
+  8.040e-01  v=191  v191h0993a492513773bc
+  8.022e-01  v=506  v506h1cd81128f5b89efd
+  8.016e-01  v=552  v552hbdf5d5a762252e37
+  7.842e-01  v=218  v218h402a30a79d0fc4aa
+  7.731e-01  v=326  v326h3013f2c13feab50a
+  7.679e-01  v=386  v386h0d9207355457defd
+
+max rel v<=30: 1.113e-04
+hero euclid: max |len-1| = 7.672e-14 over 2220 nets
+
+=== verdicts at TOL=0.01 vs current site ===
+currently-with-morphs that FAIL 1%: 0
+currently-omitted v<=50 that PASS 1%: 0
+v<=50 nets failing 1%: 1
+[dent_turn measure]
+heroes measured: 2220
+=== 8 smallest hero min_turns (dents would be negative) ===
+  -6.283e+00  v=12  v12CCCACACCAACACACCAABE
+  -6.283e+00  v=18  v18CCCACACCACCACACACCACAACADECACAAE
+  -6.283e+00  v=20  v20CCCACACCAACACACCAACACACCAACACACCA
+  -6.283e+00  v=21  v21CCCACACCACCACACACCACAACACACACCACA
+  -6.283e+00  v=24  v24CCCACACCACCACACACCACAACACACACCACA
+  -6.283e+00  v=26  v26CCCACCCACCACCACACCAACACCACAACACAC
+  -6.283e+00  v=27  v27CCCACACCACCACACACCACAACACACACCACA
+  -6.283e+00  v=28  v28CCCACACCAACACACCAACACACCAACACACCA
+heroes with min_turn < -1e-9: 13
+
+morph-frame minima measured: 2244 nets
+=== 8 smallest displayed-frame min_turns ===
+  -1.244e+01  v=394  v394h12be35569acb08a2
+  -1.242e+01  v=394  v394h7a36d28c75939de2
+  -1.236e+01  v=236  v236hc60ae96a0a268dcd
+  -1.234e+01  v=226  v226he5c99f0254e9d767
+  -1.229e+01  v=202  v202hd5d3d1cdcaa902c7
+  -1.216e+01  v=418  v418h89ce987010a54cbd
+  -1.214e+01  v=244  v244hdbc3e108e5770529
+  -1.195e+01  v=340  v340hc710a10a3524ab46
+morph nets with a displayed frame min_turn < -1e-9: 53
+[v12 pancake -2pi trace: num=-9.185e-17, den=-0.75 at two triples -> atan2 branch = -pi each; siblings +2pi; planarity sv3=0.0]
+[spot builds through build_net: v12 pancake OK 11 frames; v13 OK; v34 j45 deg-7 OK; v48 omitted (edge length err 5.93e-02 at alpha=21.87)]
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll trace the formulas and conventions against the live implementation and calibration artifacts, then give the requested one-word verdict first.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "sed -n '1,240p' TEAMWORK.md; sed -n '1,220p' TEAMWORK_LOG.md; sed -n '1,260p' MORPH_GATE_TODO.md; rg -n \"EDGE_LEN_TOL|COPLANAR_NUM_TOL|DENT_TURN_TOL|def link_rings|def display_min_turn|def develop_h_certified|def glb_movies|def glb_euclid|def glb_hero\" builders/personal.py; git status --short" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+sed: TEAMWORK.md: No such file or directory
+sed: TEAMWORK_LOG.md: No such file or directory
+# Morph gate — RESOLVED 2026-07-22 (supersedes the 2026-07-21 baton)
+
+Original plan was (1) a develop_h residual gate and (2) removing morphs
+for V > 50. Peter's rulings during implementation replaced both:
+
+- No arbitrary v-cap. Pages render morphs iff the record carries them,
+  and morphs enter the record only through the certificate. A giant that
+  certifies keeps its morphs; a small net that fails loses them.
+- Final gate spec (PD, 2026-07-22): every edge of a displayed frame has
+  the length it is supposed to have, within 1 percent.
+  Hyperbolic rungs: max over edges of |d_H(u,v) - ell(alpha)| / ell
+  <= 1e-2 (each face is an equilateral triangle of side ell(alpha), so
+  ground truth is exact and intrinsic). Euclidean end frame:
+  max |len - 1| <= 1e-2. A develop_h numerical blow-up (off-hyperboloid
+  sqrt) is a hard rejection, not a crash. Implemented in
+  builders/personal.py (EDGE_LEN_TOL, develop_h_certified, glb_movies);
+  one failing frame => NO morph GLBs, reason recorded in net.json
+  (morph_note). views.py renders the morph block only when the record
+  has the artifacts.
+- Superseded along the way (measured, then discarded): a relative
+  4-vector closure gate at 1e-6 (mis-calibrated: falsely killed ~572
+  good v<=50 morphs) and a Klein-length closure-witness gate at 1e-3.
+
+Calibration of the final gate, measured from the committed bends
+(notes/gate-calibration-20260722/edge_len.tsv, 2026-07-22): max rel edge error v<=30 = 1.11e-4;
+Euclidean heroes exact to 7.7e-14 over 2220 nets; exactly one v<=50 net
+fails (the v48, edge error ~3e-2 class at deep alpha); diverged giants
+score 0.7-1.0. Verdict deltas vs the deployed morph inventory: zero in
+both directions -- the gate confirms the site as built.
+
+Large-v morphs: no further chase (PD: "nobody will want morphs for
+large v anyway"). The ~121 v>50 nets stay morph-omitted with their
+recorded reasons; the deep-alpha store rungs for 41-58 giants remain
+unsolved and that is accepted. No doob batch.
+
+Related architecture landed with this (see data/bends/): the committed
+bend store -- personal.py persists solver output (producer) and builds
+from committed bends when present (consumer, no solver / neo / network).
+
+## Undented display gate — WIRED 2026-07-22 (PD: "fix the gate")
+
+dent_index link-turning check (port of neo/_trash-20260715/undented/
+undented/src/dent_check.c inner loop -- turning per vertex, NEVER volume
+sign) now runs on the displayed coordinates in builders/personal.py:
+- every morph rung (Klein frame post-center, exactly what renders) and
+  the Euclidean end frame, in glb_movies -- failure => morphs omitted,
+  reason in morph_note ("dented frame at alpha=...");
+- both hero paths (glb_euclid, glb_hero) -- failure raises, surfacing as
+  BUILD-FAIL: a dented hero can never ship silently.
+
+Degenerate-case handling, forced by a measured failure mode (traced on
+the v12 pancake): an exactly-coplanar vertex link makes every triple
+product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+and returns +-pi by the sign of 1e-17 noise, so per-vertex totals
+{-2pi, 0, +2pi} are branch picks, not geometry. Vertices with all
+|B.(AxC)| < COPLANAR_NUM_TOL (1e-12) are therefore skipped -- a dent
+requires non-planarity; flat is the degenerate boundary, already
+certified by the solved bends (all-plus turning system). Gate constants:
+DENT_TURN_TOL = 1e-9, COPLANAR_NUM_TOL = 1e-12. Calibration over all
+2245 stores (notes/gate-calibration-20260722/dent_turn.tsv + the v10-vertex trace): zero
+displayed heroes or morph frames fail; tightest genuine margin +3.0e-7;
+noise floor ~1e-16. Spot-verified through build_net: pancake v12 (all
+vertices skipped, passes), v13, deg-7 j45 (Klein hero + 11 rungs), and
+the v48 (correctly rejected upstream by the edge-length gate, 5.9e-2).
+
+G1 note: the two display invariants (1 percent edge-length,
+dent_index-with-coplanar-skip) are new validation conventions -- cite
+this file + the calibration tsvs in the commit evidence, and run the G1
+consult with the bundle before the batch commits.
+166:def glb_hero(name, faces, V, pos, outdir):
+171:    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
+190:def glb_euclid(name, faces, V, bends, outdir):
+193:    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
+291:EDGE_LEN_TOL = 1e-2
+313:DENT_TURN_TOL = 1e-9        # reject a displayed frame if min turn < -this
+314:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+317:def link_rings(faces):
+335:def display_min_turn(pos, rings):
+353:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+359:def develop_h_certified(faces, bd, alpha_rad, edges=None):
+379:    return posh, err, err <= EDGE_LEN_TOL
+382:def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+419:        if mt < -DENT_TURN_TOL:
+434:        if eerr > EDGE_LEN_TOL:
+437:        if mt < -DENT_TURN_TOL:
+ M builders/personal.py
+ M builders/realize_h.py
+ M builders/special.py
+ M regen_personal.sh
+?? .claude/
+?? MORPH_GATE_TODO.md
+?? data/bends/
+?? data/dentings.tsv
+?? notes/codex-consults/2026-07-21-230211-codex-gate-16c2e834a4268607f71818a16ee05d2b752e58da.txt
+?? notes/codex-consults/2026-07-22-161343-g1-display-gates.txt
+?? notes/gate-calibration-20260722/
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "sed -n '120,460p' builders/personal.py; rg -n \"def mdot|def side_length|def develop_h|def center|def klein|norm_pt|sqrt\" builders/realize_h.py builders/personal.py; sed -n '1,260p' builders/realize_h.py; find notes/gate-calibration-20260722 -maxdepth 2 -type f -print -exec wc -l {} \\;" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+        return pad + (x - cx) * scale + mid
+
+    def ty(y):
+        return pad + (cy - y) * scale + mid
+
+    lines = []
+    for u, w2 in edges:
+        if u not in positions or w2 not in positions:
+            continue
+        x1, y1 = tx(positions[u][0]), ty(positions[u][1])
+        x2, y2 = tx(positions[w2][0]), ty(positions[w2][1])
+        lines.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" '
+                     f'y2="{y2:.1f}" stroke="#000" stroke-width="0.7"/>')
+    return (f'<svg viewBox="0 0 {size} {size}" width="100%" '
+            f'xmlns="http://www.w3.org/2000/svg" style="display:block">'
+            + ''.join(lines) + '</svg>')
+
+
+def ideal_net_svg(nc, faces):
+    """The ideal net: Perron placement via horoz_c (vertex 1 at infinity),
+    edges not through vertex 1, rendered as segments."""
+    import struct
+    try:
+        r = subprocess.run([HOROZ], input=(nc + "\n").encode(),
+                           capture_output=True, timeout=120)
+        data = r.stdout
+    except Exception:
+        return ''
+    V = max(max(f) for f in faces)
+    if len(data) < V * 24:
+        return ''
+    positions = {}
+    for vi in range(V):
+        u, x, y = struct.unpack_from('<ddd', data, vi * 24)
+        if vi == 0 or math.isnan(u):
+            continue
+        positions[vi + 1] = (x, y)
+    edges = set()
+    for a, b, c in faces:
+        for u2, w2 in ((a, b), (b, c), (a, c)):
+            if u2 == 1 or w2 == 1:
+                continue
+            edges.add((min(u2, w2), max(u2, w2)))
+    return make_svg(positions, sorted(edges))
+
+
+def glb_hero(name, faces, V, pos, outdir):
+    """blue-black + CLERS GLBs from given coordinates (Klein model for
+    degree-7 nets at alpha_max; blue is the hyperbolic color, matching
+    the morph viewer's BLUE 0.25,0.55,0.85)."""
+    mt = display_min_turn(pos, link_rings(faces))
+    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
+        raise RuntimeError(f"dented hero display (min turn {mt:.2e})")
+    verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+    v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats,
+                    center_color=[0.25, 0.55, 0.85])
+    # smooth view: original shared vertices, no borders, no normals
+    # (viewer computes smooth vertex normals) -- the conemanifold look
+    write_gltf_like(os.path.join(outdir, "smooth.glb"), verts, fidx,
+                    solid_color=[0.25, 0.55, 0.85])
+    groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
+    for L, rgb in RGB.items():
+        gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
+        if gf:
+            groups.append((rgb, gf))
+    write_gltf_groups(os.path.join(outdir, "clers.glb"), v2, groups)
+
+
+def glb_euclid(name, faces, V, bends, outdir):
+    pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
+    mt = display_min_turn(pos, link_rings(faces))
+    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
+        raise RuntimeError(f"dented hero display (min turn {mt:.2e})")
+    verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+    v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
+    write_gltf_like(os.path.join(outdir, "smooth.glb"), verts, fidx)
+    # CLERS coloring: retreat emits 7 faces per original (6 border, 1 center)
+    groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
+    for L, rgb in RGB.items():
+        gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
+        if gf:
+            groups.append((rgb, gf))
+    write_gltf_groups(os.path.join(outdir, "clers.glb"), v2, groups)
+
+
+## geometric from the ideal end, then a linear tail so the arrival at 60
+## is even-paced (shape change near Euclid scales like 60 - alpha)
+MORPH_ALPHAS = ([60.0 - 57.9 * (0.87 ** i) for i in range(0, 24, 3)]
+                + [58.0, 59.0])  # 2.1 .. 56.9, 58, 59 (then exact 60)
+SUBDIV = 10
+
+
+def bary_grid(n):
+    """barycentric weights + triangle pattern for one subdivided face,
+    wound consistently with the face's (a, b, c) orientation."""
+    pts, idx = [], {}
+    for i in range(n + 1):
+        for j in range(n + 1 - i):
+            idx[(i, j)] = len(pts)
+            pts.append(((n - i - j) / n, i / n, j / n))
+    tris = []
+    for i in range(n):
+        for j in range(n - i):
+            a, b, c = idx[(i, j)], idx[(i + 1, j)], idx[(i, j + 1)]
+            tris.append((a, b, c))
+            if j < n - i - 1:
+                tris.append((b, idx[(i + 1, j + 1)], c))
+    return pts, tris
+
+
+def subdivided_frame(faces, P, grid):
+    """sample each face on the barycentric grid, linearly in the given
+    3d coordinates (in Klein, chords are geodesics, so the linear
+    samples lie on the hyperbolic face; in Euclidean they lie on the
+    flat face). Returns (verts, tris) with per-face vertex blocks."""
+    wts, pat = grid
+    verts, tris = [], []
+    for a, b, c in faces:
+        base = len(verts)
+        A, B, C = P[a], P[b], P[c]
+        for wa, wb, wc in wts:
+            verts.append((wa * A[0] + wb * B[0] + wc * C[0],
+                          wa * A[1] + wb * B[1] + wc * C[1],
+                          wa * A[2] + wb * B[2] + wc * C[2]))
+        tris += [(base + i, base + j, base + k) for i, j, k in pat]
+    return verts, tris
+
+
+def klein_to_poincare(verts):
+    out = []
+    for x, y, z in verts:
+        q = math.sqrt(max(0.0, 1.0 - (x * x + y * y + z * z)))
+        s = 1.0 / (1.0 + q)
+        out.append((x * s, y * s, z * s))
+    return out
+
+
+def align_frames(frames):
+    """remove the spurious rigid rotation between consecutive frames
+    (each is developed and centered independently), anchoring at the
+    LAST frame: the Euclidean end keeps the flat developer's own
+    coordinates -- the same frame the red-black GLB is built in -- and
+    each earlier frame is rotated onto its successor (best-fit proper
+    rotation via SVD, the standard point-set superposition recipe)."""
+    import numpy as np
+    n = len(frames)
+    out = [None] * n
+    out[-1] = np.asarray(frames[-1], float)
+    for k in range(n - 2, -1, -1):
+        A = np.asarray(frames[k], float)
+        A = A - A.mean(axis=0)
+        B = out[k + 1] - out[k + 1].mean(axis=0)
+        U, _, Vt = np.linalg.svd(A.T @ B)
+        d = 1.0 if np.linalg.det(U @ Vt) > 0 else -1.0
+        R = U @ np.diag([1.0, 1.0, d]) @ Vt
+        out[k] = A @ R
+    return [[tuple(v) for v in F] for F in out]
+
+
+# Length-fidelity gate (PD spec 2026-07-22, final): every edge of a
+# displayed frame must have the length it is supposed to have, within 1%.
+# Hyperbolic frames: every edge of every equilateral face has exact
+# hyperbolic length ell(alpha) (realize_h.side_length); the metric is
+# max over edges of |d_H(u,v) - ell| / ell, with d_H = acosh(-mdot).
+# Euclidean end frame: every edge has length 1; max |len - 1|.
+# Accumulated development divergence lands exactly here: edges whose
+# endpoints arrive via different development paths inherit the drift.
+EDGE_LEN_TOL = 1e-2
+
+
+def _edges_of(faces):
+    return {tuple(sorted((a, b))) for f in faces
+            for a, b in zip(f, f[1:] + f[:1])}
+
+
+# Undented display gate (PD 2026-07-22: "make sure what we display is
+# actually undented"). dent_index link-turning check (port of
+# undented/src/dent_check.c inner loop -- turning per vertex, NEVER
+# volume sign) run on the displayed coordinates themselves. Degenerate
+# case, measured 2026-07-22 on the v12 pancake: an exactly-coplanar
+# vertex link makes every triple product B.(AxC) exact-zero, and where
+# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
+# not geometry. Such vertices are excluded: a dent needs non-planarity,
+# and a coplanar link is the flat degenerate boundary (pancakes). Their
+# flatness is already certified by the solved bends (all-plus turning
+# system). Calibration over all 2245 stores (scratch dent_turn.tsv):
+# every displayed hero and morph frame passes; tightest genuine margin
+# +3.0e-7; noise floor ~1e-16.
+DENT_TURN_TOL = 1e-9        # reject a displayed frame if min turn < -this
+COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+
+
+def link_rings(faces):
+    """vertex -> cyclic neighbor ring, from the face structure."""
+    succ = {}
+    for a, b, c in faces:
+        succ.setdefault(a, {})[b] = c
+        succ.setdefault(b, {})[c] = a
+        succ.setdefault(c, {})[a] = b
+    rings = {}
+    for v, nxt in succ.items():
+        start = next(iter(nxt))
+        ring, cur = [start], nxt[start]
+        while cur != start:
+            ring.append(cur)
+            cur = nxt[cur]
+        rings[v] = ring
+    return rings
+
+
+def display_min_turn(pos, rings):
+    """min link turning over non-degenerate vertices of the displayed
+    positions; +inf when every vertex is coplanar-degenerate (pancake)."""
+    mt = float('inf')
+    for v, ring in rings.items():
+        k = len(ring)
+        if k < 3:
+            continue
+        dirs = []
+        for nb in ring:
+            d = np.asarray(pos[nb], float) - np.asarray(pos[v], float)
+            n = float(np.linalg.norm(d))
+            dirs.append(d / (n if n > 1e-15 else 1e-15))
+        nums, dens = [], []
+        for i in range(k):
+            A, B, C = dirs[(i - 1) % k], dirs[i], dirs[(i + 1) % k]
+            nums.append(float(np.dot(B, np.cross(A, C))))
+            dens.append(float(np.dot(A, B) * np.dot(B, C) - np.dot(A, C)))
+        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+            continue        # coplanar link: formula ill-posed, vertex flat
+        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
+    return mt
+
+
+def develop_h_certified(faces, bd, alpha_rad, edges=None):
+    """develop_h plus the edge-length gate. Returns (pos_4vec, err, ok)
+    where err = max relative hyperbolic edge-length error vs ell(alpha).
+
+    A numerical blow-up inside develop_h -- a point leaving the
+    hyperboloid so that mdot(x,x) > 0 and norm_pt does sqrt(<0), raising
+    ValueError: math domain error -- is the extreme of the divergence the
+    gate catches, so it is a hard rejection (err = inf), never a crash.
+    """
+    from realize_h import mdot, side_length
+    try:
+        posh, _, _ = develop_h(faces, bd, alpha_rad)
+        ell = side_length(alpha_rad)
+        err = 0.0
+        for u, v in (edges or _edges_of(faces)):
+            m = -mdot(posh[u], posh[v])
+            dh = math.acosh(m) if m > 1.0 else 0.0
+            err = max(err, abs(dh - ell) / ell)
+    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
+        return None, float('inf'), False
+    return posh, err, err <= EDGE_LEN_TOL
+
+
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+               stored=None):
+    """Two animated morph GLBs (Poincare, Klein): ideal end first, then
+    either the exact Euclidean solid (alpha_max = 60) or the hyperbolic
+    realization at the final rung (degree-7 nets: alpha_max = 360/maxdeg).
+
+    Consumer mode: when `stored` (the data/bends record: {"hero": bd,
+    "morph": {rounded-alpha: bd}}) provides a rung, its bends are used and
+    the solver is never invoked for it -- the deterministic no-solver
+    build path. Missing rungs fall back to the solver (producer mode) and
+    are returned in `solved` for persistence.
+
+    Every develop_h frame is certified (develop_h_certified, Klein-length
+    gate). If any frame fails, NO GLB is written and a reason is returned
+    -- never a partial or silently-broken morph. Returns (nframes, note,
+    solved). The euclidean end frame uses the flat developer
+    (walklib.develop), which the v506 diagnosis exonerated, so it is not
+    gated here.
+    """
+    grid = bary_grid(SUBDIV)
+    fp, fk, tris = [], [], None
+    solved = {}                     # alpha -> bend dict, freshly solved only
+    edges = _edges_of(faces)
+    rings = link_rings(faces)
+    for a in (alphas or MORPH_ALPHAS):
+        bd = (stored or {}).get("morph", {}).get(round(a, 6))
+        if bd is None:
+            bends = solve_alpha(nc, a)
+            if bends is None:
+                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            solved[a] = bd
+        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
+        if not ok:
+            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
+        K = klein(center(posh))
+        mt = display_min_turn(K, rings)
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
+        vk, tris = subdivided_frame(faces, K, grid)
+        fk.append(vk)
+        fp.append(klein_to_poincare(vk))
+    if euclid_end:
+        bd60 = (stored or {}).get("hero")
+        if bd60 is None:
+            bends60 = solve_prove_60(nc)
+            if bends60 is None:
+                return 0, "solve_prove_60 failed (euclidean end frame)", solved
+            bd60 = {tuple(sorted(e)): b for e, b in bends60.items()}
+        pos60, _ = develop(faces, bd60)
+        eerr = max(abs(float(np.linalg.norm(pos60[u] - pos60[v])) - 1.0)
+                   for u, v in edges)
+        if eerr > EDGE_LEN_TOL:
+            return 0, f"euclid edge err {eerr:.2e}", solved
+        mt = display_min_turn(pos60, rings)
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented euclid frame (min turn {mt:.2e})", solved
+        ctr = sum(pos60.values()) / len(pos60)
+        ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+        fp.append(ve)
+        fk.append(ve)
+    fp = align_frames(fp)
+    fk = align_frames(fk)
+    write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
+    return len(fp), None, solved
+
+def _build_net(job, morphs=True):
+    """One directory per net under nets/, named v{V}{CLERS}: a database
+    record (net.json) plus the net's artifacts (rb.glb, clers.glb,
+    morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
+    page itself is rendered from the record by views.py."""
+    import json
+    from views import render_page, net_id
+    name, nc = job
+    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+    V = max(max(f) for f in faces)
+    vname = f"v{V}{name}"
+    nid = net_id(V, name)
+builders/realize_h.py:18:def mdot(x, y):
+builders/realize_h.py:21:def norm_pt(x):
+builders/realize_h.py:22:    return x / math.sqrt(-mdot(x, x))
+builders/realize_h.py:25:    return t / math.sqrt(mdot(t, t))
+builders/realize_h.py:32:def side_length(alpha):
+builders/realize_h.py:36:def develop_h(faces, bend, alpha):
+builders/realize_h.py:55:        M = norm_pt(A + B)
+builders/realize_h.py:71:                n = t / math.sqrt(q); break
+builders/realize_h.py:100:def klein(pos):
+builders/realize_h.py:106:def center(pos):
+builders/realize_h.py:114:    c = math.sqrt(-q)
+builders/personal.py:252:def klein_to_poincare(verts):
+builders/personal.py:255:        q = math.sqrt(max(0.0, 1.0 - (x * x + y * y + z * z)))
+builders/personal.py:359:def develop_h_certified(faces, bd, alpha_rad, edges=None):
+builders/personal.py:364:    hyperboloid so that mdot(x,x) > 0 and norm_pt does sqrt(<0), raising
+"""realize_h.py -- develop a bend record in H^3 (hyperboloid model).
+
+Faces are equilateral hyperbolic triangles with corner angle alpha;
+side length from cosh(ell) = cos(alpha)/(1 - cos(alpha)) (alpha -> 60
+degrees gives ell -> 0, the Euclidean shrink limit; alpha -> 0 gives
+ideal). Development mirrors the Euclidean place_third offset form:
+midpoint frame (u along the edge, w toward the old apex, n normal),
+new apex at geodesic distance alt along -cos(theta) w + sin(theta) n.
+
+Signature (+,+,+,-): mdot(x,y) = x1y1 + x2y2 + x3y3 - x4y4;
+points have mdot(x,x) = -1, x4 > 0; tangents are spacelike.
+"""
+import math
+import numpy as np
+from collections import deque
+
+
+def mdot(x, y):
+    return x[0]*y[0] + x[1]*y[1] + x[2]*y[2] - x[3]*y[3]
+
+def norm_pt(x):
+    return x / math.sqrt(-mdot(x, x))
+
+def norm_sp(t):
+    return t / math.sqrt(mdot(t, t))
+
+def tangent_at(M, X):
+    """tangent at M pointing toward X (projection of X to M-perp)."""
+    t = X + mdot(X, M) * M
+    return t
+
+def side_length(alpha):
+    ca = math.cos(alpha)
+    return math.acosh(ca / (1.0 - ca))
+
+def develop_h(faces, bend, alpha):
+    """bend: {(a,b) sorted: radians}; returns {v: 4-vector}, closure resid."""
+    ell = side_length(alpha)
+    chl, shl = math.cosh(ell), math.sinh(ell)
+    alt = math.acosh(math.cosh(ell) / math.cosh(ell / 2.0))
+    cha, sha = math.cosh(alt), math.sinh(alt)
+
+    apex = {}
+    for a, b, c in faces:
+        apex[(a, b)] = c; apex[(b, c)] = a; apex[(c, a)] = b
+    a0, b0, c0 = faces[0]
+    O = np.array([0.0, 0.0, 0.0, 1.0])
+    e1 = np.array([1.0, 0.0, 0.0, 0.0])
+    e2 = np.array([0.0, 1.0, 0.0, 0.0])
+    pos = {a0: O,
+           b0: chl * O + shl * e1,
+           c0: chl * O + shl * (math.cos(alpha) * e1 + math.sin(alpha) * e2)}
+
+    def place(A, B, P, theta):
+        M = norm_pt(A + B)
+        u = norm_sp(tangent_at(M, B))
+        wt = tangent_at(M, P)
+        wt = wt - mdot(wt, u) * u
+        w = norm_sp(wt)
+        # n: spacelike unit vector orthogonal to M, u, w; sign fixed so the
+        # Euclidean limit matches the flat developer (measured: Procrustes
+        # of the alpha=59.9 frame against walklib.develop needs rotation
+        # only, residual ~1e-3; the opposite sign needs a reflection)
+        n = None
+        for cand in (np.array([0.,0.,1.,0.]), np.array([0.,1.,0.,0.]),
+                     np.array([1.,0.,0.,0.]), np.array([0.,0.,0.,1.])):
+            t = cand + mdot(cand, M) * M
+            t = t - mdot(t, u) * u - mdot(t, w) * w
+            q = mdot(t, t)
+            if q > 1e-12:
+                n = t / math.sqrt(q); break
+        # orientation: det(M, w, u, n) fixes handedness of the frame
+        if np.linalg.det(np.stack([M, w, u, n])) > 0:
+            n = -n
+        d = -math.cos(theta) * w + math.sin(theta) * n
+        return cha * M + sha * d
+
+    def fkey(f):
+        return min(f, f[1:] + f[:1], f[2:] + f[:2])
+    seen = {fkey((a0, b0, c0))}
+    dq = deque([(a0, b0, c0)])
+    resid = 0.0
+    events = []          # closure events: (vertex, second-path placement)
+    while dq:
+        f0 = dq.popleft()
+        for i in range(3):
+            x, y = f0[i], f0[(i + 1) % 3]
+            d = apex[(y, x)]
+            f1 = (y, x, d)
+            th = bend[tuple(sorted((x, y)))]
+            D = place(pos[x], pos[y], pos[f0[(i + 2) % 3]], th)
+            if fkey(f1) in seen:
+                resid = max(resid, float(np.max(np.abs(D - pos[d]))))
+                events.append((d, D))
+                continue
+            pos[d] = D
+            seen.add(fkey(f1)); dq.append(f1)
+    return pos, resid, events
+
+def klein(pos):
+    return {v: x[:3] / x[3] for v, x in pos.items()}
+
+def poincare(pos):
+    return {v: x[:3] / (1.0 + x[3]) for v, x in pos.items()}
+
+def center(pos):
+    """boost the Minkowski mean of the vertex 4-vectors to the x4 axis
+    (salvaged from the old atlas lorentz.py, matrix form identical)."""
+    C = np.mean([x for x in pos.values()], axis=0)
+    q = mdot(C, C)
+    if q >= 0:
+        return dict(pos)
+    x1, x2, x3, x4 = C
+    c = math.sqrt(-q)
+    dd = x4 - x3
+    if dd <= 0:
+        return dict(pos)
+    a = x1 / dd; b = x2 / dd; s = c / dd
+    M = np.array([
+        [1,     0,     a,                     -a],
+        [0,     1,     b,                     -b],
+        [-a/s, -b/s,  (1-a*a-b*b+s*s)/(2*s),  (1+a*a+b*b-s*s)/(2*s)],
+        [-a/s, -b/s,  (1-a*a-b*b-s*s)/(2*s),  (1+a*a+b*b+s*s)/(2*s)],
+    ])
+    return {v: M @ x for v, x in pos.items()}
+
+def edge_length_check(faces, pos):
+    """max deviation of edge geodesic lengths from their common value."""
+    ds = []
+    seen = set()
+    for a, b, c in faces:
+        for x, y in ((a, b), (b, c), (c, a)):
+            k = (min(x, y), max(x, y))
+            if k in seen: continue
+            seen.add(k)
+            ds.append(math.acosh(max(1.0, -mdot(pos[x], pos[y]))))
+    return min(ds), max(ds)
+notes/gate-calibration-20260722/klein_v50.tsv
+    2125 notes/gate-calibration-20260722/klein_v50.tsv
+notes/gate-calibration-20260722/edge_len.tsv
+    2246 notes/gate-calibration-20260722/edge_len.tsv
+notes/gate-calibration-20260722/dent_turn.tsv
+    2246 notes/gate-calibration-20260722/dent_turn.tsv
+notes/gate-calibration-20260722/rel_v50.tsv
+    2125 notes/gate-calibration-20260722/rel_v50.tsv
+
+codex
+The main convention checks are now localized: the link traversal follows the supplied face winding, and the dent test is applied after the same Klein centering used for rendering. I’m checking two numerical edge cases before deciding: hyperboloid normalization in the distance formula, and whether the coplanar skip is scale-safe.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "rg -n \"dent_index|B.*cross|atan2|COPLANAR_NUM_TOL|display_min_turn\" . /Users/doyle/Dropbox/projects/neo 2>/dev/null | head -n 240; head -n 8 notes/gate-calibration-20260722/dent_turn.tsv; head -n 8 notes/gate-calibration-20260722/edge_len.tsv; rg -n \"v12CCCACACCAACACACCAABE|3\\.0e-7|3\\.0E-7|branch|sv3|noise\" notes MORPH_GATE_TODO.md data/dentings.tsv" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 1040ms:
+z89wxw5vusCcbzJ7h4/R1jJvasU2r7kO1M9zTg3vpK5iLxtQZG8rxeFvnt7mb1BnRA/IBDgvR/ox76cTlc9dVM6voYytbyGrCC8FX+CvpyrmL2AJbo+7dj5Ps8lhj7kO1M9zTg3vpK5iLzP7KM9gUAQvvLiHTz9a6o+BBzZPhNUcz4AO1U99Wc0vrxNWLyuF589S1URviXmKzzJ7h4/R1jJvasU2r7P7KM9gUAQvvLiHTzkO1M9zTg3vpK5iLzZMxE/HoDVvUErxb5B1qQ9yvgRvirV4jsmuGA9dAs1vqZkibxs59w+r1IHP7nhHD4m+yk/gSGmvdknvr7ASLE95I1HPlAEDD5Nk80+DRL5PpaiFz4lXRw/VB9/vVjrpb5amro9v5M+Put0CD4m+yk/gSGmvdknvr5s59w+r1IHP7nhHD79s8o91EHXvdE+7zwNHxw/5I+fvWBjqL4eF80+/xHxPoeyEj4his89lsbLvfusAT1s59w+r1IHP7nhHD7ASLE95I1HPlAEDD7E7y2/02+bPnbmGz3N/8c+bGQCP48tGT5cTKQ9VQFWPuP/CT468xu/qBidPnI/PD0m+yk/gSGmvdknvr7E7y2/02+bPnbmGz3ASLE95I1HPlAEDD6WNxs/VPBnvRtgo74JTxq/vUeUPnVtSj3mbbE9f19EPmSLDT5s59w+r1IHP7nhHD7E7y2/02+bPnbmGz3SmWw+gyPBvgwrIT9RYcg+d4n8PkoWKT55whu/R9mUPl3iez3pElg+ht6kvlMGGD8m+yk/gSGmvdknvr7SmWw+gyPBvgwrIT/E7y2/02+bPnbmGz2AKxk/sniLvaU8oL5NsFU+MlCrvsCAFj8gWxy/m2eOPiaJYz1s59w+r1IHP7nhHD7SmWw+gyPBvgwrIT9aq/++G0QWPyAMnb4JZMs+sGf+Ps5mIz5YGF4+TgCjvnWaFj93huG+uaYMPxU9gr4m+yk/gSGmvdknvr5aq/++G0QWPyAMnb7SmWw+gyPBvgwrIT9UiRs/p+hGve+9rb7V/uC+U38NP8nxj76cJ18+Gk+hvhvADz9s59w+r1IHP7nhHD5aq/++G0QWPyAMnb5PIty+yGsuv56Aj75qLrg+L47wPhF1CD4WvPS++bkFP/S1j76/wNS+7X0evzOFg74m+yk/gSGmvdknvr5PIty+yGsuv56Aj75aq/++G0QWPyAMnb4FvBY/A8+kvTo1u74cnsq+6eMev1I4kb5zmeq+/VMFPxNpnb5s59w+r1IHP7nhHD5PIty+yGsuv56Aj77nY5483aZnvnZCGL1YysE+SrbmPkmAED7RJMu+32kjvy7/fr5auPg7qTlqvlmb97wm+yk/gSGmvdknvr7nY5483aZnvnZCGL1PIty+yGsuv56Aj76YfBo/LIfXvQuPtL7Fq748431xvgxiVL32HMO+7jolvyOSir5s59w+r1IHP7nhHD7nY5483aZnvnZCGL2HdJ49BnoSvrhhEDwIssg+93brPuPlDz4fqaw8T7hgvopu/LwUI5Y99A8Uvu02LTwm+yk/gSGmvdknvr6HdJ49BnoSvrhhEDznY5483aZnvnZCGL2kRBs/9Ku5vZb6rL4d5KA97OcVvsA0jjtErdc8R5Bivmi+F71s59w+r1IHP7nhHD6HdJ49BnoSvrhhEDz9s8o91EHXvdE+7zzS4co+A7rtPrzrED474p493IkPvoSUPTzytMY9hSbZvZ8j9Twm+yk/gSGmvdknvr79s8o91EHXvdE+7zyHdJ49BnoSvrhhEDxrqRs/GK+uvQ6/qr4R3cs9yuXavQ6f3TxaCqQ9fmkQvmKLDjwLe/Y+DzkOPwC0QT1OMDc/mKpyvVe1lL6h7NI8ChFGPjs4pD0speI+/BUDP6oQSz2xRic/AQkpvfk+gr68agU93pk+PvApoj1OMDc/mKpyvVe1lL4Le/Y+DzkOPwC0QT1kmt491X6RvRtyGj1U7yc/njFivagrg75z9uM+5Qb/PjGrQz3+3OA9y9eGvUlWID0Le/Y+DzkOPwC0QT2h7NI8ChFGPjs4pD09oUW/AYuJPs3igr0TU9w+PGkIPyDWPD3ms6U83OZTPqsMmz3znjK/EZyMPlIXXb1OMDc/mKpyvVe1lL49oUW/AYuJPs3igr2h7NI8ChFGPjs4pD0f4SQ/xGobvba6gL532zG/WamDPrG6Qr1QI748bQFCPvw6qD0Le/Y+DzkOPwC0QT09oUW/AYuJPs3igr2FSUw+hZYDv8QlFT9Xrt0+zzADP5VJez1Q8TG/NyuCPt2jHr0sjjc+bHrmvt0KCz9OMDc/mKpyvVe1lL6FSUw+hZYDv8QlFT89oUW/AYuJPs3igr139CI/kBFdvbwIeb7uMjA+IzHtvpvkCj8gyDO/AOl2PvIHIb0Le/Y+DzkOPwC0QT2FSUw+hZYDv8QlFT8xcO++AQooP8xGW74TkOQ+3bgDPxbIgD2jUUU+UGrlvkZvCz+kw9C+6vQaP5OKML5OMDc/mKpyvVe1lL4xcO++AQooP8xGW76FSUw+hZYDv8QlFT9kyCc/wj4GvYl9hr4lq9G+rX4cP5WnRr6hgkM+yVbivgboBT8Le/Y+DzkOPwC0QT0xcO++AQooP8xGW75qh+G+uvM7v0DLSL4SONE+qjP+PoqaJT2lG+S+4lUWP/yHR77xlte+eQ4qv5flNr5OMDc/mKpyvVe1lL5qh+G+uvM7v0DLSL4xcO++AQooP8xGW74tgiM/beBwvbCLkb7fss2+yY8qv30hTL6TN9q+ktQVP+LDXL4Le/Y+DzkOPwC0QT1qh+G+uvM7v0DLSL7FrVs9N+xAvsek8bsef9s+58/1Pm9iQj3lT82+WkAuv56zL77QBTM9MgJCvltD5LpOMDc/mKpyvVe1lL7FrVs9N+xAvsek8btqh+G+uvM7v0DLSL7ieSc/52+rvZZLjL5PaW89w79MvpWxnbx1w8W+v+8wv0mhQb4Le/Y+DzkOPwC0QT3FrVs9N+xAvsek8bs8usM9EWjbvZf0xTw9EeE+I+T5PquSPT3Fll89utk5vvMdP7sAGL097efdvd2j0DxOMDc/mKpyvVe1lL48usM9EWjbvZf0xTzFrVs9N+xAvsek8bv+sCc/r0KKvcg2hr4lusY9x4bivfAirDwP23I9Jyk8vq+S8bsLe/Y+DzkOPwC0QT08usM9EWjbvZf0xTxkmt491X6RvRtyGj1opeI+7vb7PkbUPz2saMM9w5zVvRMn1TzQmNs9pxeTvV1/HD1OMDc/mKpyvVe1lL5kmt491X6RvRtyGj08usM9EWjbvZf0xTyM1Sc/WsB+veCkhL64DuA9KR+VvYmMFD2V3sc9RaTXvWtBxTxEdAQ/saASPxl8qL2GnEc/0BIJvVMtAL4/2wS9Ppw5PphhdLw09PA+9ygHPzlJl70i6zQ/VH2QvFJe5r0Yj8a8YtQzPh0kWbyGnEc/0BIJvVMtAL5EdAQ/saASPxl8qL0nENk9B/ggvYRPrzwCUDY/doHxvFFa4r30vfM+1SAEPzhFk72hp9g9OUIOvTs+rzxEdAQ/saASPxl8qL0/2wS9Ppw5PphhdLzptle/Gu9rPkizRL4iZeo+rO4LP6SFp70cwBe9N+tGPruDrbx/J0S/yjV0PiH5OL6GnEc/0BIJvVMtAL7ptle/Gu9rPkizRL4/2wS9Ppw5PphhdLyGtDE/ttCJvAvV5b2SFkS/ifRhPkiWML5NsRa99qk0PurZVLxEdAQ/saASPxl8qL3ptle/Gu9rPkizRL6wQCk+Enggv+BT+j4Vn+w+U+cFP0gCib2FCkO/aBhcPnO3Kb46vBQ+w3sOv6Pz5D6GnEc/0BIJvVMtAL6wQCk+Enggv+BT+j7ptle/Gu9rPkizRL5sxC8/nhsWvbKP0b2fywg+7xcSv4+V5j6sBka/uKdNPptzJr5EdAQ/saASPxl8qL2wQCk+Enggv+BT+j5+gNy+qPs4P9pFab0z3fY+RcsFP4Lac712OCk+0ZcOv+W46D5SAb6+V1AoP82GFr2GnEc/0BIJvVMtAL5+gNy+qPs4P9pFab2wQCk+Enggv+BT+j5a5jY/HW5UvEXk373i87++OuAqP6NKRL1XUyU+7QcMv2oA4z5EdAQ/saASPxl8qL1+gNy+qPs4P9pFab1ro+S+xx9Kvy1aib0orOM+DaMDP0jolb1dMtG+HygmP9t8Tr0Ahdi+Xj02v7XGc72GnEc/0BIJvVMtAL5ro+S+xx9Kvy1aib1+gNy+qPs4P9pFab0nVjM/kDsJvSHi9r3qZs6+Q8c2vxvIi71IFMe+Op4lP1tGcr1EdAQ/saASPxl8qL1ro+S+xx9Kvy1aib1uoaY9RsMVvu9CHjzPou4+slUAPyWUkL1Zjs2+uoo5v3Aeab1o15Y9p04Vvl3lRjyGnEc/0BIJvVMtAL5uoaY9RsMVvu9CHjxro+S+xx9Kvy1aib22Xzc/j61uvRg4772cwbM9TZ0jviHdlDvMU8a+Yx49vxIehL1EdAQ/saASPxl8qL1uoaY9RsMVvu9CHjxH+9E9tq6SvXhrlzzphfI+CukBP7+ykr3PY6Y9SAEPvpLwNTzfZ809gnOUva8HnDyGnEc/0BIJvVMtAL5H+9E9tq6SvXhrlzxuoaY9RsMVvu9CHjxcuDY/zZImvUoE5b3ZitU9LZ6ZvecVjzzKhq49nZYRvgANHDxEdAQ/saASPxl8qL1H+9E9tq6SvXhrlzwnENk9B/ggvYRPrzwGY/M+Ms0CP/nMkr1T3NA9PFKNvceemzzpO9c9aXwjvTgfsTyGnEc/0BIJvVMtAL4nENk9B/ggvYRPrzxH+9E9tq6SvXhrlzzWkjY/XT0Svfsk471Gvto93L4nvZQTrDyvXtQ9dXOPvSOTljzc9gU/PUkTP8HkHr6rU0s/mJ7nvBltMDoIEjG94Ps1Ptmlob08MvM+Zb8HP+M5FL4/Bjg/tb5UvMVAk7se4Q69z4swPkftm72rU0s/mJ7nvBltMDrc9gU/PUkTP8HkHr5ySNQ9JVQIvf+RPrtuiDk/rZPHvFfHFrqZNvY+w9UEP6Q2EL5oXdM9zILsvGHneLvc9gU/PUkTP8HkHr4IEjG94Ps1Ptmlob1wrVq/VPVjPsNBiL7+puw+eWkMPy4JHr4MO0O9HTRDPtyLr70sDUe/oJRsPqIlgr6rU0s/mJ7nvBltMDpwrVq/VPVjPsNBiL4IEjG94Ps1Ptmlob3BtDQ/WI9PvCK6s7sLGUe/SD9aPsV/e74D+UO9xd4wPt30nb3c9gU/PUkTP8HkHr5wrVq/VPVjPsNBiL4wjCI+vnwlv8e82D58Ce8+UkEGP3DvDr7t20W/BPRTPocxdb5zGA4+qj0Tvx8Zwz6rU0s/mJ7nvBltMDowjCI+vnwlv8e82D5wrVq/VPVjPsNBiL4jwTI/QMkHva/injuAVQE+MOkWv3M8xT6pDEm/7UVFPt/qcL7c9gU/PUkTP8HkHr4wjCI+vnwlv8e82D6okti+nC48PxyVUD0f4Pk+6/8FPyBnBb64xSM+EX8Tv0fdxz4ELbq+Ws4qPzchYj2rU0s/mJ7nvBltMDqokti+nC48PxyVUD0wjCI+vnwlv8e82D58UDo/X40RvGjV3ztuRry+mpotP/A4VT3kkh8+0bIQvz5Axj7c9gU/PUkTP8HkHr6okti+nC48PxyVUD1I/eS+eAlNv+SLoDytveY+ulUEPzsvDL51T82+KSQpP8sARz05fNi+gsE4v7EMpzyrU0s/mJ7nvBltMDpI/eS+eAlNv+SLoDyokti+nC48PxyVUD3Z5zY/aunovO/sXTt3RM6+KEw5v0BFpzy0F8O+hJkoPxIdRz3c9gU/PUkTP8HkHr5I/eS+eAlNv+SLoDzcRK89JYkMvhmu9jt+0/E+nTsBP8XkDb5oZs2+n9s7v2NgmTz3gKA91scLvoTGADyrU0s/mJ7nvBltMDrcRK89JYkMvhmu9jtI/eS+eAlNv+SLoDzg7jo/epRZvVkU8Dr4QL096NEavo0XAzxoNsa+JJ4/v+iImjzc9gU/PUkTP8HkHr7cRK89JYkMvhmu9jteOtE9g0uEvfOljzrIVvU+u7MCP5K0Dr4fjq49XucFvlyT5ztHHs09pOiFvaaJpzqrU0s/mJ7nvBltMDpeOtE9g0uEvfOljzrcRK89JYkMvhmu9jtdEDo/ol0QvQnthDoF3dQ9SyKLvUzRtjrdTLY9MoQIvkZl6zvc9gU/PUkTP8HkHr5eOtE9g0uEvfOljzpySNQ9JVQIvf+RPrvzDPY+u44DPxYvD77z9s89SyF+vQqQVDrSttI95bEKvaoDN7urU0s/mJ7nvBltMDpySNQ9JVQIvf+RPrteOtE9g0uEvfOljzoZ3Dk/NPr4vAYSCDrG+tU9qvQOvQoxMbvoOtM9CDKBvYvaazoAAAAAAACAPwAAAEAAAEBAAACAQAAAoEAAAMBAAADgQAAAAEEAABBBAAAgQQAAMEEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgD8="};const LABELS={"morph_icosa_sep.glb": ["t=0.03", "t=0.07", "t=0.14", "t=0.25", "t=0.4", "t=0.55", "t=0.7", "t=0.82", "t=0.9", "t=0.95", "t=0.975", "t=0.99", "t=0.997", "t=0.999", "EUC"], "morph_icosa_face.glb": ["t=0.07", "t=0.14", "t=0.25", "t=0.4", "t=0.55", "t=0.7", "t=0.82", "t=0.9", "t=0.95", "t=0.975", "t=0.99", "t=0.997", "t=0.999", "EUC"], "morph_tr_faces_euc.glb": ["u=0 (0x)", "u=0.08 (0x)", "u=0.18 (0x)", "u=0.28 (0x)", "u=0.38 (0x)", "u=0.48 (0x)", "u=0.58 (0x)", "u=0.68 (0x)", "u=0.78 (0x)", "u=0.88 (0x)", "u=0.98 (0x)", "u=1 (0x)"], "morph_tr_edgeshare_euc.glb": ["u=0 (0x)", "u=0.08 (0x)", "u=0.18 (0x)", "u=0.28 (0x)", "u=0.38 (0x)", "u=0.48 (0x)", "u=0.58 (0x)", "u=0.68 (0x)", "u=0.78 (0x)", "u=0.88 (0x)", "u=0.98 (0x)", "u=1 (0x)"], "morph_tr_abbe_euc.glb": ["u=0 (0x)", "u=0.08 (0x)", "u=0.18 (0x)", "u=0.28 (0x)", "u=0.38 (0x)", "u=0.48 (0x)", "u=0.58 (0x)", "u=0.68 (0x)", "u=0.78 (0x)", "u=0.88 (0x)", "u=0.98 (0x)", "u=1 (0x)"], "morph_tr_fan7_euc.glb": ["u=0 (0x)", "u=0.08 (0x)", "u=0.18 (0x)", "u=0.28 (0x)", "u=0.38 (0x)", "u=0.48 (0x)", "u=0.58 (0x)", "u=0.68 (0x)", "u=0.78 (0x)", "u=0.88 (0x)", "u=0.98 (0x)", "u=1 (0x)"], "morph_tr_sepsep_euc.glb": ["u=0 (0x)", "u=0.08 (0x)", "u=0.18 (0x)", "u=0.28 (0x)", "u=0.38 (0x)", "u=0.48 (0x)", "u=0.58 (0x)", "u=0.68 (0x)", "u=0.78 (0x)", "u=0.88 (0x)", "u=0.98 (0x)", "u=1 (0x)"]};const CAPTIONS={"morph_icosa_sep.glb": "Icosa: hyperbolic march, all-ideal toward the separated triple {6,7,9}; final frame = the Euclidean-solver origami limit (display turns red). Label = t.", "morph_icosa_face.glb": "Icosa: hyperbolic march toward face (1,2,3); final frame = exact Euclidean pancake (display turns red). Label = t.", "morph_tr_faces_euc.glb": "Lifted homotopy: hyperbolic transfer at t*=0.99 between face concentrations (1,2,3)->(12,8,7), every sampled u descended to the Euclidean stratum. Endpoints = exact pancakes. 0 strict crossings at all sampled frames (tol 1e-9).", "morph_tr_edgeshare_euc.glb": "Lifted homotopy, edge-sharing faces (1,2,3)->(1,3,4). 0 strict crossings at all sampled frames (tol 1e-9).", "morph_tr_sepsep_euc.glb": "Lifted homotopy between separated-triple origami limits {6,7,9}->{1,8,10}; every frame is a descended Euclidean solution. 0 strict crossings at all sampled frames (tol 1e-9).", "morph_tr_abbe_euc.glb": "Lifted homotopy on the v13 ABBE net, disjoint face pancakes. 0 strict crossings at all sampled frames (tol 1e-9).", "morph_tr_fan7_euc.glb": "fan7 (maxdeg 9), winding allowed: lifted homotopy (1,4,5)->(2,7,6) with per-u Euclidean descent. 0 strict crossings at all sampled frames (tol 1e-9)."};</script>
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/atlas/scripts/gen_tet_radial_page.py:55:    angle = math.degrees(math.atan2(b0 * math.sqrt(3) / 2, a0 + b0 / 2))
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/atlas/scripts/gen_gallery.py:105:    return math.atan2(num, den)
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/atlas/scripts/gen_tet_blowups_page.py:28:    return math.degrees(math.atan2(b * math.sqrt(3) / 2, a + b / 2))
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/atlas/scripts/classify.py:52:    return math.atan2(num, den)
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_prover/src/euclid_prover.c:905:    return atan2(y, x);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_prover/src/euclid_prover.c:1001:      sin(T/2) > 0. This proof path uses no atan/atan2. The prover's
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_prover/src/euclid_prover.c:1051:            /* Diagnostic only. This uses libm atan2, but it is not reached unless
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_prover/README.md:50:- `--print-turning` — per-vertex sin(T/2) interval bounds (libm atan2
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_prover/python/euclid_prover.py:542:    return math.atan2(y, x)
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/chatgpt/check/dent_check/dent_check.c:244:        double num = vdot(B, vcross(A, C));
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/chatgpt/check/dent_check/dent_check.c:246:        total += atan2(num, den);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/chatgpt/checkold/dent_check.c:244:        double num = vdot(B, vcross(A, C));
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/chatgpt/checkold/dent_check.c:246:        total += atan2(num, den);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/chatgpt/abc_check.py:57:    return math.atan2(num, den)
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/homotopy_stage/src/puffup_c.c:987: *   b_last = atan2(-X^T[2,0], X^T[1,0]) = atan2(-X[0,2], X[0,1]),
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/homotopy_stage/src/puffup_c.c:988: *   b_first = atan2(-X^T[0,2], -X^T[0,1]) = atan2(-X[2,0], -X[1,0])  (debug check).
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/homotopy_stage/src/puffup_c.c:1013:        recovered_A[bi] = atan2(-X[0][2],  X[0][1]);   /* = b on outgoing base edge */
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/homotopy_stage/src/puffup_c.c:1014:        recovered_B[bi] = atan2(-X[2][0], -X[1][0]);   /* = b on incoming base edge */
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/homotopy_stage/src/puffup_c.c:1116:            /* Impute the 3 base-edge bends via the atan2 closed form, then
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_check/src/dent.c:38:            turn += atan2(num, den);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_check/tests/run_tests.sh:87:    "$BIN" < "$FIX/two_triangles_crossing.obj" | awk '
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_check/tests/run_tests.sh:120:        out=$("$EMBED_CHECK" < "$FIX/two_triangles_crossing.obj") || rc=$?
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_check/tests/run_tests.sh:134:        fast=$("$BIN" < "$FIX/two_triangles_crossing.obj" | awk '{print $2}')
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/euclid_check/tests/run_tests.sh:135:        cgal=$("$EMBED_CHECK" < "$FIX/two_triangles_crossing.obj") || true
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/__init__.py:165:        atan2,
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/tests/test_public_api.py:618:                            "arctan2",  # np.atan2
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/matlib.pyi:56:    atan2,
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/__init__.py:144:atan2 = numeric.arctan2
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/__init__.py:153:    "abs", "acos", "acosh", "asin", "asinh", "atan", "atanh", "atan2",
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2266:        # atan2(1, 1) returns pi/4.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2272:        # atan2(+-0, -0) returns +-pi.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2277:        # atan2(+-0, +0) returns +-0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2282:        # atan2(+-0, x) returns +-pi for x < 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2287:        # atan2(+-0, x) returns +-0 for x > 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2292:        # atan2(y, +-0) returns +pi/2 for y > 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2297:        # atan2(y, +-0) returns -pi/2 for y < 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2302:        # atan2(+-y, -infinity) returns +-pi for finite y > 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2307:        # atan2(+-y, +infinity) returns +-0 for finite y > 0.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2312:        # atan2(+-infinity, x) returns +-pi/2 for finite x.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2317:        # atan2(+-infinity, -infinity) returns +-3*pi/4.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2322:        # atan2(+-infinity, +infinity) returns +-pi/4.
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/tests/test_umath.py:2327:        # atan2(nan, x) returns nan for any x, including inf
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/include/numpy/npy_math.h:172:NPY_INPLACE double npy_atan2(double x, double y);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/include/numpy/npy_math.h:247:NPY_INPLACE float npy_atan2f(float x, float y);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/include/numpy/npy_math.h:292:NPY_INPLACE npy_longdouble npy_atan2l(npy_longdouble x, npy_longdouble y);
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/__init__.pyi:244:    arctan2 as atan2,
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/_core/__init__.pyi:381:    "atan2",
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/__init__.pyi:618:    "abs", "acos", "acosh", "asin", "asinh", "atan", "atanh", "atan2", "bitwise_invert",
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/__init__.pyi:5939:atan2 = arctan2
+/Users/doyle/Dropbox/projects/neo/_trash-20260715/codex/euclid_prover/unused_venv_delete_me/lib/python3.13/site-packages/numpy/ctypeslib/_ctypeslib.py:100:        But there are cross-platform considerations, such as library file extensions,
+./MORPH_GATE_TODO.md:42:dent_index link-turning check (port of neo/_trash-20260715/undented/
+./MORPH_GATE_TODO.md:53:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+./MORPH_GATE_TODO.md:56:|B.(AxC)| < COPLANAR_NUM_TOL (1e-12) are therefore skipped -- a dent
+./MORPH_GATE_TODO.md:59:DENT_TURN_TOL = 1e-9, COPLANAR_NUM_TOL = 1e-12. Calibration over all
+./MORPH_GATE_TODO.md:67:dent_index-with-coplanar-skip) are new validation conventions -- cite
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:14:G1 design audit (atlas repo, display-fidelity gates). Two new validation invariants gate what the atlas DISPLAYS; audit the design before commit. (1) Edge-length gate: every edge of a displayed frame within 1% of exact -- hyperbolic rungs max|d_H(u,v)-ell(alpha)|/ell <= 1e-2 with d_H=acosh(-mdot), ell=side_length(alpha); Euclidean end frame max|len-1| <= 1e-2; develop_h numerical blow-up = hard reject. (2) Undented display gate: dent_index link-turning port run on displayed coordinates (Klein post-center for rungs, raw Euclidean for heroes); vertices with all |B.(AxC)| < 1e-12 skipped as coplanar-degenerate (measured: exact-planar links put atan2 on the branch cut, +-pi by sign of 1e-17 noise); reject frame if min turn < -1e-9; dented hero raises (build failure). Bundle: spec+calibration in MORPH_GATE_TODO.md, gate code, measured calibration over all 2245 committed bend stores, degenerate-case trace, spot builds. Audit for: formula errors, convention traps (ring orientation, sign conventions, Klein vs hyperboloid), tolerance choices vs measured margins (+3.0e-7 tightest genuine, 1e-16 noise), failure modes the gates miss, and whether the coplanar skip could mask a real dent. First line exactly one of: APPROVE / REVISE / BLOCK. Then concise findings, max 40 lines.
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:17:=== G1 BUNDLE: display-fidelity gates (edge-length 1%, dent_index with coplanar skip) ===
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:61:dent_index link-turning check (port of neo/_trash-20260715/undented/
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:72:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:75:|B.(AxC)| < COPLANAR_NUM_TOL (1e-12) are therefore skipped -- a dent
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:78:DENT_TURN_TOL = 1e-9, COPLANAR_NUM_TOL = 1e-12. Calibration over all
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:86:dent_index-with-coplanar-skip) are new validation conventions -- cite
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:90:--- builders/personal.py: gate code (constants, _edges_of, develop_h_certified, dent block, link_rings, display_min_turn) ---
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:108:# actually undented"). dent_index link-turning check (port of
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:113:# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:122:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:143:def display_min_turn(pos, rings):
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:159:            nums.append(float(np.dot(B, np.cross(A, C))))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:161:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:163:        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:229:        mt = display_min_turn(K, rings)
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:247:        mt = display_min_turn(pos60, rings)
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:307:[v12 pancake -2pi trace: num=-9.185e-17, den=-0.75 at two triples -> atan2 branch = -pi each; siblings +2pi; planarity sv3=0.0]
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:317:/bin/zsh -lc "sed -n '1,240p' TEAMWORK.md; sed -n '1,220p' TEAMWORK_LOG.md; sed -n '1,260p' MORPH_GATE_TODO.md; rg -n \"EDGE_LEN_TOL|COPLANAR_NUM_TOL|DENT_TURN_TOL|def link_rings|def display_min_turn|def develop_h_certified|def glb_movies|def glb_euclid|def glb_hero\" builders/personal.py; git status --short" in /Users/doyle/Dropbox/projects/atlas
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:362:dent_index link-turning check (port of neo/_trash-20260715/undented/
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:373:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:376:|B.(AxC)| < COPLANAR_NUM_TOL (1e-12) are therefore skipped -- a dent
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:379:DENT_TURN_TOL = 1e-9, COPLANAR_NUM_TOL = 1e-12. Calibration over all
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:387:dent_index-with-coplanar-skip) are new validation conventions -- cite
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:396:314:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:398:335:def display_min_turn(pos, rings):
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:399:353:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:473:    mt = display_min_turn(pos, link_rings(faces))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:495:    mt = display_min_turn(pos, link_rings(faces))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:603:# actually undented"). dent_index link-turning check (port of
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:608:# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:617:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:638:def display_min_turn(pos, rings):
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:654:            nums.append(float(np.dot(B, np.cross(A, C))))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:656:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:658:        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:721:        mt = display_min_turn(K, rings)
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:739:        mt = display_min_turn(pos60, rings)
+./notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:930:/bin/zsh -lc "rg -n \"dent_index|B.*cross|atan2|COPLANAR_NUM_TOL|display_min_turn\" . /Users/doyle/Dropbox/projects/neo 2>/dev/null | head -n 240; head -n 8 notes/gate-calibration-20260722/dent_turn.tsv; head -n 8 notes/gate-calibration-20260722/edge_len.tsv; rg -n \"v12CCCACACCAACACACCAABE|3\\.0e-7|3\\.0E-7|branch|sv3|noise\" notes MORPH_GATE_TODO.md data/dentings.tsv" in /Users/doyle/Dropbox/projects/atlas
+./builders/walklib.py:68:        out[(a, b)] = math.atan2(np.dot(np.cross(n1, n2), u), np.dot(n1, n2))
+./builders/personal.py:170:    mt = display_min_turn(pos, link_rings(faces))
+./builders/personal.py:192:    mt = display_min_turn(pos, link_rings(faces))
+./builders/personal.py:300:# actually undented"). dent_index link-turning check (port of
+./builders/personal.py:305:# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+./builders/personal.py:314:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+./builders/personal.py:335:def display_min_turn(pos, rings):
+./builders/personal.py:351:            nums.append(float(np.dot(B, np.cross(A, C))))
+./builders/personal.py:353:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+./builders/personal.py:355:        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
+./builders/personal.py:418:        mt = display_min_turn(K, rings)
+./builders/personal.py:436:        mt = display_min_turn(pos60, rings)
+./builders/assets/vendor/jsm/utils/BufferGeometryUtils.js:346:			console.error( 'THREE.BufferGeometryUtils: .mergeAttributes() failed. BufferAttribute.array must be of consistent array types across matching attributes.' );
+./builders/assets/vendor/jsm/utils/BufferGeometryUtils.js:354:			console.error( 'THREE.BufferGeometryUtils: .mergeAttributes() failed. BufferAttribute.itemSize must be consistent across matching attributes.' );
+./builders/assets/vendor/jsm/utils/BufferGeometryUtils.js:362:			console.error( 'THREE.BufferGeometryUtils: .mergeAttributes() failed. BufferAttribute.normalized must be consistent across matching attributes.' );
+./builders/assets/vendor/jsm/utils/BufferGeometryUtils.js:370:			console.error( 'THREE.BufferGeometryUtils: .mergeAttributes() failed. BufferAttribute.gpuType must be consistent across matching attributes.' );
+./builders/assets/vendor/three.core.js:3622:		const angle = Math.atan2( - this.y, - this.x ) + Math.PI;
+./builders/assets/vendor/three.core.js:11281:					this._x = Math.atan2( - m23, m33 );
+./builders/assets/vendor/three.core.js:11282:					this._z = Math.atan2( - m12, m11 );
+./builders/assets/vendor/three.core.js:11286:					this._x = Math.atan2( m32, m22 );
+./builders/assets/vendor/three.core.js:11299:					this._y = Math.atan2( m13, m33 );
+./builders/assets/vendor/three.core.js:11300:					this._z = Math.atan2( m21, m22 );
+./builders/assets/vendor/three.core.js:11304:					this._y = Math.atan2( - m31, m11 );
+./builders/assets/vendor/three.core.js:11317:					this._y = Math.atan2( - m31, m33 );
+./builders/assets/vendor/three.core.js:11318:					this._z = Math.atan2( - m12, m22 );
+./builders/assets/vendor/three.core.js:11323:					this._z = Math.atan2( m21, m11 );
+./builders/assets/vendor/three.core.js:11335:					this._x = Math.atan2( m32, m33 );
+./builders/assets/vendor/three.core.js:11336:					this._z = Math.atan2( m21, m11 );
+./builders/assets/vendor/three.core.js:11341:					this._z = Math.atan2( - m12, m22 );
+nid	v	hero_min_turn	morph_min_turn
+v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACABCACACACACADEACACACACADEACACACADEACACADEACADEADEE	100	-5.28326995829927e-15	0.5448956946608214
+v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACABABACACACCACACABABABACACCACACABABABACADEADEE	100	0.5287541364619744	0.5480800875623577
+v102h248728676c88abd7	102	None	1.2728581616167294
+v102h63135343ab206f3b	102	-5.988395542050329e-15	-0.016701697888552823
+v102ha0145080ab94fac9	102	None	1.2723218369991356
+v102hae056372ee7b85b8	102	None	1.2728765048833812
+v102he0fc26d1f37f5c66	102	None	1.2728829072638659
+nid	v	max_rel	argmax_alpha	hero_abs	nrungs
+v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACABCACACACACADEACACACACADEACACACADEACACADEACADEADEE	100	0.09756331056368815	2.1000000000000014	1.4432899320127035e-15	1
+v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACABABACACACCACACABABABACACCACACABABABACADEADEE	100	0.02771649676333945	2.1000000000000014	4.440892098500626e-15	1
+v102h248728676c88abd7	102	3.1111535616602266e-05	1.8000000000000012	None	1
+v102h63135343ab206f3b	102	0.3247304918747567	2.1000000000000014	1.9984014443252818e-15	1
+v102ha0145080ab94fac9	102	0.0015701497944595824	1.8000000000000012	None	1
+v102hae056372ee7b85b8	102	2.285108077050619e-05	1.8000000000000012	None	1
+v102he0fc26d1f37f5c66	102	9.646036327282774e-06	1.8000000000000012	None	1
+MORPH_GATE_TODO.md:53:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+MORPH_GATE_TODO.md:54:and returns +-pi by the sign of 1e-17 noise, so per-vertex totals
+MORPH_GATE_TODO.md:55:{-2pi, 0, +2pi} are branch picks, not geometry. Vertices with all
+MORPH_GATE_TODO.md:61:displayed heroes or morph frames fail; tightest genuine margin +3.0e-7;
+MORPH_GATE_TODO.md:62:noise floor ~1e-16. Spot-verified through build_net: pancake v12 (all
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:14:G1 design audit (atlas repo, display-fidelity gates). Two new validation invariants gate what the atlas DISPLAYS; audit the design before commit. (1) Edge-length gate: every edge of a displayed frame within 1% of exact -- hyperbolic rungs max|d_H(u,v)-ell(alpha)|/ell <= 1e-2 with d_H=acosh(-mdot), ell=side_length(alpha); Euclidean end frame max|len-1| <= 1e-2; develop_h numerical blow-up = hard reject. (2) Undented display gate: dent_index link-turning port run on displayed coordinates (Klein post-center for rungs, raw Euclidean for heroes); vertices with all |B.(AxC)| < 1e-12 skipped as coplanar-degenerate (measured: exact-planar links put atan2 on the branch cut, +-pi by sign of 1e-17 noise); reject frame if min turn < -1e-9; dented hero raises (build failure). Bundle: spec+calibration in MORPH_GATE_TODO.md, gate code, measured calibration over all 2245 committed bend stores, degenerate-case trace, spot builds. Audit for: formula errors, convention traps (ring orientation, sign conventions, Klein vs hyperboloid), tolerance choices vs measured margins (+3.0e-7 tightest genuine, 1e-16 noise), failure modes the gates miss, and whether the coplanar skip could mask a real dent. First line exactly one of: APPROVE / REVISE / BLOCK. Then concise findings, max 40 lines.
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:72:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:73:and returns +-pi by the sign of 1e-17 noise, so per-vertex totals
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:74:{-2pi, 0, +2pi} are branch picks, not geometry. Vertices with all
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:80:displayed heroes or morph frames fail; tightest genuine margin +3.0e-7;
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:81:noise floor ~1e-16. Spot-verified through build_net: pancake v12 (all
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:113:# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:114:# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:120:# +3.0e-7; noise floor ~1e-16.
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:286:  -6.283e+00  v=12  v12CCCACACCAACACACCAABE
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:307:[v12 pancake -2pi trace: num=-9.185e-17, den=-0.75 at two triples -> atan2 branch = -pi each; siblings +2pi; planarity sv3=0.0]
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:373:product B.(AxC) exact-zero; where den < 0, atan2 sits on the branch cut
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:374:and returns +-pi by the sign of 1e-17 noise, so per-vertex totals
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:375:{-2pi, 0, +2pi} are branch picks, not geometry. Vertices with all
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:381:displayed heroes or morph frames fail; tightest genuine margin +3.0e-7;
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:382:noise floor ~1e-16. Spot-verified through build_net: pancake v12 (all
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:608:# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:609:# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:615:# +3.0e-7; noise floor ~1e-16.
+notes/codex-consults/2026-07-22-161343-g1-display-gates.txt:930:/bin/zsh -lc "rg -n \"dent_index|B.*cross|atan2|COPLANAR_NUM_TOL|display_min_turn\" . /Users/doyle/Dropbox/projects/neo 2>/dev/null | head -n 240; head -n 8 notes/gate-calibration-20260722/dent_turn.tsv; head -n 8 notes/gate-calibration-20260722/edge_len.tsv; rg -n \"v12CCCACACCAACACACCAABE|3\\.0e-7|3\\.0E-7|branch|sv3|noise\" notes MORPH_GATE_TODO.md data/dentings.tsv" in /Users/doyle/Dropbox/projects/atlas
+notes/codex-consults/2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt:53:cd /Users/doyle/Dropbox/neo/atlas2 && cp /private/tmp/claude-501/-Users-doyle-Dropbox-neo/ca3ed8a1-7ca1-4b24-ba21-e56114bf6314/scratchpad/failure_frames.py /private/tmp/claude-501/-Users-doyle-Dropbox-neo/ca3ed8a1-7ca1-4b24-ba21-e56114bf6314/scratchpad/failure_pages.py builders/ && mkdir -p data/failure_frames && cp /private/tmp/claude-501/-Users-doyle-Dropbox-neo/ca3ed8a1-7ca1-4b24-ba21-e56114bf6314/scratchpad/failure_frames/*.json data/failure_frames/ && cp /private/tmp/claude-501/-Users-doyle-Dropbox-neo/ca3ed8a1-7ca1-4b24-ba21-e56114bf6314/scratchpad/{ideal_limit,slice_solve,climb_all,hinge_sweep}.py builders/ && git add -A && git commit -q -m "failures gallery: dented branches that fail to reach the ideal, with morph movies
+notes/codex-consults/2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt:206:     branch; verified: rerun log printed "tarball exists, keeping").
+notes/codex-consults/2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt:345:+{"name":"v12CCCACACCAACACACCAABE","clers":"CCCACACCAACACACCAABE","v":12,"E":30,"F":20,"netcode":"1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,5;5,8,9;5,9,6;6,9,10;6,10,7;7,10,11;7,11,12;7,12,8;8,12,9;9,12,11;9,11,10","artifacts":{"rb":true,"clers_glb":true,"morph_p":true,"morph_k":true,"ideal_net":true,"clers_layout":true},"flags":{"pancake":true,"convex":false,"strictly_convex":false,"buried":0,"buried_depth":0.0,"floppy":true,"sym_order":8,"sym_refl":true,"conway":"*222"},"eisenstein":{"ancestors":[],"descendants":[]},"id":"v12CCCACACCAACACACCAABE","themes":["preapproved","recognized","small"],"maxdeg":6}
+notes/codex-consults/2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt:129:The live index is empty, but the wrapper supplied a staged tree object for the proposed commit. I’m checking that tree against `HEAD` so the gate reviews the intended commit rather than unrelated worktree noise.
+notes/gate-calibration-20260722/edge_len.tsv:51:v12CCCACACCAACACACCAABE	12	2.1657929248471747e-08	55.27909663310495	5.551115123125783e-16	10
+notes/gate-calibration-20260722/rel_v50.tsv:31:v12CCCACACCAACACACCAABE	12	6	1.0877461012298025e-08	43.466993469328585	0	False
+notes/gate-calibration-20260722/klein_v50.tsv:31:v12CCCACACCAACACACCAABE	12	6	5.37404944429803e-08	55.27909663310495
+notes/gate-calibration-20260722/dent_turn.tsv:51:v12CCCACACCAACACACCAABE	12	-6.283185307179586	1.3833786362055873
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "sed -n '380,455p' /Users/doyle/Dropbox/projects/neo/ideal/python/puffup.py; sed -n '1,240p' /Users/doyle/Dropbox/projects/neo/_trash-20260715/undented/undented/src/dent_check.c; find notes/gate-calibration-20260722 .claude -maxdepth 2 -type f -not -name '*.tsv' -print; rg -n \"dent_turn.tsv|edge_len.tsv|display_min_turn|sv3|tightest|COPLANAR\" .claude notes/gate-calibration-20260722 builders --glob '*.py' --glob '*.sh' --glob '*.md'" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+                retries_residual += 1
+            else:
+                # n_trial decreased but trial_gate vetoed → dent.
+                retries_dent += 1
+            lam = min(lam * lambda_up, lambda_max)
+            if lam >= lambda_max:
+                return NewtonOut(x, r, False, it, "lambda_saturated")
+        if not accepted:
+            return NewtonOut(x, r, False, it, "lm_retries_exhausted")
+    return NewtonOut(x, r, norm <= tol, max_iter, "max iter")
+
+
+# ── dent index (port of undented/src/dent_check.c) ──────────────────────
+
+def vertex_neighbors_cyclic(tri: Tri, v: Vertex) -> List[Vertex]:
+    """Cyclic list of v's neighbors, in flower order."""
+    out: List[Vertex] = []
+    seen: set = set()
+    for fi in tri.vertex_flower[v]:
+        f = face_with_v_first(tri.faces[fi], v)  # (v, b, c)
+        if f[1] not in seen:
+            out.append(f[1]); seen.add(f[1])
+        if f[2] not in seen:
+            out.append(f[2]); seen.add(f[2])
+    return out
+
+
+def link_turning(v: Vertex, neighbors: Sequence[Vertex],
+                 coords: Dict[Vertex, np.ndarray]) -> float:
+    """Sum of signed spherical exterior angles of the link polygon at v.
+    Positive = undented at v. Direct port of dent_check.c::dent_index inner loop."""
+    pv = coords[v]
+    dirs = []
+    for nb in neighbors:
+        d = coords[nb] - pv
+        n = float(np.linalg.norm(d))
+        if n < 1e-15:
+            n = 1e-15
+        dirs.append(d / n)
+    k = len(dirs)
+    total = 0.0
+    for i in range(k):
+        A = dirs[(i - 1) % k]
+        B = dirs[i]
+        C = dirs[(i + 1) % k]
+        cross = np.cross(A, C)
+        num = float(B @ cross)
+        den = float((A @ B) * (B @ C) - (A @ C))
+        total += math.atan2(num, den)
+    return total
+
+
+def dent_index(tri: Tri, coords: Dict[Vertex, np.ndarray]) -> float:
+    """Minimum link turning across all vertices. Positive = undented.
+
+    The cyclic neighbor order comes from the face orientation in the input
+    netcode. If you get a sign you didn't expect, the input orientation is
+    wrong — fix it upstream, do NOT silently flip here."""
+    min_turn = float("inf")
+    for v in tri.vertices:
+        nbrs = vertex_neighbors_cyclic(tri, v)
+        if len(nbrs) < 3:
+            continue
+        t = link_turning(v, nbrs, coords)
+        if t < min_turn:
+            min_turn = t
+    return min_turn
+
+
+# ── homotopy driver ──────────────────────────────────────────────────────
+
+@dataclass
+class HomotopyOut:
+    bend_full: Dict[Edge, float]
+    final_residual: float
+    success: bool
+/* dent_check.c — compute dent index (min link turning) of OBJ polyhedra.
+ *
+ * No args:  reads one OBJ from stdin, prints turning to stdout.
+ * With args: each arg is an OBJ file, prints "turning name" per line.
+ *
+ * Link turning at vertex v: sum of signed spherical exterior angles
+ * of the link polygon (neighbors of v on the unit sphere centered at v).
+ * Positive = undented.
+ *
+ * Compile: cc -O3 -o dent_check dent_check.c -lm
+ *
+ * Usage:
+ *   ./dent_check < foo.obj                       # one file, stdin
+ *   ./dent_check dir/foo.obj dir/bar.obj                        # batch, one process
+ *   find dir -name '*.obj' | xargs -n1000 ./dent_check   # large batch
+ *   find dir -name '*.obj' | parallel -j80 -n1000 ./dent_check  # parallel
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+#include <libgen.h>
+
+#define MAXV 400
+#define MAXF (2*MAXV+4)
+#define MAXRING 12
+
+static double VX[MAXV+1], VY[MAXV+1], VZ[MAXV+1];
+static int FA[MAXF], FB[MAXF], FC[MAXF];
+static int NV, NF;
+
+static int EM[MAXV+1][MAXV+1];
+static int NBR[MAXV+1][MAXRING], NNBR[MAXV+1];
+
+static void nbr_add(int u, int w) {
+    for (int i = 0; i < NNBR[u]; i++) if (NBR[u][i] == w) return;
+    NBR[u][NNBR[u]++] = w;
+}
+
+static int parse_obj_fp(FILE *fp) {
+    char line[4096];
+    NV = 0; NF = 0;
+    while (fgets(line, sizeof(line), fp)) {
+        if (line[0] == 'v' && line[1] == ' ') {
+            NV++;
+            sscanf(line + 2, "%lf %lf %lf", &VX[NV], &VY[NV], &VZ[NV]);
+        } else if (line[0] == 'f' && line[1] == ' ') {
+            int a, b, c;
+            if (sscanf(line + 2, "%d %d %d", &a, &b, &c) == 3) {
+                FA[NF] = a; FB[NF] = b; FC[NF] = c; NF++;
+            }
+        }
+    }
+    return NV > 0 && NF > 0;
+}
+
+static void build(void) {
+    memset(EM, 0, sizeof(EM));
+    memset(NNBR, 0, sizeof(NNBR));
+    for (int i = 0; i < NF; i++) {
+        int a = FA[i], b = FB[i], c = FC[i];
+        EM[a][b] = c; EM[b][c] = a; EM[c][a] = b;
+        nbr_add(a, b); nbr_add(b, a);
+        nbr_add(b, c); nbr_add(c, b);
+        nbr_add(a, c); nbr_add(c, a);
+    }
+}
+
+static int cyclic_nbrs(int v, int ring[]) {
+    if (!NNBR[v]) return 0;
+    int start = NBR[v][0];
+    ring[0] = start; int k = 1, cur = start;
+    for (;;) {
+        int nxt = EM[v][cur];
+        if (nxt == start || nxt == 0) break;
+        ring[k++] = nxt; cur = nxt;
+    }
+    return k;
+}
+
+static double dent_index(void) {
+    double min_turn = 1e30;
+    int ring[MAXRING];
+
+    for (int v = 1; v <= NV; v++) {
+        int k = cyclic_nbrs(v, ring);
+        if (k < 3) continue;
+
+        double dirs[MAXRING][3];
+        for (int i = 0; i < k; i++) {
+            int nb = ring[i];
+            double dx = VX[nb] - VX[v], dy = VY[nb] - VY[v], dz = VZ[nb] - VZ[v];
+            double len = sqrt(dx*dx + dy*dy + dz*dz);
+            if (len < 1e-15) len = 1e-15;
+            dirs[i][0] = dx/len; dirs[i][1] = dy/len; dirs[i][2] = dz/len;
+        }
+
+        double turn = 0;
+        for (int i = 0; i < k; i++) {
+            double *A = dirs[(i-1+k)%k], *B = dirs[i], *C = dirs[(i+1)%k];
+            double bc0 = A[1]*C[2] - A[2]*C[1];
+            double bc1 = A[2]*C[0] - A[0]*C[2];
+            double bc2 = A[0]*C[1] - A[1]*C[0];
+            double num = B[0]*bc0 + B[1]*bc1 + B[2]*bc2;
+            double den = (A[0]*B[0]+A[1]*B[1]+A[2]*B[2])
+                        *(B[0]*C[0]+B[1]*C[1]+B[2]*C[2])
+                        -(A[0]*C[0]+A[1]*C[1]+A[2]*C[2]);
+            turn += atan2(num, den);
+        }
+
+        if (turn < min_turn) min_turn = turn;
+    }
+    return min_turn;
+}
+
+/* strip directory and .obj extension from path */
+static const char *stem(const char *path) {
+    static char buf[4096];
+    const char *p = strrchr(path, '/');
+    p = p ? p + 1 : path;
+    strncpy(buf, p, sizeof(buf) - 1);
+    buf[sizeof(buf) - 1] = '\0';
+    char *dot = strrchr(buf, '.');
+    if (dot && strcmp(dot, ".obj") == 0) *dot = '\0';
+    return buf;
+}
+
+static int process(FILE *fp, const char *name) {
+    if (!parse_obj_fp(fp)) {
+        fprintf(stderr, "bad input: %s\n", name);
+        return 1;
+    }
+    build();
+    if (name)
+        printf("%.6e %s\n", dent_index(), name);
+    else
+        printf("%.6e\n", dent_index());
+    return 0;
+}
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        /* stdin mode: one OBJ, print just the number */
+        return process(stdin, NULL);
+    }
+
+    /* batch mode: each arg is an OBJ file */
+    int errors = 0;
+    for (int i = 1; i < argc; i++) {
+        FILE *fp = fopen(argv[i], "r");
+        if (!fp) {
+            fprintf(stderr, "can't open: %s\n", argv[i]);
+            errors++;
+            continue;
+        }
+        errors += process(fp, stem(argv[i]));
+        fclose(fp);
+    }
+    return errors ? 1 : 0;
+}
+.claude/launch.json
+builders/personal.py:170:    mt = display_min_turn(pos, link_rings(faces))
+builders/personal.py:192:    mt = display_min_turn(pos, link_rings(faces))
+builders/personal.py:310:# system). Calibration over all 2245 stores (scratch dent_turn.tsv):
+builders/personal.py:311:# every displayed hero and morph frame passes; tightest genuine margin
+builders/personal.py:314:COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+builders/personal.py:335:def display_min_turn(pos, rings):
+builders/personal.py:353:        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+builders/personal.py:418:        mt = display_min_turn(K, rings)
+builders/personal.py:436:        mt = display_min_turn(pos60, rings)
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "rg -n \"glb_hero\\(|glb_euclid\\(|glb_movies\\(\" builders/personal.py; sed -n '455,650p' builders/personal.py; rg -n \"def face_with_v_first|vertex_flower\" /Users/doyle/Dropbox/projects/neo/ideal/python/puffup.py | head -n 30; git diff -- builders/personal.py | sed -n '1,280p'" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+166:def glb_hero(name, faces, V, pos, outdir):
+190:def glb_euclid(name, faces, V, bends, outdir):
+382:def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+497:            glb_euclid(name, faces, V, bends, netdir)
+502:            glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir)
+510:        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
+    from views import render_page, net_id
+    name, nc = job
+    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+    V = max(max(f) for f in faces)
+    vname = f"v{V}{name}"
+    nid = net_id(V, name)
+    netdir = os.path.join(OUT, "nets", nid)
+    os.makedirs(netdir, exist_ok=True)
+    deg = {}
+    for f in faces:
+        for x in f:
+            deg[x] = deg.get(x, 0) + 1
+    maxdeg = max(deg.values())
+    amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+    alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+              [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
+    # consumer mode: committed bends (data/bends/<nid>.json) supply every
+    # solved quantity; the solver runs only for rungs the store lacks.
+    store = None
+    spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
+    if os.path.exists(spath):
+        st = json.load(open(spath))
+        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
+                          for k, v in st["hero"].items()},
+                 "morph": {round(m["alpha"], 6):
+                           {tuple(int(x) for x in k.split(',')): float(v)
+                            for k, v in m["bends"].items()}
+                           for m in st["morph"]}}
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+    if not (os.path.exists(os.path.join(netdir, "rb.glb"))
+            and os.path.exists(os.path.join(netdir, "clers.glb"))):
+        if store:
+            bends = store["hero"]
+        elif maxdeg <= 6:
+            bends = solve_prove_60(nc)
+        else:
+            bends = solve_alpha(nc, amax)
+        if bends is None:
+            return (vname, "SOLVE-FAIL")
+        if not store:
+            hero_bends = bends
+        if maxdeg <= 6:
+            glb_euclid(name, faces, V, bends, netdir)
+        else:
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            pos = center(develop_h(faces, bd, math.radians(amax))[0])
+            K = klein(pos)
+            glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir)
+    morph_note, morph_bends = None, None
+    if not morphs:
+        built = "skipped (morphs=False)"          # generation-time opt-out
+    elif (os.path.exists(os.path.join(netdir, "morph_p.glb"))
+            and os.path.exists(os.path.join(netdir, "morph_k.glb"))):
+        built = "reused"
+    else:
+        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
+                                                      alphas=alphas, euclid_end=(maxdeg <= 6),
+                                                      stored=store)
+        built = (f"omitted ({morph_note})" if morph_note
+                 else f"built {nframes} frames")
+    inet_path = os.path.join(netdir, "ideal_net.svg")
+    if not os.path.exists(inet_path):
+        inet = ideal_net_svg(nc, faces)
+        if inet:
+            with open(inet_path, "w") as f:
+                f.write(inet)
+    layout_path = os.path.join(netdir, "clers_layout.svg")
+    if not os.path.exists(layout_path):
+        with open(layout_path, "w") as f:
+            f.write(clers_svg(name))
+    E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
+    have = {k: os.path.exists(os.path.join(netdir, fn)) for k, fn in
+            (("rb", "rb.glb"), ("clers_glb", "clers.glb"),
+             ("morph_p", "morph_p.glb"), ("morph_k", "morph_k.glb"),
+             ("ideal_net", "ideal_net.svg"), ("clers_layout", "clers_layout.svg"))}
+    recpath = os.path.join(netdir, "net.json")
+    rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
+    rec.update({"id": nid, "name": vname, "clers": name, "v": V, "E": E,
+                "F": len(faces), "netcode": nc, "artifacts": have,
+                "maxdeg": maxdeg})
+    if maxdeg > 6:
+        rec["alpha_max"] = amax
+        rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
+    if morph_note:
+        rec["morph_note"] = morph_note      # why the morphs are absent (audit)
+    else:
+        rec.pop("morph_note", None)
+    rec.setdefault("flags", {})
+    rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
+    with open(recpath, "w") as f:
+        json.dump(rec, f, indent=1)
+    # persist the solved bends to the committed store (producer step): one
+    # solver build populates data/bends/, and the consumer builder reads it
+    # -- no solver / neo / network at build time. Written only when this net
+    # was actually solved (fresh); reused nets keep their existing store.
+    if hero_bends is not None:
+        def _ser(bd):
+            return {f"{min(e)},{max(e)}": float(bd[e]) for e in bd}
+        store = {"clers": name, "v": V, "netcode": nc, "maxdeg": maxdeg,
+                 "hero": _ser(hero_bends),
+                 "morph": [{"alpha": a, "bends": _ser(bd)}
+                           for a, bd in (morph_bends or {}).items()]}
+        bdir = os.path.join(TOP, "data", "bends")
+        os.makedirs(bdir, exist_ok=True)
+        with open(os.path.join(bdir, f"{nid}.json"), "w") as bf:
+            json.dump(store, bf)
+    render_page(netdir)
+    return (vname, f"OK morphs {built}")
+
+
+def build_net(job, morphs=True):
+    """Backstop wrapper: no single net may crash the whole Pool. Any
+    unexpected exception becomes a BUILD-FAIL result for that net so the
+    rest of the sweep continues (main() reports the FAIL list)."""
+    try:
+        return _build_net(job, morphs)
+    except Exception as e:
+        return (f"v?{job[0]}", f"BUILD-FAIL {type(e).__name__}: {e}")
+
+
+def main(input_path=None):
+    """Build records + artifacts + pages for the nets in input_path
+    (default data/nets_pages.txt, lines: name netcode). Listing pages,
+    galleries, and the front page are special.py's job."""
+    os.makedirs(OUT, exist_ok=True)
+    # viewer wrappers: source of truth is builders/assets/
+    import shutil
+    for w in ("morph.html", "turntable.html"):
+        shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
+    vsrc = os.path.join(HERE, "assets", "vendor")
+    if os.path.isdir(vsrc):
+        shutil.copytree(vsrc, os.path.join(OUT, "vendor"), dirs_exist_ok=True)
+    jobs = []
+    with open(input_path or os.path.join(TOP, "data", "nets_pages.txt")) as f:
+        for ln in f:
+            t = ln.split()
+            jobs.append((t[0], t[1]))
+    # morphs are generated by default; set ATLAS_MORPHS=0 to skip morph
+    # generation for this run (a compute choice -- e.g. giant eisenbuddies --
+    # NOT a correctness cap: pages render morphs iff the record has them, and
+    # morphs enter the record only through the certified gate in glb_movies).
+    gen_morphs = os.environ.get("ATLAS_MORPHS", "1") != "0"
+    worker = partial(build_net, morphs=gen_morphs)
+    with Pool(6) as pool:
+        results = pool.map(worker, jobs)
+    fails = [n for n, msg in results if "FAIL" in msg]
+    omitted = [n for n, msg in results if "omitted" in msg]
+    for name, msg in results:
+        print(name, msg, flush=True)
+    print(f"built {len(results) - len(fails)}/{len(results)}"
+          + (f"  morphs omitted (gate): {len(omitted)}" if omitted else "")
+          + (f"  FAILURES: {fails}" if fails else ""), flush=True)
+
+
+if __name__ == "__main__":
+    import sys
+    main(sys.argv[1] if len(sys.argv) > 1 else None)
+81:    vertex_flower: Dict[Vertex, List[int]]
+126:def face_with_v_first(face: Face, v: Vertex) -> Face:
+152:    for fi in tri.vertex_flower[v]:
+188:    for fi in tri.vertex_flower[v]:
+398:    for fi in tri.vertex_flower[v]:
+809:        flower = tri.vertex_flower[v]
+diff --git a/builders/personal.py b/builders/personal.py
+index 8d4e657..b627fda 100644
+--- a/builders/personal.py
++++ b/builders/personal.py
+@@ -12,6 +12,7 @@ from doob prove_final_v4_50/input.txt); everything else is solved here
+ GLBs under site/personal/glb/.
+ """
+ import math, os, subprocess, sys
++from functools import partial
+ from multiprocessing import Pool
+ import numpy as np
+ 
+@@ -166,6 +167,9 @@ def glb_hero(name, faces, V, pos, outdir):
+     """blue-black + CLERS GLBs from given coordinates (Klein model for
+     degree-7 nets at alpha_max; blue is the hyperbolic color, matching
+     the morph viewer's BLUE 0.25,0.55,0.85)."""
++    mt = display_min_turn(pos, link_rings(faces))
++    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
++        raise RuntimeError(f"dented hero display (min turn {mt:.2e})")
+     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+@@ -185,6 +189,9 @@ def glb_hero(name, faces, V, pos, outdir):
+ 
+ def glb_euclid(name, faces, V, bends, outdir):
+     pos, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends.items()})
++    mt = display_min_turn(pos, link_rings(faces))
++    if mt < -DENT_TURN_TOL:      # tripwire: a dented hero must never ship
++        raise RuntimeError(f"dented hero display (min turn {mt:.2e})")
+     verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+     fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+     v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+@@ -273,27 +280,162 @@ def align_frames(frames):
+     return [[tuple(v) for v in F] for F in out]
+ 
+ 
+-def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True):
+-    """two animated morph GLBs (Poincare, Klein): ideal end first,
+-    then either the exact Euclidean solid (alpha_max = 60) or the
+-    hyperbolic realization at the final rung (degree-7 nets:
+-    alpha_max = 360/maxdeg)."""
++# Length-fidelity gate (PD spec 2026-07-22, final): every edge of a
++# displayed frame must have the length it is supposed to have, within 1%.
++# Hyperbolic frames: every edge of every equilateral face has exact
++# hyperbolic length ell(alpha) (realize_h.side_length); the metric is
++# max over edges of |d_H(u,v) - ell| / ell, with d_H = acosh(-mdot).
++# Euclidean end frame: every edge has length 1; max |len - 1|.
++# Accumulated development divergence lands exactly here: edges whose
++# endpoints arrive via different development paths inherit the drift.
++EDGE_LEN_TOL = 1e-2
++
++
++def _edges_of(faces):
++    return {tuple(sorted((a, b))) for f in faces
++            for a, b in zip(f, f[1:] + f[:1])}
++
++
++# Undented display gate (PD 2026-07-22: "make sure what we display is
++# actually undented"). dent_index link-turning check (port of
++# undented/src/dent_check.c inner loop -- turning per vertex, NEVER
++# volume sign) run on the displayed coordinates themselves. Degenerate
++# case, measured 2026-07-22 on the v12 pancake: an exactly-coplanar
++# vertex link makes every triple product B.(AxC) exact-zero, and where
++# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
++# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
++# not geometry. Such vertices are excluded: a dent needs non-planarity,
++# and a coplanar link is the flat degenerate boundary (pancakes). Their
++# flatness is already certified by the solved bends (all-plus turning
++# system). Calibration over all 2245 stores (scratch dent_turn.tsv):
++# every displayed hero and morph frame passes; tightest genuine margin
++# +3.0e-7; noise floor ~1e-16.
++DENT_TURN_TOL = 1e-9        # reject a displayed frame if min turn < -this
++COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
++
++
++def link_rings(faces):
++    """vertex -> cyclic neighbor ring, from the face structure."""
++    succ = {}
++    for a, b, c in faces:
++        succ.setdefault(a, {})[b] = c
++        succ.setdefault(b, {})[c] = a
++        succ.setdefault(c, {})[a] = b
++    rings = {}
++    for v, nxt in succ.items():
++        start = next(iter(nxt))
++        ring, cur = [start], nxt[start]
++        while cur != start:
++            ring.append(cur)
++            cur = nxt[cur]
++        rings[v] = ring
++    return rings
++
++
++def display_min_turn(pos, rings):
++    """min link turning over non-degenerate vertices of the displayed
++    positions; +inf when every vertex is coplanar-degenerate (pancake)."""
++    mt = float('inf')
++    for v, ring in rings.items():
++        k = len(ring)
++        if k < 3:
++            continue
++        dirs = []
++        for nb in ring:
++            d = np.asarray(pos[nb], float) - np.asarray(pos[v], float)
++            n = float(np.linalg.norm(d))
++            dirs.append(d / (n if n > 1e-15 else 1e-15))
++        nums, dens = [], []
++        for i in range(k):
++            A, B, C = dirs[(i - 1) % k], dirs[i], dirs[(i + 1) % k]
++            nums.append(float(np.dot(B, np.cross(A, C))))
++            dens.append(float(np.dot(A, B) * np.dot(B, C) - np.dot(A, C)))
++        if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
++            continue        # coplanar link: formula ill-posed, vertex flat
++        mt = min(mt, sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens)))
++    return mt
++
++
++def develop_h_certified(faces, bd, alpha_rad, edges=None):
++    """develop_h plus the edge-length gate. Returns (pos_4vec, err, ok)
++    where err = max relative hyperbolic edge-length error vs ell(alpha).
++
++    A numerical blow-up inside develop_h -- a point leaving the
++    hyperboloid so that mdot(x,x) > 0 and norm_pt does sqrt(<0), raising
++    ValueError: math domain error -- is the extreme of the divergence the
++    gate catches, so it is a hard rejection (err = inf), never a crash.
++    """
++    from realize_h import mdot, side_length
++    try:
++        posh, _, _ = develop_h(faces, bd, alpha_rad)
++        ell = side_length(alpha_rad)
++        err = 0.0
++        for u, v in (edges or _edges_of(faces)):
++            m = -mdot(posh[u], posh[v])
++            dh = math.acosh(m) if m > 1.0 else 0.0
++            err = max(err, abs(dh - ell) / ell)
++    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
++        return None, float('inf'), False
++    return posh, err, err <= EDGE_LEN_TOL
++
++
++def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
++               stored=None):
++    """Two animated morph GLBs (Poincare, Klein): ideal end first, then
++    either the exact Euclidean solid (alpha_max = 60) or the hyperbolic
++    realization at the final rung (degree-7 nets: alpha_max = 360/maxdeg).
++
++    Consumer mode: when `stored` (the data/bends record: {"hero": bd,
++    "morph": {rounded-alpha: bd}}) provides a rung, its bends are used and
++    the solver is never invoked for it -- the deterministic no-solver
++    build path. Missing rungs fall back to the solver (producer mode) and
++    are returned in `solved` for persistence.
++
++    Every develop_h frame is certified (develop_h_certified, Klein-length
++    gate). If any frame fails, NO GLB is written and a reason is returned
++    -- never a partial or silently-broken morph. Returns (nframes, note,
++    solved). The euclidean end frame uses the flat developer
++    (walklib.develop), which the v506 diagnosis exonerated, so it is not
++    gated here.
++    """
+     grid = bary_grid(SUBDIV)
+     fp, fk, tris = [], [], None
++    solved = {}                     # alpha -> bend dict, freshly solved only
++    edges = _edges_of(faces)
++    rings = link_rings(faces)
+     for a in (alphas or MORPH_ALPHAS):
+-        bends = solve_alpha(nc, a)
+-        if bends is None:
+-            return 0
+-        bd = {tuple(sorted(e)): b for e, b in bends.items()}
+-        pos = center(develop_h(faces, bd, math.radians(a))[0])
+-        vk, tris = subdivided_frame(faces, klein(pos), grid)
++        bd = (stored or {}).get("morph", {}).get(round(a, 6))
++        if bd is None:
++            bends = solve_alpha(nc, a)
++            if bends is None:
++                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
++            bd = {tuple(sorted(e)): b for e, b in bends.items()}
++            solved[a] = bd
++        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
++        if not ok:
++            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
++        K = klein(center(posh))
++        mt = display_min_turn(K, rings)
++        if mt < -DENT_TURN_TOL:
++            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
++        vk, tris = subdivided_frame(faces, K, grid)
+         fk.append(vk)
+         fp.append(klein_to_poincare(vk))
+     if euclid_end:
+-        bends60 = solve_prove_60(nc)
+-        if bends60 is None:
+-            return 0
+-        pos60, _ = develop(faces, {tuple(sorted(e)): b for e, b in bends60.items()})
++        bd60 = (stored or {}).get("hero")
++        if bd60 is None:
++            bends60 = solve_prove_60(nc)
++            if bends60 is None:
++                return 0, "solve_prove_60 failed (euclidean end frame)", solved
++            bd60 = {tuple(sorted(e)): b for e, b in bends60.items()}
++        pos60, _ = develop(faces, bd60)
++        eerr = max(abs(float(np.linalg.norm(pos60[u] - pos60[v])) - 1.0)
++                   for u, v in edges)
++        if eerr > EDGE_LEN_TOL:
++            return 0, f"euclid edge err {eerr:.2e}", solved
++        mt = display_min_turn(pos60, rings)
++        if mt < -DENT_TURN_TOL:
++            return 0, f"dented euclid frame (min turn {mt:.2e})", solved
+         ctr = sum(pos60.values()) / len(pos60)
+         ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+         fp.append(ve)
+@@ -302,9 +444,9 @@ def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True):
+     fk = align_frames(fk)
+     write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+     write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
+-    return len(fp)
++    return len(fp), None, solved
+ 
+-def build_net(job):
++def _build_net(job, morphs=True):
+     """One directory per net under nets/, named v{V}{CLERS}: a database
+     record (net.json) plus the net's artifacts (rb.glb, clers.glb,
+     morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
+@@ -326,28 +468,50 @@ def build_net(job):
+     amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+     alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+               [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
++    # consumer mode: committed bends (data/bends/<nid>.json) supply every
++    # solved quantity; the solver runs only for rungs the store lacks.
++    store = None
++    spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
++    if os.path.exists(spath):
++        st = json.load(open(spath))
++        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
++                          for k, v in st["hero"].items()},
++                 "morph": {round(m["alpha"], 6):
++                           {tuple(int(x) for x in k.split(',')): float(v)
++                            for k, v in m["bends"].items()}
++                           for m in st["morph"]}}
++    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+     if not (os.path.exists(os.path.join(netdir, "rb.glb"))
+             and os.path.exists(os.path.join(netdir, "clers.glb"))):
+-        if maxdeg <= 6:
++        if store:
++            bends = store["hero"]
++        elif maxdeg <= 6:
+             bends = solve_prove_60(nc)
+-            if bends is None:
+-                return (vname, "SOLVE-FAIL")
+-            glb_euclid(name, faces, V, bends, netdir)
+         else:
+             bends = solve_alpha(nc, amax)
+-            if bends is None:
+-                return (vname, "SOLVE-FAIL")
++        if bends is None:
++            return (vname, "SOLVE-FAIL")
++        if not store:
++            hero_bends = bends
++        if maxdeg <= 6:
++            glb_euclid(name, faces, V, bends, netdir)
++        else:
+             bd = {tuple(sorted(e)): b for e, b in bends.items()}
+             pos = center(develop_h(faces, bd, math.radians(amax))[0])
+             K = klein(pos)
+             glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir)
+-    if (os.path.exists(os.path.join(netdir, "morph_p.glb"))
++    morph_note, morph_bends = None, None
++    if not morphs:
++        built = "skipped (morphs=False)"          # generation-time opt-out
++    elif (os.path.exists(os.path.join(netdir, "morph_p.glb"))
+             and os.path.exists(os.path.join(netdir, "morph_k.glb"))):
+         built = "reused"
+     else:
+-        nframes = glb_movies(name, faces, V, nc, netdir,
+-                             alphas=alphas, euclid_end=(maxdeg <= 6))
+-        built = f"built {nframes} frames"
++        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
++                                                      alphas=alphas, euclid_end=(maxdeg <= 6),
++                                                      stored=store)
++        built = (f"omitted ({morph_note})" if morph_note
++                 else f"built {nframes} frames")
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import csv,json,math,sys
+from pathlib import Path
+sys.path.insert(0,'builders')
+from realize_h import develop_h,mdot,side_length
+rows=list(csv.DictReader(open('notes/gate-calibration-20260722/edge_len.tsv'),delimiter='\\t'))
+rows.sort(key=lambda r: float(r['max_rel']) if r['max_rel'] "'!= '"'None' else -1, reverse=True)
+for r in rows[:15]:
+ p=Path('data/bends')/(r['nid']+'.json'); st=json.load(open(p)); faces=[tuple(map(int,f.split(','))) for f in st['netcode'].split(';')]
+ rec=max(st['morph'],key=lambda x: abs(x['alpha']-float(r['argmax_alpha'])))
+ bd={tuple(map(int,k.split(','))):v for k,v in rec['bends'].items()}
+ pos,_,_=develop_h(faces,bd,math.radians(rec['alpha']))
+ norms={v:-mdot(x,x) for v,x in pos.items()}
+ ell=side_length(math.radians(rec['alpha'])); eraw=enorm=0
+ edges={tuple(sorted((f[i],f[(i+1)%3]))) for f in faces for i in range(3)}
+ bad=0
+ for u,v in edges:
+  raw=-mdot(pos[u],pos[v]); den=norms[u]*norms[v]
+  dr=math.acosh(raw) if raw>1 else 0
+  if den>0 and math.isfinite(den):
+   z=raw/math.sqrt(den); dn=math.acosh(max(1,z))
+  else: dn=float('nan'); bad+=1
+  eraw=max(eraw,abs(dr-ell)/ell); enorm=max(enorm,abs(dn-ell)/ell)
+ print(r['nid'], 'a',rec['alpha'],'raw',f'{eraw:.3g}','normed',f'{enorm:.3g}','norm_range',f'{min(norms.values()):.3g}',f'{max(norms.values()):.3g}','bad',bad)
+PY" in /Users/doyle/Dropbox/projects/atlas
+ exited 1 in 0ms:
+Traceback (most recent call last):
+  File "<stdin>", line 4, in <module>
+  File "/Users/doyle/Dropbox/projects/atlas/builders/realize_h.py", line 14, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "find . -maxdepth 3 -type f \\( -path '*/bin/python' -o -path '*/bin/python3' \\) -print; command -v python3; rg -n \"numpy\" requirements* pyproject.toml setup.cfg 2>/dev/null" in /Users/doyle/Dropbox/projects/atlas
+ exited 1 in 0ms:
+/opt/homebrew/bin/python3
+zsh:1: no matches found: requirements*
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "command -v uv; command -v python; ls -la builders | sed -n '1,100p'; rg -n \"PYTHON|venv|numpy\" Makefile regen_personal.sh README.md TEAMWORK_V2_DESIGN.md 2>/dev/null" in /Users/doyle/Dropbox/projects/atlas
+ exited 2 in 0ms:
+/opt/homebrew/bin/uv
+/usr/local/bin/python
+total 632
+drwxr-xr-x@ 35 doyle  staff   1120 Jul 22 16:15 .
+drwxr-xr-x@ 18 doyle  staff    576 Jul 22 16:11 ..
+drwxr-xr-x@ 40 doyle  staff   1280 Jul 22 16:15 __pycache__
+drwxr-xr-x@  7 doyle  staff    224 Jul 14 22:48 assets
+-rw-r--r--@  1 doyle  staff   5483 Jul 21 18:23 classics.py
+-rw-r--r--@  1 doyle  staff   3826 Jul 21 18:23 classify.py
+-rw-r--r--@  1 doyle  staff   6969 Jul  9 21:24 clers_decode_src.py
+-rw-r--r--@  1 doyle  staff   3557 Jul  9 21:27 clers_tools.py
+-rw-r--r--@  1 doyle  staff   4338 Jul 21 18:18 climb_all.py
+-rw-r--r--@  1 doyle  staff   5338 Jul 14 19:25 conway.py
+-rw-r--r--@  1 doyle  staff   5107 Jul 21 18:23 decap_search.py
+-rw-r--r--@  1 doyle  staff  10573 Jul 14 18:35 eisenmap.py
+-rw-r--r--@  1 doyle  staff   4889 Jul 21 18:18 failure_frames.py
+-rw-r--r--@  1 doyle  staff   7787 Jul 21 18:18 failure_pages.py
+-rw-r--r--@  1 doyle  staff   1594 Jul 14 00:28 fetch_dents.py
+-rw-r--r--@  1 doyle  staff   2747 Jul 17 11:43 gen_ray.py
+-rwxr-xr-x@  1 doyle  staff  17224 Jul 11 23:38 glb.py
+-rw-r--r--@  1 doyle  staff   1885 Jul 14 00:26 harvest_themes.py
+-rw-r--r--@  1 doyle  staff   2687 Jul 21 18:18 hinge_sweep.py
+-rw-r--r--@  1 doyle  staff  13220 Jul 19 01:29 homepage.py
+-rwxr-xr-x@  1 doyle  staff  34744 Jul 17 11:42 horoz_c
+-rw-r--r--@  1 doyle  staff  13465 Jul 17 11:42 horoz_c.c
+-rw-r--r--@  1 doyle  staff   3395 Jul 21 18:23 icorel_sweep.py
+-rw-r--r--@  1 doyle  staff   5757 Jul 21 18:18 ideal_limit.py
+-rw-r--r--@  1 doyle  staff   5093 Jul 21 18:23 members.py
+-rw-r--r--@  1 doyle  staff  26876 Jul 22 16:15 personal.py
+-rw-r--r--@  1 doyle  staff   4854 Jul 22 15:35 realize_h.py
+-rw-r--r--@  1 doyle  staff   3529 Jul 21 18:23 recognize_sweep.py
+-rw-r--r--@  1 doyle  staff   4372 Jul 21 18:18 slice_solve.py
+-rw-r--r--@  1 doyle  staff   2945 Jul 17 11:25 smooth_glb.py
+-rw-r--r--@  1 doyle  staff  31573 Jul 22 15:35 special.py
+-rw-r--r--@  1 doyle  staff   3354 Jul 14 10:17 symmetry.py
+-rw-r--r--@  1 doyle  staff   8685 Jul 17 11:26 views.py
+-rw-r--r--@  1 doyle  staff   8048 Jul  9 19:51 walklib.py
+-rwxr-xr-x@  1 doyle  staff   6787 Jul 21 18:19 zenodo_dist.sh
+regen_personal.sh:7:# override with NEO_SRC. PYTHON must have numpy/scipy (bare python3 on this
+regen_personal.sh:10:PYTHON="${PYTHON:-python3.13}"
+regen_personal.sh:18:"$PYTHON" builders/classify.py
+regen_personal.sh:19:"$PYTHON" builders/members.py
+regen_personal.sh:20:"$PYTHON" builders/personal.py
+regen_personal.sh:21:"$PYTHON" builders/fetch_dents.py
+regen_personal.sh:22:"$PYTHON" builders/symmetry.py
+regen_personal.sh:23:"$PYTHON" builders/special.py
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "command -v python3.13; python3.13 -c 'import numpy; print(numpy.__version__)'" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+/usr/local/bin/python3.13
+2.4.4
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import csv,json,math,sys
+from pathlib import Path
+sys.path.insert(0,'builders')
+from realize_h import develop_h,mdot,side_length
+rows=list(csv.DictReader(open('notes/gate-calibration-20260722/edge_len.tsv'),delimiter='\\t'))
+rows=[r for r in rows if r['max_rel'] "'!= '"'None' and r['argmax_alpha'] "'!= '"'None']
+rows.sort(key=lambda r: float(r['max_rel']), reverse=True)
+for r in rows[:15]:
+ st=json.load(open(Path('data/bends')/(r['nid']+'.json'))); faces=[tuple(map(int,f.split(','))) for f in st['netcode'].split(';')]
+ rec=min(st['morph'],key=lambda x: abs(x['alpha']-float(r['argmax_alpha'])))
+ bd={tuple(map(int,k.split(','))):v for k,v in rec['bends'].items()}
+ pos,_,_=develop_h(faces,bd,math.radians(rec['alpha']))
+ norms={v:-mdot(x,x) for v,x in pos.items()}; ell=side_length(math.radians(rec['alpha'])); eraw=enorm=0.; bad=0
+ edges={tuple(sorted((f[i],f[(i+1)%3]))) for f in faces for i in range(3)}
+ for u,v in edges:
+  raw=-mdot(pos[u],pos[v]); den=norms[u]*norms[v]
+  dr=math.acosh(raw) if raw>1 else 0.
+  if den>0 and math.isfinite(den):
+   z=raw/math.sqrt(den); dn=math.acosh(max(1.,z))
+  else: dn=float('nan'); bad+=1
+  eraw=max(eraw,abs(dr-ell)/ell); enorm=max(enorm,abs(dn-ell)/ell)
+ print(r['nid'], 'a',f\"{rec['alpha']:.4g}\",'raw',f'{eraw:.3g}','normed',f'{enorm:.3g}','norm_range',f'{min(norms.values()):.3g}',f'{max(norms.values()):.3g}','bad',bad)
+PY" in /Users/doyle/Dropbox/projects/atlas
+ exited 1 in 0ms:
+Traceback (most recent call last):
+  File "<stdin>", line 12, in <module>
+  File "/Users/doyle/Dropbox/projects/atlas/builders/realize_h.py", line 91, in develop_h
+    D = place(pos[x], pos[y], pos[f0[(i + 2) % 3]], th)
+  File "/Users/doyle/Dropbox/projects/atlas/builders/realize_h.py", line 55, in place
+    M = norm_pt(A + B)
+  File "/Users/doyle/Dropbox/projects/atlas/builders/realize_h.py", line 22, in norm_pt
+    return x / math.sqrt(-mdot(x, x))
+               ~~~~~~~~~^^^^^^^^^^^^^
+ValueError: math domain error
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import csv,json,math,sys
+from pathlib import Path
+sys.path.insert(0,'builders')
+from realize_h import develop_h,mdot,side_length
+rows=list(csv.DictReader(open('notes/gate-calibration-20260722/edge_len.tsv'),delimiter='\\t'))
+rows=[r for r in rows if r['max_rel'] "'!= '"'None' and r['argmax_alpha'] "'!= '"'None']
+rows.sort(key=lambda r: float(r['max_rel']), reverse=True)
+shown=0
+for r in rows:
+ if shown>=20: break
+ st=json.load(open(Path('data/bends')/(r['nid']+'.json'))); faces=[tuple(map(int,f.split(','))) for f in st['netcode'].split(';')]
+ rec=min(st['morph'],key=lambda x: abs(x['alpha']-float(r['argmax_alpha'])))
+ bd={tuple(map(int,k.split(','))):v for k,v in rec['bends'].items()}
+ try: pos,_,_=develop_h(faces,bd,math.radians(rec['alpha']))
+ except Exception as e:
+  print(r['nid'], 'a',f\"{rec['alpha']:.4g}\",'DEVELOP',type(e).__name__); shown+=1; continue
+ norms={v:-mdot(x,x) for v,x in pos.items()}; ell=side_length(math.radians(rec['alpha'])); eraw=enorm=0.; bad=0
+ edges={tuple(sorted((f[i],f[(i+1)%3]))) for f in faces for i in range(3)}
+ for u,v in edges:
+  raw=-mdot(pos[u],pos[v]); den=norms[u]*norms[v]
+  dr=math.acosh(raw) if raw>1 else 0.
+  if den>0 and math.isfinite(den):
+   z=raw/math.sqrt(den); dn=math.acosh(max(1.,z))
+  else: dn=float('nan'); bad+=1
+  eraw=max(eraw,abs(dr-ell)/ell); enorm=max(enorm,abs(dn-ell)/ell)
+ print(r['nid'], 'a',f\"{rec['alpha']:.4g}\",'raw',f'{eraw:.3g}','normed',f'{enorm:.3g}','norm_range',f'{min(norms.values()):.3g}',f'{max(norms.values()):.3g}','bad',bad); shown+=1
+PY" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 801ms:
+v452h66b0eea56a6b673b a 2.1 DEVELOP ValueError
+v290h1a2f90bc498c4723 a 2.1 raw 1.03 normed 1.04 norm_range 0.8 1.02 bad 0
+v418h89ce987010a54cbd a 2.1 raw 0.995 normed 0.994 norm_range 0.82 5.06 bad 0
+v236hc60ae96a0a268dcd a 2.1 raw 0.98 normed 0.976 norm_range 0.953 1.06 bad 0
+v340hc710a10a3524ab46 a 2.1 raw 0.88 normed 0.881 norm_range 0.82 2.09 bad 0
+v191h0993a492513773bc a 2.1 raw 0.804 normed 0.807 norm_range 0.953 1.01 bad 0
+v506h1cd81128f5b89efd a 2.1 raw 0.802 normed 0.802 norm_range -2.34 1.81 bad 12
+v552hbdf5d5a762252e37 a 2.1 raw 0.802 normed 0.802 norm_range 0.806 864 bad 0
+v218h402a30a79d0fc4aa a 2.1 raw 0.784 normed 0.784 norm_range 0.469 1.02 bad 0
+v326h3013f2c13feab50a a 2.1 raw 0.773 normed 0.773 norm_range 0.812 1.04 bad 0
+v386h0d9207355457defd a 2.1 raw 0.768 normed 0.767 norm_range 0.25 2.04 bad 0
+v650h05db026f45f32a95 a 2.1 raw 0.752 normed 0.749 norm_range -4.5 91.2 bad 12
+v354h6a0cce6a517ee928 a 2.1 raw 0.746 normed 0.745 norm_range 0.984 1.58 bad 0
+v296hcb57467ec7a6dde6 a 2.1 raw 0.742 normed 0.741 norm_range 0.972 1.02 bad 0
+v202hb84cee6a728cdd59 a 2.1 raw 0.74 normed 0.739 norm_range 0.998 1.02 bad 0
+v244hdbc3e108e5770529 a 2.1 raw 0.732 normed 0.732 norm_range -0 3.38 bad 6
+v394h7a36d28c75939de2 a 2.1 raw 0.73 normed 0.73 norm_range 0.961 1.02 bad 0
+v452hdf751e9c22065e97 a 2.1 raw 0.73 normed 0.73 norm_range 0.971 1 bad 0
+v352h1f6724b95fe9acdb a 2.1 raw 0.73 normed 0.735 norm_range 0.857 1.11 bad 0
+v394h12be35569acb08a2 a 2.1 raw 0.721 normed 0.721 norm_range 0.875 2 bad 0
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import csv,json,math,sys
+from pathlib import Path
+sys.path.insert(0,'builders')
+from realize_h import develop_h,mdot,side_length
+rows=list(csv.DictReader(open('notes/gate-calibration-20260722/edge_len.tsv'),delimiter='\\t'))
+rows=[r for r in rows if r['max_rel'] not in ('None','inf') and r['argmax_alpha']"'!='"'None' and .002<float(r['max_rel'])<.05]
+rows.sort(key=lambda r: float(r['max_rel']))
+print('cases',len(rows))
+for r in rows:
+ st=json.load(open(Path('data/bends')/(r['nid']+'.json'))); faces=[tuple(map(int,f.split(','))) for f in st['netcode'].split(';')]; rec=min(st['morph'],key=lambda x: abs(x['alpha']-float(r['argmax_alpha']))); bd={tuple(map(int,k.split(','))):v for k,v in rec['bends'].items()}; pos,_,_=develop_h(faces,bd,math.radians(rec['alpha'])); norms={v:-mdot(x,x) for v,x in pos.items()}; ell=side_length(math.radians(rec['alpha'])); eraw=enorm=0.
+ edges={tuple(sorted((f[i],f[(i+1)%3]))) for f in faces for i in range(3)}
+ for u,v in edges:
+  raw=-mdot(pos[u],pos[v]); dr=math.acosh(raw) if raw>1 else 0.; z=raw/math.sqrt(norms[u]*norms[v]); dn=math.acosh(max(1.,z)); eraw=max(eraw,abs(dr-ell)/ell); enorm=max(enorm,abs(dn-ell)/ell)
+ print(f\"{eraw:.8g} {enorm:.8g} {min(norms.values()):.6g} {max(norms.values()):.6g} {r['nid']}\")
+PY" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 168ms:
+cases 10
+0.0025670552 0.0025672341 0.999994 1.00002 v66CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACAACACACAACACADECACACAACACAACACAACAACACAACAACAAACAAE
+0.0044824508 0.0044816161 0.999988 1.00001 v132h1603e125d77882ba
+0.0045609791 0.004559429 0.999947 1.00005 v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACACACACAACCACACAACACACACACACACACACACAACCACACAACACACACACACACACACAACCACACAACACACACACACACACAABCACADEACADEADEE
+0.0072487959 0.0072468882 0.999634 1.00117 v88CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACABCACACACACACABCACACACACACABABCACACADEACACADEACADEADEE
+0.010911384 0.010911384 0.999962 1.00006 v116h36e5646efec1b226
+0.019356261 0.019366277 0.998291 1.00098 v106hb125deb358f972a7
+0.027716497 0.027720312 0.998138 1.00009 v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACABABACACACCACACABABABACACCACACABABABACADEADEE
+0.028885245 0.029372442 0.999512 1.00586 v99CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACACCACACACACACACACAABABABABABABABABE
+0.031095277 0.03109367 0.999973 1.00006 v102he593564ce5c632e4
+0.03607483 0.036079122 0.999943 1.00009 v114hbbc5b9238e0f042a
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import numpy as np, math, random
+random.seed(1)
+for k in range(3,8):
+ for trial in range(100000):
+  ang=[random.random()*2*math.pi for _ in range(k)]
+  eps=1e-14
+  dirs=[]
+  for a in ang:
+   d=np.array([math.cos(a),math.sin(a),eps*random.uniform(-1,1)])
+   dirs.append(d/np.linalg.norm(d))
+  nums=[]; dens=[]
+  for i in range(k):
+   A,B,C=dirs[i-1],dirs[i],dirs[(i+1)%k]
+   nums.append(float(B@np.cross(A,C)))
+   dens.append(float((A@B)*(B@C)-(A@C)))
+  turn=sum(math.atan2(n,d) for n,d in zip(nums,dens))
+  if turn < -1e-6 and max(map(abs,nums)) < 1e-12:
+   print('angles_deg',*[round(math.degrees(a),3) for a in ang])
+   print('z/1e-14',*[round(d[2]/eps,3) for d in dirs])
+   print('maxnum',max(map(abs,nums)),'turn',turn)
+   print('nums',nums); print('dens',dens)
+   raise SystemExit
+PY" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+angles_deg 48.371 305.076 274.959
+z/1e-14 -0.49 -0.009 -0.101
+maxnum 3.3747718522158186e-15 turn -6.283185307179579
+nums [-3.3747718522158186e-15, -3.3747718522158183e-15, -3.3747718522158186e-15]
+dens [-0.7069585978380504, 0.48832369975876, -0.36450077994039976]
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import math
+for ell,s in [(1,.9),(.5,.9),(.1,.9)]:
+ d=math.acosh(math.cosh(ell)/(s*s))
+ print(ell,s,d,(d-ell)/ell)
+PY" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+1 0.9 1.2603084571738592 0.2603084571738592
+0.5 0.9 0.8589367476271347 0.7178734952542694
+0.1 0.9 0.6806791405480505 5.806791405480505
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "sed -n '1,80p' regen_personal.sh; sed -n '1,120p' builders/views.py; rg -n \"morph_p|morph_k|artifacts\" builders/views.py | head -n 50; find . -maxdepth 2 -name 'TEAMWORK*.md' -print" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+#!/bin/bash
+# Regenerate the personal pages from scratch. Everything is derived from
+# builders/ + data/nets_v4_14.txt; solver binaries are built if missing.
+set -u
+cd "$(dirname "$0")"
+# neo is a sibling of atlas since the 2026-07-21 move (was the parent);
+# override with NEO_SRC. PYTHON must have numpy/scipy (bare python3 on this
+# box is 3.14 without them; the builders run under 3.13).
+NEO="${NEO_SRC:-$(cd .. && pwd)/neo}"
+PYTHON="${PYTHON:-python3.13}"
+
+[ -x "$NEO/bendprover/csrc/euclid_lm_mp" ] || make -C "$NEO/bendprover/csrc" euclid_lm_mp
+[ -x builders/horoz_c ] || cc -O2 -o builders/horoz_c builders/horoz_c.c -lm
+
+/bin/rm -rf site/personal
+# classification sweep (from neo/data/objs, ~2 min) and the page-worthy
+# list; then records+artifacts+pages; then galleries/by-v/front
+"$PYTHON" builders/classify.py
+"$PYTHON" builders/members.py
+"$PYTHON" builders/personal.py
+"$PYTHON" builders/fetch_dents.py
+"$PYTHON" builders/symmetry.py
+"$PYTHON" builders/special.py
+#!/usr/bin/env python3
+"""View layer: render a net's index.html from its net.json record.
+
+The record is the database; this file is the only place that knows
+what a net's homepage looks like. Rerun over all records to change
+the display (python3 builders/views.py re-renders every page under
+site/personal/nets/).
+"""
+import hashlib, json, os, sys
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+TOP = os.path.dirname(HERE)
+OUT = os.path.join(TOP, "site", "personal")
+
+
+def net_id(V, clers):
+    """directory key for a net: the v-prefixed name when it fits the
+    filesystem (255-byte path components; v=128 names hit 256), else a
+    hashed key. Display names always come from the record, never from
+    the key."""
+    full = f"v{V}{clers}"
+    if len(full) <= 200:
+        return full
+    return f"v{V}h" + hashlib.sha1(clers.encode()).hexdigest()[:16]
+
+
+def display(name, cap=44):
+    """elide long display names for gallery captions."""
+    return name if len(name) <= cap else name[:cap - 12] + '&hellip;' + name[-8:]
+
+STYLE = ("body{font-family:Georgia,serif;max-width:680px;margin:2em auto;"
+         "line-height:1.6;color:#222;padding:0 1em}"
+         "h1{font-family:monospace;font-size:1.2em;word-break:break-all}"
+         "nav{font-size:.9em}nav a{color:#2255aa;text-decoration:none}"
+         "nav a:hover{text-decoration:underline}"
+         ".info{font-size:.9em;color:#555;margin:-.5em 0 .5em}"
+         ".flags{font-size:.85em;color:#777;margin:0 0 .5em}"
+         ".hint{font-size:.8em;color:#aaa;font-style:italic;margin-bottom:1em}"
+         ".pair{display:grid;grid-template-columns:1fr 1fr;gap:.8em;margin-bottom:1em}"
+         ".cell{position:relative;width:100%;padding-bottom:100%}"
+         ".cell iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}"
+         ".cell .svgwrap{position:absolute;top:0;left:0;width:100%;height:100%;"
+         "display:flex;align-items:center;justify-content:center;"
+         "border:1px solid #ddd;box-sizing:border-box}"
+         ".cell .svgwrap img{max-width:90%;max-height:90%}"
+         ".label{text-align:center;font-size:.8em;color:#888;margin-top:.2em}"
+         "a{color:#2255aa}")
+
+
+def netlink(name):
+    """name -> link to its page (recomputes the id rule)."""
+    i = 1
+    while i < len(name) and name[i].isdigit():
+        i += 1
+    V, clers = int(name[1:i]), name[i:]
+    return f'<a href="../{net_id(V, clers)}/">{display(name, 28)}</a>'
+
+
+def flag_line(rec):
+    fl = rec.get("flags", {})
+    bits = []
+    if fl.get("pancake"):
+        bits.append("pancake")
+    elif fl.get("strictly_convex"):
+        bits.append("strictly convex")
+    elif fl.get("convex"):
+        bits.append("convex")
+    if fl.get("buried"):
+        bits.append(f'{fl["buried"]} buried '
+                    f'vert{"ex" if fl["buried"] == 1 else "ices"} '
+                    f'(depth {fl.get("buried_depth", 0):.3f})')
+    if fl.get("floppy"):
+        bits.append("floppy")
+    if fl.get("conway") and fl.get("conway") != '1':
+        bits.append(f'symmetry {fl["conway"]}')
+    if rec.get("maxdeg", 6) > 6:
+        bits.append(f'max degree {rec["maxdeg"]} &mdash; no Euclidean '
+                    f'realization; hyperbolic up to '
+                    f'&alpha; = 360/{rec["maxdeg"]}')
+    ei = rec.get("eisenstein", {})
+    if ei.get("family"):
+        bits.append(f'Eisenstein: {ei["family"]} T={ei["T"]} '
+                    f'({ei["a"]},{ei["b"]})')
+    return " &middot; ".join(bits)
+
+
+_LEADERS = None
+
+
+def family_leader_id(fam):
+    """net id of the family's (1,0) unit, from data/eisenstein.tsv."""
+    global _LEADERS
+    if _LEADERS is None:
+        _LEADERS = {}
+        import csv
+        p = os.path.join(TOP, "data", "eisenstein.tsv")
+        if os.path.exists(p):
+            for r in csv.DictReader(open(p), delimiter='\t'):
+                if r['a'] == '1' and r['b'] == '0':
+                    name = r['name']
+                    i = 1
+                    while i < len(name) and name[i].isdigit():
+                        i += 1
+                    _LEADERS[r['family']] = net_id(int(name[1:i]), name[i:])
+    return _LEADERS.get(fam)
+
+
+def render_page(netdir):
+    rec = json.load(open(os.path.join(netdir, "net.json")))
+    name, V = rec["name"], rec["v"]
+    nid = rec.get("id", name)
+    art = rec.get("artifacts", {})
+
+    def cell_iframe(src, label):
+        return (f'<div><div class=cell><iframe src="{src}"></iframe></div>'
+                f'<div class=label>{label}</div></div>')
+
+    def cell_svg(fname, label):
+        return (f'<div><div class=cell><div class=svgwrap>'
+                f'<img src="{fname}" alt="{label}"></div></div>'
+112:    art = rec.get("artifacts", {})
+144:    if art.get("morph_p"):
+150:        body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb{lab}',
+152:                 cell_iframe(f'../../morph.html?file=nets/{nid}/morph_k.glb{lab}',
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3.13 - <<'PY'
+import csv,math
+rows=list(csv.DictReader(open('notes/gate-calibration-20260722/dent_turn.tsv'),delimiter='\\t'))
+for col in ('hero_min_turn','morph_min_turn'):
+ vals=[]
+ for r in rows:
+  s=r[col]
+  if s"'!='"'None':
+   x=float(s)
+   if x>1e-12: vals.append((x,r['nid']))
+ print(col, len(vals), min(vals) if vals else None)
+PY
+sed -n '135,165p' builders/views.py" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+hero_min_turn 2103 (3.0146194847831837e-07, 'v177h9a146be2ce10951e')
+morph_min_turn 2191 (0.10006240667536948, 'v164he26c84ccf7059402')
+            '<div class=pair>']
+    amax = rec.get("alpha_max")
+    if art.get("rb"):
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/rb.glb',
+                                'Euclidean' if not amax else
+                                f'hyperbolic, Klein model, '
+                                f'&alpha;={amax:.2f}&deg;'))
+    # 2x2 block:  Euclidean | Poincare morph
+    #             Klein morph | ideal net
+    if art.get("morph_p"):
+        lab = ''
+        end = 'Euclidean'
+        if amax:
+            lab = '&labels=' + ','.join(rec.get("morph_labels", []))
+            end = f'&alpha;={amax:.2f}&deg;'
+        body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb{lab}',
+                             f'ideal to {end}, Poincar&eacute;'),
+                 cell_iframe(f'../../morph.html?file=nets/{nid}/morph_k.glb{lab}',
+                             f'ideal to {end}, Klein')]
+    if art.get("ideal_net"):
+        body.append(cell_svg('ideal_net.svg', 'ideal net'))
+    body.append('</div>')
+    body.append('<div class=pair>')
+    if os.path.exists(os.path.join(netdir, "smooth.glb")):
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/smooth.glb',
+                                'smooth shading (no edges)'))
+    if art.get("clers_glb"):
+        body.append(cell_iframe(f'../../turntable.html?file=nets/{nid}/clers.glb',
+                                'CLERS colored'))
+    if art.get("clers_layout"):
+        body.append(cell_svg('clers_layout.svg', 'CLERS layout'))
+
+codex
+REVISE
+
+- `side_length(alpha)`, edge enumeration, link formula, and ring orientation match `dent_check.c`; positive turning means undented.
+- Klein post-centering is the correct frame for the Klein rendering. Euclidean centering/alignment preserves lengths and link turning.
+- `acosh(-mdot(u,v))` is valid only for unit future-timelike vectors. The code neither normalizes nor validates that invariant. Counterexample: scaling both endpoints by 0.9 can make the raw gate report `ell=1` while the displayed rays are distance `1.2603`, a 26% error. Normalize by `sqrt((-mdot(u,u))(-mdot(v,v)))`, rejecting nonfinite/non-timelike inputs.
+- Validate after `center`, including finite Klein coordinates; centering currently occurs after certification.
+- The coplanar skip can mask a real near-flat dent. I reproduced a three-neighbor link with `max|B·(A×C)|=3.37e-15` and turning `-2π`; the `1e-12` skip accepts it.
+- Therefore either restrict skipping to independently certified flat vertices, or explicitly redefine the invariant as “undented modulo 1e-12 planarity” and record this false-negative region. The present claim that the skip cannot hide a dent is unsupported.
+- `1e-9` turning tolerance is well separated from the measured `+3.0146e-7` genuine margin and `~1e-16` noise. The `1e-12` coplanarity tolerance lacks calibration against the smallest nondegenerate triple product.
+- Nonfinite Euclidean lengths and dent values can pass because comparisons with NaN are false. Add explicit `isfinite` rejection.
+- Existing hero/morph artifacts bypass both gates. A partial stale `morph_p.glb` is enough for `views.py` to render both viewers. Gate reuse through a certificate or recertify, and require both artifacts.
+- Hero exceptions are caught by `build_net`; `main` still exits successfully. If “dented hero raises” means a hard build failure, return nonzero when failures exist.
+- The gates still miss global self-intersection and corruption introduced in subdivision/Poincaré conversion; declare those out of scope or add artifact-level checks.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+90,565
+REVISE
+
+- `side_length(alpha)`, edge enumeration, link formula, and ring orientation match `dent_check.c`; positive turning means undented.
+- Klein post-centering is the correct frame for the Klein rendering. Euclidean centering/alignment preserves lengths and link turning.
+- `acosh(-mdot(u,v))` is valid only for unit future-timelike vectors. The code neither normalizes nor validates that invariant. Counterexample: scaling both endpoints by 0.9 can make the raw gate report `ell=1` while the displayed rays are distance `1.2603`, a 26% error. Normalize by `sqrt((-mdot(u,u))(-mdot(v,v)))`, rejecting nonfinite/non-timelike inputs.
+- Validate after `center`, including finite Klein coordinates; centering currently occurs after certification.
+- The coplanar skip can mask a real near-flat dent. I reproduced a three-neighbor link with `max|B·(A×C)|=3.37e-15` and turning `-2π`; the `1e-12` skip accepts it.
+- Therefore either restrict skipping to independently certified flat vertices, or explicitly redefine the invariant as “undented modulo 1e-12 planarity” and record this false-negative region. The present claim that the skip cannot hide a dent is unsupported.
+- `1e-9` turning tolerance is well separated from the measured `+3.0146e-7` genuine margin and `~1e-16` noise. The `1e-12` coplanarity tolerance lacks calibration against the smallest nondegenerate triple product.
+- Nonfinite Euclidean lengths and dent values can pass because comparisons with NaN are false. Add explicit `isfinite` rejection.
+- Existing hero/morph artifacts bypass both gates. A partial stale `morph_p.glb` is enough for `views.py` to render both viewers. Gate reuse through a certificate or recertify, and require both artifacts.
+- Hero exceptions are caught by `build_net`; `main` still exits successfully. If “dented hero raises” means a hard build failure, return nonzero when failures exist.
+- The gates still miss global self-intersection and corruption introduced in subdivision/Poincaré conversion; declare those out of scope or add artifact-level checks.

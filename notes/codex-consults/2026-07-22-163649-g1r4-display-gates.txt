@@ -1,0 +1,965 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8b8b-99eb-71b2-9e72-6ab22183cc9b
+--------
+user
+G1 round 4 (atlas display gates). Round-3 residuals were: reuse certifies a reconstruction not the served bytes; storeless heroes uncertified; no executed failing-exit test. Resolutions in bundle: reuse eliminated entirely (always regenerate from committed bends through the gates; deterministic), deg-7 heroes edge-gated, executed tests including a corrupted-store test that exposed and fixed a euclid closure-vacuousness hole (walklib.develop computes no closure; kept edges unit by construction), supplementary hyperbolic closure gate, and a final sweep in which the normalized metric caught one production net 57 percent off-hyperboloid that the old metric passed. Audit ONLY: are the round-3 residuals resolved, and do the new closure gates / always-regenerate introduce defects. First line exactly one of: APPROVE / REVISE / BLOCK. Max 20 lines.
+
+<stdin>
+=== G1 ROUND 4: round-3 residual resolution ===
+Round-3 residuals: (i) certify-reconstruction-vs-reuse-artifact gap; (ii) storeless heroes uncertified; (iii) finding 6 lacked an executed failing test.
+Resolutions:
+(i,ii) REUSE ELIMINATED: build_net always regenerates every displayed artifact from committed bends through the gates (regeneration measured byte-deterministic). Storeless => producer path (solve+persist). Deg-7 fresh heroes now edge-gated too.
+(iii) Tests EXECUTED, transcript below -- including one that EXPOSED a further gate hole (euclid rigid placement => edge lengths unit by construction; closure never computed by walklib.develop), now fixed with euclid_closure_resid over all directed adjacencies + a supplementary hyperbolic closure gate.
+
+--- build_net (always-regenerate region) ---
+    # Displayed artifacts are ALWAYS regenerated through the gates from
+    # the committed bends (G1 r3): certifying a reconstruction while
+    # reusing on-disk GLBs proves nothing about the bytes actually
+    # served, and regeneration is deterministic (measured byte-stable),
+    # so no reuse optimization is worth that hole. Store present =>
+    # store-only; no store => producer mode (solve + persist).
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+    if store:
+        bends = store["hero"]
+    elif maxdeg <= 6:
+        bends = solve_prove_60(nc)
+    else:
+        bends = solve_alpha(nc, amax)
+    if bends is None:
+        return (vname, "SOLVE-FAIL")
+    if not store:
+        hero_bends = bends
+    if maxdeg <= 6:
+        glb_euclid(name, faces, V, bends, netdir)
+    else:
+        bd = {tuple(sorted(e)): b for e, b in bends.items()}
+        posh, herr, hok = develop_h_certified(faces, bd, math.radians(amax))
+        if not hok:                  # deg-7 hero edge gate (G1 r3)
+            raise RuntimeError(f"hero fails edge gate ({herr:.2e})")
+        K = klein(posh)              # posh already centered (displayed)
+        glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
+                 bends=bd)
+    morph_note, morph_bends = None, None
+    if not morphs:
+        built = "skipped (morphs=False)"          # generation-time opt-out
+    else:
+        for fn in ("morph_p.glb", "morph_k.glb"):
+            try:
+                os.remove(os.path.join(netdir, fn))
+            except FileNotFoundError:
+                pass
+        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
+                                                      alphas=alphas, euclid_end=(maxdeg <= 6),
+                                                      stored=store)
+        built = (f"omitted ({morph_note})" if morph_note
+--- euclid_closure_resid + glb_euclid tripwires ---
+def euclid_closure_resid(faces, bd, pos):
+    """Max mismatch between every face's apex as re-placed from its
+    neighbor (walklib.develop's placement formula) and the kept position.
+    Rigid placement makes KEPT edge lengths unit by construction, so bad
+    bends surface only here (proven by the corrupted-store test, G1 r3):
+    walklib.develop skips revisited faces without comparing, computing no
+    residual at all. Checked over ALL directed adjacencies, a superset of
+    any single BFS's closure events. Edge scale is 1, so this bounds the
+    true edge-length error of the displayed configuration."""
+    apex = {}
+    for a, b, c in faces:
+        apex[(a, b)] = c; apex[(b, c)] = a; apex[(c, a)] = b
+    r = 0.0
+    for f0 in faces:
+        for i in range(3):
+            x, y = f0[i], f0[(i + 1) % 3]
+            d = apex[(y, x)]
+            A, B, P = pos[x], pos[y], pos[f0[(i + 2) % 3]]
+            M = 0.5 * (A + B)
+            w = P - M
+            w = w / np.linalg.norm(w)
+            n = np.cross(w, B - A)
+            n = n / np.linalg.norm(n)
+            th = bd[tuple(sorted((x, y)))]
+            D = M + (math.sqrt(3) / 2) * (-math.cos(th) * w + math.sin(th) * n)
+            r = max(r, float(np.max(np.abs(D - pos[d]))))
+    return r
+
+
+def glb_euclid(name, faces, V, bends, outdir):
+    bd = {tuple(sorted(e)): b for e, b in bends.items()}
+    pos, _ = develop(faces, bd)
+    # hero tripwires: closure AND edge lengths AND undented display
+    cres = euclid_closure_resid(faces, bd, pos)
+    eerr = max(abs(float(np.linalg.norm(pos[u] - pos[v])) - 1.0)
+               for u, v in _edges_of(faces))
+    mt, dbad = display_min_turn(pos, link_rings(faces), bd)
+    if not (math.isfinite(eerr) and math.isfinite(cres)) \
+            or cres > EDGE_LEN_TOL or eerr > EDGE_LEN_TOL or dbad \
+            or mt < -DENT_TURN_TOL:
+        raise RuntimeError(
+            f"hero fails display gates (closure {cres:.2e}, "
+            f"eerr {eerr:.2e}, min turn {mt:.2e})")
+    verts = [tuple(map(float, pos[v])) for v in range(1, V + 1)]
+    fidx = [(a - 1, b - 1, c - 1) for a, b, c in faces]
+    v2, f2, mats = retreat_to_incenter(verts, fidx, 0.9)
+    write_gltf_like(os.path.join(outdir, "rb.glb"), v2, f2, mats)
+    write_gltf_like(os.path.join(outdir, "smooth.glb"), verts, fidx)
+    # CLERS coloring: retreat emits 7 faces per original (6 border, 1 center)
+    groups = [(BLACK, [f2[k] for k in range(len(f2)) if mats[k] == "border"])]
+    for L, rgb in RGB.items():
+        gf = [f2[7 * i + 6] for i, ch in enumerate(name) if ch == L]
+        if gf:
+            groups.append((rgb, gf))
+    write_gltf_groups(os.path.join(outdir, "clers.glb"), v2, groups)
+
+
+## geometric from the ideal end, then a linear tail so the arrival at 60
+## is even-paced (shape change near Euclid scales like 60 - alpha)
+MORPH_ALPHAS = ([60.0 - 57.9 * (0.87 ** i) for i in range(0, 24, 3)]
+                + [58.0, 59.0])  # 2.1 .. 56.9, 58, 59 (then exact 60)
+SUBDIV = 10
+
+
+def bary_grid(n):
+    """barycentric weights + triangle pattern for one subdivided face,
+    wound consistently with the face's (a, b, c) orientation."""
+    pts, idx = [], {}
+    for i in range(n + 1):
+        for j in range(n + 1 - i):
+            idx[(i, j)] = len(pts)
+            pts.append(((n - i - j) / n, i / n, j / n))
+    tris = []
+    for i in range(n):
+        for j in range(n - i):
+            a, b, c = idx[(i, j)], idx[(i + 1, j)], idx[(i, j + 1)]
+            tris.append((a, b, c))
+            if j < n - i - 1:
+                tris.append((b, idx[(i + 1, j + 1)], c))
+    return pts, tris
+
+
+def subdivided_frame(faces, P, grid):
+    """sample each face on the barycentric grid, linearly in the given
+    3d coordinates (in Klein, chords are geodesics, so the linear
+    samples lie on the hyperbolic face; in Euclidean they lie on the
+    flat face). Returns (verts, tris) with per-face vertex blocks."""
+    wts, pat = grid
+    verts, tris = [], []
+    for a, b, c in faces:
+        base = len(verts)
+        A, B, C = P[a], P[b], P[c]
+        for wa, wb, wc in wts:
+            verts.append((wa * A[0] + wb * B[0] + wc * C[0],
+                          wa * A[1] + wb * B[1] + wc * C[1],
+                          wa * A[2] + wb * B[2] + wc * C[2]))
+        tris += [(base + i, base + j, base + k) for i, j, k in pat]
+    return verts, tris
+
+
+def klein_to_poincare(verts):
+    out = []
+    for x, y, z in verts:
+        q = math.sqrt(max(0.0, 1.0 - (x * x + y * y + z * z)))
+        s = 1.0 / (1.0 + q)
+        out.append((x * s, y * s, z * s))
+    return out
+
+
+def align_frames(frames):
+    """remove the spurious rigid rotation between consecutive frames
+    (each is developed and centered independently), anchoring at the
+    LAST frame: the Euclidean end keeps the flat developer's own
+    coordinates -- the same frame the red-black GLB is built in -- and
+    each earlier frame is rotated onto its successor (best-fit proper
+    rotation via SVD, the standard point-set superposition recipe)."""
+    import numpy as np
+    n = len(frames)
+    out = [None] * n
+    out[-1] = np.asarray(frames[-1], float)
+    for k in range(n - 2, -1, -1):
+        A = np.asarray(frames[k], float)
+        A = A - A.mean(axis=0)
+        B = out[k + 1] - out[k + 1].mean(axis=0)
+        U, _, Vt = np.linalg.svd(A.T @ B)
+        d = 1.0 if np.linalg.det(U @ Vt) > 0 else -1.0
+        R = U @ np.diag([1.0, 1.0, d]) @ Vt
+        out[k] = A @ R
+    return [[tuple(v) for v in F] for F in out]
+
+
+# Length-fidelity gate (PD spec 2026-07-22, final): every edge of a
+# displayed frame must have the length it is supposed to have, within 1%.
+# Hyperbolic frames: every edge of every equilateral face has exact
+# hyperbolic length ell(alpha) (realize_h.side_length); the metric is
+# max over edges of |d_H(u,v) - ell| / ell, with d_H = acosh(-mdot).
+# Euclidean end frame: every edge has length 1; max |len - 1|.
+# Accumulated development divergence lands exactly here: edges whose
+# endpoints arrive via different development paths inherit the drift.
+EDGE_LEN_TOL = 1e-2
+
+
+def _edges_of(faces):
+    return {tuple(sorted((a, b))) for f in faces
+            for a, b in zip(f, f[1:] + f[:1])}
+
+
+# Undented display gate (PD 2026-07-22: "make sure what we display is
+# actually undented"). dent_index link-turning check (port of
+# undented/src/dent_check.c inner loop -- turning per vertex, NEVER
+# volume sign) run on the displayed coordinates themselves. Degenerate
+# case, measured 2026-07-22 on the v12 pancake: an exactly-coplanar
+# vertex link makes every triple product B.(AxC) exact-zero, and where
+# den < 0 the atan2 lands on the branch cut -- +-pi decided by 1e-17
+# rounding noise, so per-vertex totals {-2pi, 0, +2pi} are branch picks,
+# not geometry. Such vertices are excluded: a dent needs non-planarity,
+# and a coplanar link is the flat degenerate boundary (pancakes). Their
+# flatness is already certified by the solved bends (all-plus turning
+# system). Calibration over all 2245 stores
+# (notes/gate-calibration-20260722/dent_turn.tsv): every displayed hero
+# and morph frame passes; tightest genuine margin +3.0e-7; noise floor
+# ~1e-16.
+DENT_TURN_TOL = 1e-9        # reject a displayed frame if min turn < -this
+COPLANAR_NUM_TOL = 1e-12    # all |B.(AxC)| below this => degenerate vertex
+FLAT_BEND_TOL = 1e-6        # bend within this of {0, +-pi} counts as flat/fold
+
+
+def link_rings(faces):
+    """vertex -> cyclic neighbor ring, from the face structure."""
+    succ = {}
+    for a, b, c in faces:
+        succ.setdefault(a, {})[b] = c
+        succ.setdefault(b, {})[c] = a
+        succ.setdefault(c, {})[a] = b
+    rings = {}
+    for v, nxt in succ.items():
+        start = next(iter(nxt))
+        ring, cur = [start], nxt[start]
+        while cur != start:
+            ring.append(cur)
+            cur = nxt[cur]
+        rings[v] = ring
+    return rings
+
+
+def display_min_turn(pos, rings, bends=None):
+    """(min_turn, bad) over the displayed positions. min_turn is the
+    minimum link turning over non-degenerate vertices (+inf if none).
+
+    G1 revision (consult 2026-07-22-161343): a coplanar-degenerate vertex
+    (all |B.(AxC)| < COPLANAR_NUM_TOL, where the atan2 branch is noise)
+    is SKIPPED only when its flatness is independently certified by the
+    solved bends -- every incident bend within FLAT_BEND_TOL of 0 or
+    +-pi, the doubled-flat/pancake signature. A coplanar link WITHOUT
+    that certificate may hide a near-flat dent, so bad=True and the
+    caller must reject the frame. Nonfinite coordinates or turning sums
+    also set bad=True.
+    """
+    mt, bad = float('inf'), False
+    for v, ring in rings.items():
+        k = len(ring)
+        if k < 3:
+            continue
+        dirs = []
+        for nb in ring:
+            d = np.asarray(pos[nb], float) - np.asarray(pos[v], float)
+            n = float(np.linalg.norm(d))
+            if not math.isfinite(n):
+                bad = True
+                break
+            dirs.append(d / (n if n > 1e-15 else 1e-15))
+        else:
+            nums, dens = [], []
+            for i in range(k):
+                A, B, C = dirs[(i - 1) % k], dirs[i], dirs[(i + 1) % k]
+                nums.append(float(np.dot(B, np.cross(A, C))))
+                dens.append(float(np.dot(A, B) * np.dot(B, C) - np.dot(A, C)))
+            if max(abs(x) for x in nums) < COPLANAR_NUM_TOL:
+                flat_ok = bends is not None
+                if flat_ok:
+                    for nb in ring:
+                        b = bends.get(tuple(sorted((v, nb))))
+                        # a MISSING bend is uncertified, never flat (G1 r2)
+                        if b is None or not (abs(b) < FLAT_BEND_TOL
+                                             or abs(abs(b) - math.pi) < FLAT_BEND_TOL):
+                            flat_ok = False
+                            break
+                if not flat_ok:
+                    bad = True       # degenerate link, flatness uncertified
+                continue
+            t = sum(math.atan2(n_, d_) for n_, d_ in zip(nums, dens))
+            if not math.isfinite(t):
+                bad = True
+                continue
+            mt = min(mt, t)
+            continue
+        break                        # nonfinite direction: stop, frame bad
+    return mt, bad
+
+
+def develop_h_certified(faces, bd, alpha_rad, edges=None):
+    """develop_h -> center -> edge-length gate ON THE CENTERED (displayed)
+    coordinates. Returns (pos_centered, err, ok), err = max relative
+    hyperbolic edge-length error vs ell(alpha).
+
+    G1 revisions (consult 2026-07-22-161343): the distance is the
+    NORMALIZED form d_H = acosh(-mdot(u,v)/sqrt((-mdot(u,u))(-mdot(v,v))))
+    -- the raw acosh(-mdot) is valid only on exact unit timelike vectors
+    and silently mis-measures off-hyperboloid drift; every point must be
+    finite, timelike (-mdot(x,x) > 0), and future (x4 > 0); certification
+    runs after center() so it validates exactly what is rendered.
+
+    A numerical blow-up anywhere (off-hyperboloid sqrt in develop/center,
+    nonfinite coordinates) is a hard rejection (err = inf), never a crash.
+    """
+    from realize_h import mdot, side_length
+    try:
+        raw, hresid, _ = develop_h(faces, bd, alpha_rad)
+        # supplementary closure gate (G1 r3): rigid placement can keep
+        # edge lengths near-exact while paths disagree; the development's
+        # own closure residual, relative to the raw coordinate scale,
+        # bounds that disagreement. Calibrated: v<=30 max relative
+        # closure 5.3e-4 (rel_v50.tsv) -- 1e-2 changes no verdicts.
+        scale = max(1.0, max(float(np.max(np.abs(x))) for x in raw.values()))
+        if not math.isfinite(hresid) or hresid > EDGE_LEN_TOL * scale:
+            return None, float('inf'), False
+        posh = center(raw)
+        ell = side_length(alpha_rad)
+        norm2 = {}
+        for v, x in posh.items():
+            q = -mdot(x, x)
+            if not (math.isfinite(q) and q > 0.0 and float(x[3]) > 0.0):
+                return None, float('inf'), False
+            norm2[v] = q
+        err = 0.0
+        for u, v in (edges or _edges_of(faces)):
+            m = -mdot(posh[u], posh[v]) / math.sqrt(norm2[u] * norm2[v])
+            if not math.isfinite(m):
+                return None, float('inf'), False
+            dh = math.acosh(m) if m > 1.0 else 0.0
+            err = max(err, abs(dh - ell) / ell)
+        if not math.isfinite(err):
+            return None, float('inf'), False
+    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
+        return None, float('inf'), False
+    return posh, err, err <= EDGE_LEN_TOL
+
+
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+               stored=None, write=True):
+    """Two animated morph GLBs (Poincare, Klein): ideal end first, then
+    either the exact Euclidean solid (alpha_max = 60) or the hyperbolic
+    realization at the final rung (degree-7 nets: alpha_max = 360/maxdeg).
+
+    Consumer mode: when `stored` (the data/bends record: {"hero": bd,
+    "morph": {rounded-alpha: bd}}) provides a rung, its bends are used and
+    the solver is never invoked for it -- the deterministic no-solver
+    build path. Missing rungs fall back to the solver (producer mode) and
+    are returned in `solved` for persistence.
+
+    Every develop_h frame is certified (develop_h_certified, Klein-length
+    gate). If any frame fails, NO GLB is written and a reason is returned
+    -- never a partial or silently-broken morph. Returns (nframes, note,
+    solved). The euclidean end frame uses the flat developer
+    (walklib.develop), which the v506 diagnosis exonerated, so it is not
+    gated here.
+    """
+    grid = bary_grid(SUBDIV)
+    fp, fk, tris = [], [], None
+    solved = {}                     # alpha -> bend dict, freshly solved only
+    edges = _edges_of(faces)
+    rings = link_rings(faces)
+    for a in (alphas or MORPH_ALPHAS):
+        bd = (stored or {}).get("morph", {}).get(round(a, 6))
+        if bd is None:
+            if stored is not None:
+                # store present => store-only (G1 r2): never fall back to
+                # the solver, neither in certify-only nor in build mode --
+                # an incomplete store means the morphs stay unbuilt.
+                return 0, f"store incomplete at alpha={a:.2f}", solved
+            bends = solve_alpha(nc, a)
+            if bends is None:
+                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            solved[a] = bd
+        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
+        if not ok:
+            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
+        K = klein(posh)              # posh is already centered (displayed)
+        mt, dbad = display_min_turn(K, rings, bd)
+        if dbad:
+            return 0, f"uncertified degenerate frame at alpha={a:.2f}", solved
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
+        if write:
+            vk, tris = subdivided_frame(faces, K, grid)
+            fk.append(vk)
+            fp.append(klein_to_poincare(vk))
+    if euclid_end:
+        bd60 = (stored or {}).get("hero")
+        if bd60 is None:
+            bends60 = solve_prove_60(nc)
+            if bends60 is None:
+                return 0, "solve_prove_60 failed (euclidean end frame)", solved
+            bd60 = {tuple(sorted(e)): b for e, b in bends60.items()}
+        pos60, _ = develop(faces, bd60)
+        cres = euclid_closure_resid(faces, bd60, pos60)
+        eerr = max(abs(float(np.linalg.norm(pos60[u] - pos60[v])) - 1.0)
+                   for u, v in edges)
+        if not (math.isfinite(eerr) and math.isfinite(cres)) \
+                or cres > EDGE_LEN_TOL or eerr > EDGE_LEN_TOL:
+            return 0, f"euclid closure/edge err {cres:.2e}/{eerr:.2e}", solved
+        mt, dbad = display_min_turn(pos60, rings, bd60)
+        if dbad:
+            return 0, "uncertified degenerate euclid frame", solved
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented euclid frame (min turn {mt:.2e})", solved
+        if write:
+            ctr = sum(pos60.values()) / len(pos60)
+            ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+            fp.append(ve)
+            fk.append(ve)
+    if not write:                    # certification-only pass (reuse path)
+        return 0, None, solved
+    fp = align_frames(fp)
+    fk = align_frames(fk)
+    write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
+    return len(fp), None, solved
+
+def _build_net(job, morphs=True):
+    """One directory per net under nets/, named v{V}{CLERS}: a database
+    record (net.json) plus the net's artifacts (rb.glb, clers.glb,
+    morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
+    page itself is rendered from the record by views.py."""
+    import json
+    from views import render_page, net_id
+    name, nc = job
+    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+    V = max(max(f) for f in faces)
+    vname = f"v{V}{name}"
+    nid = net_id(V, name)
+    netdir = os.path.join(OUT, "nets", nid)
+    os.makedirs(netdir, exist_ok=True)
+    deg = {}
+    for f in faces:
+        for x in f:
+            deg[x] = deg.get(x, 0) + 1
+    maxdeg = max(deg.values())
+    amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+    alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+              [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
+    # consumer mode: committed bends (data/bends/<nid>.json) supply every
+    # solved quantity; the solver runs only for rungs the store lacks.
+    store = None
+    spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
+    if os.path.exists(spath):
+        st = json.load(open(spath))
+        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
+                          for k, v in st["hero"].items()},
+                 "morph": {round(m["alpha"], 6):
+                           {tuple(int(x) for x in k.split(',')): float(v)
+                            for k, v in m["bends"].items()}
+                           for m in st["morph"]}}
+    # Displayed artifacts are ALWAYS regenerated through the gates from
+    # the committed bends (G1 r3): certifying a reconstruction while
+    # reusing on-disk GLBs proves nothing about the bytes actually
+    # served, and regeneration is deterministic (measured byte-stable),
+    # so no reuse optimization is worth that hole. Store present =>
+    # store-only; no store => producer mode (solve + persist).
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+    if store:
+        bends = store["hero"]
+    elif maxdeg <= 6:
+        bends = solve_prove_60(nc)
+    else:
+        bends = solve_alpha(nc, amax)
+    if bends is None:
+        return (vname, "SOLVE-FAIL")
+    if not store:
+        hero_bends = bends
+    if maxdeg <= 6:
+        glb_euclid(name, faces, V, bends, netdir)
+    else:
+        bd = {tuple(sorted(e)): b for e, b in bends.items()}
+        posh, herr, hok = develop_h_certified(faces, bd, math.radians(amax))
+        if not hok:                  # deg-7 hero edge gate (G1 r3)
+            raise RuntimeError(f"hero fails edge gate ({herr:.2e})")
+        K = klein(posh)              # posh already centered (displayed)
+        glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
+                 bends=bd)
+    morph_note, morph_bends = None, None
+    if not morphs:
+        built = "skipped (morphs=False)"          # generation-time opt-out
+    else:
+        for fn in ("morph_p.glb", "morph_k.glb"):
+            try:
+                os.remove(os.path.join(netdir, fn))
+            except FileNotFoundError:
+                pass
+        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
+                                                      alphas=alphas, euclid_end=(maxdeg <= 6),
+                                                      stored=store)
+        built = (f"omitted ({morph_note})" if morph_note
+                 else f"built {nframes} frames")
+    inet_path = os.path.join(netdir, "ideal_net.svg")
+    if not os.path.exists(inet_path):
+        inet = ideal_net_svg(nc, faces)
+        if inet:
+            with open(inet_path, "w") as f:
+                f.write(inet)
+    layout_path = os.path.join(netdir, "clers_layout.svg")
+    if not os.path.exists(layout_path):
+        with open(layout_path, "w") as f:
+            f.write(clers_svg(name))
+    E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
+    have = {k: os.path.exists(os.path.join(netdir, fn)) for k, fn in
+            (("rb", "rb.glb"), ("clers_glb", "clers.glb"),
+             ("morph_p", "morph_p.glb"), ("morph_k", "morph_k.glb"),
+             ("ideal_net", "ideal_net.svg"), ("clers_layout", "clers_layout.svg"))}
+    recpath = os.path.join(netdir, "net.json")
+    rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
+    rec.update({"id": nid, "name": vname, "clers": name, "v": V, "E": E,
+                "F": len(faces), "netcode": nc, "artifacts": have,
+                "maxdeg": maxdeg})
+    if maxdeg > 6:
+        rec["alpha_max"] = amax
+        rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
+    if morph_note:
+        rec["morph_note"] = morph_note      # why the morphs are absent (audit)
+    else:
+        rec.pop("morph_note", None)
+    rec.setdefault("flags", {})
+    rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
+    with open(recpath, "w") as f:
+        json.dump(rec, f, indent=1)
+    # persist the solved bends to the committed store (producer step): one
+    # solver build populates data/bends/, and the consumer builder reads it
+    # -- no solver / neo / network at build time. Written only when this net
+    # was actually solved (fresh); reused nets keep their existing store.
+    if hero_bends is not None:
+        def _ser(bd):
+            return {f"{min(e)},{max(e)}": float(bd[e]) for e in bd}
+        store = {"clers": name, "v": V, "netcode": nc, "maxdeg": maxdeg,
+                 "hero": _ser(hero_bends),
+                 "morph": [{"alpha": a, "bends": _ser(bd)}
+                           for a, bd in (morph_bends or {}).items()]}
+        bdir = os.path.join(TOP, "data", "bends")
+        os.makedirs(bdir, exist_ok=True)
+        with open(os.path.join(bdir, f"{nid}.json"), "w") as bf:
+            json.dump(store, bf)
+    render_page(netdir)
+    return (vname, f"OK morphs {built}")
+
+
+def build_net(job, morphs=True):
+    """Backstop wrapper: no single net may crash the whole Pool. Any
+    unexpected exception becomes a BUILD-FAIL result for that net so the
+    rest of the sweep continues (main() reports the FAIL list)."""
+    try:
+        return _build_net(job, morphs)
+    except Exception as e:
+        return (f"v?{job[0]}", f"BUILD-FAIL {type(e).__name__}: {e}")
+
+
+def main(input_path=None):
+    """Build records + artifacts + pages for the nets in input_path
+    (default data/nets_pages.txt, lines: name netcode). Listing pages,
+    galleries, and the front page are special.py's job."""
+    os.makedirs(OUT, exist_ok=True)
+    # viewer wrappers: source of truth is builders/assets/
+    import shutil
+    for w in ("morph.html", "turntable.html"):
+        shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
+    vsrc = os.path.join(HERE, "assets", "vendor")
+    if os.path.isdir(vsrc):
+        shutil.copytree(vsrc, os.path.join(OUT, "vendor"), dirs_exist_ok=True)
+    jobs = []
+    with open(input_path or os.path.join(TOP, "data", "nets_pages.txt")) as f:
+        for ln in f:
+            t = ln.split()
+            jobs.append((t[0], t[1]))
+    # morphs are generated by default; set ATLAS_MORPHS=0 to skip morph
+    # generation for this run (a compute choice -- e.g. giant eisenbuddies --
+    # NOT a correctness cap: pages render morphs iff the record has them, and
+    # morphs enter the record only through the certified gate in glb_movies).
+    gen_morphs = os.environ.get("ATLAS_MORPHS", "1") != "0"
+    worker = partial(build_net, morphs=gen_morphs)
+    with Pool(6) as pool:
+        results = pool.map(worker, jobs)
+    fails = [n for n, msg in results if "FAIL" in msg]
+    omitted = [n for n, msg in results if "omitted" in msg]
+    for name, msg in results:
+        print(name, msg, flush=True)
+    print(f"built {len(results) - len(fails)}/{len(results)}"
+          + (f"  morphs omitted (gate): {len(omitted)}" if omitted else "")
+          + (f"  FAILURES: {fails}" if fails else ""), flush=True)
+    return 1 if fails else 0     # G1: a failed net (incl. dented hero) is a
+                                 # failed build -- nonzero exit, never silent
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+--- develop_h_certified (supplementary closure) ---
+def develop_h_certified(faces, bd, alpha_rad, edges=None):
+    """develop_h -> center -> edge-length gate ON THE CENTERED (displayed)
+    coordinates. Returns (pos_centered, err, ok), err = max relative
+    hyperbolic edge-length error vs ell(alpha).
+
+    G1 revisions (consult 2026-07-22-161343): the distance is the
+    NORMALIZED form d_H = acosh(-mdot(u,v)/sqrt((-mdot(u,u))(-mdot(v,v))))
+    -- the raw acosh(-mdot) is valid only on exact unit timelike vectors
+    and silently mis-measures off-hyperboloid drift; every point must be
+    finite, timelike (-mdot(x,x) > 0), and future (x4 > 0); certification
+    runs after center() so it validates exactly what is rendered.
+
+    A numerical blow-up anywhere (off-hyperboloid sqrt in develop/center,
+    nonfinite coordinates) is a hard rejection (err = inf), never a crash.
+    """
+    from realize_h import mdot, side_length
+    try:
+        raw, hresid, _ = develop_h(faces, bd, alpha_rad)
+        # supplementary closure gate (G1 r3): rigid placement can keep
+        # edge lengths near-exact while paths disagree; the development's
+        # own closure residual, relative to the raw coordinate scale,
+        # bounds that disagreement. Calibrated: v<=30 max relative
+        # closure 5.3e-4 (rel_v50.tsv) -- 1e-2 changes no verdicts.
+        scale = max(1.0, max(float(np.max(np.abs(x))) for x in raw.values()))
+        if not math.isfinite(hresid) or hresid > EDGE_LEN_TOL * scale:
+            return None, float('inf'), False
+        posh = center(raw)
+        ell = side_length(alpha_rad)
+        norm2 = {}
+        for v, x in posh.items():
+            q = -mdot(x, x)
+            if not (math.isfinite(q) and q > 0.0 and float(x[3]) > 0.0):
+                return None, float('inf'), False
+            norm2[v] = q
+        err = 0.0
+        for u, v in (edges or _edges_of(faces)):
+            m = -mdot(posh[u], posh[v]) / math.sqrt(norm2[u] * norm2[v])
+            if not math.isfinite(m):
+                return None, float('inf'), False
+            dh = math.acosh(m) if m > 1.0 else 0.0
+            err = max(err, abs(dh - ell) / ell)
+        if not math.isfinite(err):
+            return None, float('inf'), False
+    except (ValueError, FloatingPointError, ZeroDivisionError, OverflowError):
+        return None, float('inf'), False
+    return posh, err, err <= EDGE_LEN_TOL
+
+
+def glb_movies(name, faces, V, nc, outdir, alphas=None, euclid_end=True,
+               stored=None, write=True):
+    """Two animated morph GLBs (Poincare, Klein): ideal end first, then
+    either the exact Euclidean solid (alpha_max = 60) or the hyperbolic
+    realization at the final rung (degree-7 nets: alpha_max = 360/maxdeg).
+
+    Consumer mode: when `stored` (the data/bends record: {"hero": bd,
+    "morph": {rounded-alpha: bd}}) provides a rung, its bends are used and
+    the solver is never invoked for it -- the deterministic no-solver
+    build path. Missing rungs fall back to the solver (producer mode) and
+    are returned in `solved` for persistence.
+
+    Every develop_h frame is certified (develop_h_certified, Klein-length
+    gate). If any frame fails, NO GLB is written and a reason is returned
+    -- never a partial or silently-broken morph. Returns (nframes, note,
+    solved). The euclidean end frame uses the flat developer
+    (walklib.develop), which the v506 diagnosis exonerated, so it is not
+    gated here.
+    """
+    grid = bary_grid(SUBDIV)
+    fp, fk, tris = [], [], None
+    solved = {}                     # alpha -> bend dict, freshly solved only
+    edges = _edges_of(faces)
+    rings = link_rings(faces)
+    for a in (alphas or MORPH_ALPHAS):
+        bd = (stored or {}).get("morph", {}).get(round(a, 6))
+        if bd is None:
+            if stored is not None:
+                # store present => store-only (G1 r2): never fall back to
+                # the solver, neither in certify-only nor in build mode --
+                # an incomplete store means the morphs stay unbuilt.
+                return 0, f"store incomplete at alpha={a:.2f}", solved
+            bends = solve_alpha(nc, a)
+            if bends is None:
+                return 0, f"solve_alpha failed at alpha={a:.2f}", solved
+            bd = {tuple(sorted(e)): b for e, b in bends.items()}
+            solved[a] = bd
+        posh, err, ok = develop_h_certified(faces, bd, math.radians(a), edges)
+        if not ok:
+            return 0, f"edge length err {err:.2e} at alpha={a:.2f}", solved
+        K = klein(posh)              # posh is already centered (displayed)
+        mt, dbad = display_min_turn(K, rings, bd)
+        if dbad:
+            return 0, f"uncertified degenerate frame at alpha={a:.2f}", solved
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented frame at alpha={a:.2f} (min turn {mt:.2e})", solved
+        if write:
+            vk, tris = subdivided_frame(faces, K, grid)
+            fk.append(vk)
+            fp.append(klein_to_poincare(vk))
+    if euclid_end:
+        bd60 = (stored or {}).get("hero")
+        if bd60 is None:
+            bends60 = solve_prove_60(nc)
+            if bends60 is None:
+                return 0, "solve_prove_60 failed (euclidean end frame)", solved
+            bd60 = {tuple(sorted(e)): b for e, b in bends60.items()}
+        pos60, _ = develop(faces, bd60)
+        cres = euclid_closure_resid(faces, bd60, pos60)
+        eerr = max(abs(float(np.linalg.norm(pos60[u] - pos60[v])) - 1.0)
+                   for u, v in edges)
+        if not (math.isfinite(eerr) and math.isfinite(cres)) \
+                or cres > EDGE_LEN_TOL or eerr > EDGE_LEN_TOL:
+            return 0, f"euclid closure/edge err {cres:.2e}/{eerr:.2e}", solved
+        mt, dbad = display_min_turn(pos60, rings, bd60)
+        if dbad:
+            return 0, "uncertified degenerate euclid frame", solved
+        if mt < -DENT_TURN_TOL:
+            return 0, f"dented euclid frame (min turn {mt:.2e})", solved
+        if write:
+            ctr = sum(pos60.values()) / len(pos60)
+            ve, tris = subdivided_frame(faces, {v: p - ctr for v, p in pos60.items()}, grid)
+            fp.append(ve)
+            fk.append(ve)
+    if not write:                    # certification-only pass (reuse path)
+        return 0, None, solved
+    fp = align_frames(fp)
+    fk = align_frames(fk)
+    write_gltf_morph(os.path.join(outdir, "morph_p.glb"), fp, tris)
+    write_gltf_morph(os.path.join(outdir, "morph_k.glb"), fk, tris)
+    return len(fp), None, solved
+
+def _build_net(job, morphs=True):
+    """One directory per net under nets/, named v{V}{CLERS}: a database
+    record (net.json) plus the net's artifacts (rb.glb, clers.glb,
+    morph_p.glb, morph_k.glb, ideal_net.svg, clers_layout.svg). The
+    page itself is rendered from the record by views.py."""
+    import json
+    from views import render_page, net_id
+    name, nc = job
+    faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+    V = max(max(f) for f in faces)
+    vname = f"v{V}{name}"
+    nid = net_id(V, name)
+    netdir = os.path.join(OUT, "nets", nid)
+    os.makedirs(netdir, exist_ok=True)
+    deg = {}
+    for f in faces:
+        for x in f:
+            deg[x] = deg.get(x, 0) + 1
+    maxdeg = max(deg.values())
+    amax = 60.0 if maxdeg <= 6 else 360.0 / maxdeg
+    alphas = (MORPH_ALPHAS if maxdeg <= 6 else
+              [a * amax / 60.0 for a in MORPH_ALPHAS] + [amax])
+    # consumer mode: committed bends (data/bends/<nid>.json) supply every
+    # solved quantity; the solver runs only for rungs the store lacks.
+    store = None
+    spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
+    if os.path.exists(spath):
+        st = json.load(open(spath))
+        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
+                          for k, v in st["hero"].items()},
+                 "morph": {round(m["alpha"], 6):
+                           {tuple(int(x) for x in k.split(',')): float(v)
+                            for k, v in m["bends"].items()}
+                           for m in st["morph"]}}
+    # Displayed artifacts are ALWAYS regenerated through the gates from
+    # the committed bends (G1 r3): certifying a reconstruction while
+    # reusing on-disk GLBs proves nothing about the bytes actually
+    # served, and regeneration is deterministic (measured byte-stable),
+    # so no reuse optimization is worth that hole. Store present =>
+    # store-only; no store => producer mode (solve + persist).
+    hero_bends = None      # freshly-solved hero bends (persisted to the store)
+    if store:
+        bends = store["hero"]
+    elif maxdeg <= 6:
+        bends = solve_prove_60(nc)
+    else:
+        bends = solve_alpha(nc, amax)
+    if bends is None:
+        return (vname, "SOLVE-FAIL")
+    if not store:
+        hero_bends = bends
+    if maxdeg <= 6:
+        glb_euclid(name, faces, V, bends, netdir)
+    else:
+        bd = {tuple(sorted(e)): b for e, b in bends.items()}
+        posh, herr, hok = develop_h_certified(faces, bd, math.radians(amax))
+        if not hok:                  # deg-7 hero edge gate (G1 r3)
+            raise RuntimeError(f"hero fails edge gate ({herr:.2e})")
+        K = klein(posh)              # posh already centered (displayed)
+        glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
+                 bends=bd)
+    morph_note, morph_bends = None, None
+    if not morphs:
+        built = "skipped (morphs=False)"          # generation-time opt-out
+    else:
+        for fn in ("morph_p.glb", "morph_k.glb"):
+            try:
+                os.remove(os.path.join(netdir, fn))
+            except FileNotFoundError:
+                pass
+        nframes, morph_note, morph_bends = glb_movies(name, faces, V, nc, netdir,
+                                                      alphas=alphas, euclid_end=(maxdeg <= 6),
+                                                      stored=store)
+        built = (f"omitted ({morph_note})" if morph_note
+                 else f"built {nframes} frames")
+    inet_path = os.path.join(netdir, "ideal_net.svg")
+    if not os.path.exists(inet_path):
+        inet = ideal_net_svg(nc, faces)
+        if inet:
+            with open(inet_path, "w") as f:
+                f.write(inet)
+    layout_path = os.path.join(netdir, "clers_layout.svg")
+    if not os.path.exists(layout_path):
+        with open(layout_path, "w") as f:
+            f.write(clers_svg(name))
+    E = len({tuple(sorted((a, b))) for f in faces for a, b in zip(f, f[1:] + f[:1])})
+    have = {k: os.path.exists(os.path.join(netdir, fn)) for k, fn in
+            (("rb", "rb.glb"), ("clers_glb", "clers.glb"),
+             ("morph_p", "morph_p.glb"), ("morph_k", "morph_k.glb"),
+             ("ideal_net", "ideal_net.svg"), ("clers_layout", "clers_layout.svg"))}
+    recpath = os.path.join(netdir, "net.json")
+    rec = json.load(open(recpath)) if os.path.exists(recpath) else {}
+    rec.update({"id": nid, "name": vname, "clers": name, "v": V, "E": E,
+                "F": len(faces), "netcode": nc, "artifacts": have,
+                "maxdeg": maxdeg})
+    if maxdeg > 6:
+        rec["alpha_max"] = amax
+        rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
+    if morph_note:
+        rec["morph_note"] = morph_note      # why the morphs are absent (audit)
+    else:
+        rec.pop("morph_note", None)
+    rec.setdefault("flags", {})
+    rec.setdefault("eisenstein", {"ancestors": [], "descendants": []})
+    with open(recpath, "w") as f:
+        json.dump(rec, f, indent=1)
+    # persist the solved bends to the committed store (producer step): one
+    # solver build populates data/bends/, and the consumer builder reads it
+    # -- no solver / neo / network at build time. Written only when this net
+    # was actually solved (fresh); reused nets keep their existing store.
+    if hero_bends is not None:
+        def _ser(bd):
+            return {f"{min(e)},{max(e)}": float(bd[e]) for e in bd}
+        store = {"clers": name, "v": V, "netcode": nc, "maxdeg": maxdeg,
+                 "hero": _ser(hero_bends),
+                 "morph": [{"alpha": a, "bends": _ser(bd)}
+                           for a, bd in (morph_bends or {}).items()]}
+        bdir = os.path.join(TOP, "data", "bends")
+        os.makedirs(bdir, exist_ok=True)
+        with open(os.path.join(bdir, f"{nid}.json"), "w") as bf:
+            json.dump(store, bf)
+    render_page(netdir)
+    return (vname, f"OK morphs {built}")
+
+
+def build_net(job, morphs=True):
+    """Backstop wrapper: no single net may crash the whole Pool. Any
+    unexpected exception becomes a BUILD-FAIL result for that net so the
+    rest of the sweep continues (main() reports the FAIL list)."""
+    try:
+        return _build_net(job, morphs)
+    except Exception as e:
+        return (f"v?{job[0]}", f"BUILD-FAIL {type(e).__name__}: {e}")
+
+
+def main(input_path=None):
+    """Build records + artifacts + pages for the nets in input_path
+    (default data/nets_pages.txt, lines: name netcode). Listing pages,
+    galleries, and the front page are special.py's job."""
+    os.makedirs(OUT, exist_ok=True)
+    # viewer wrappers: source of truth is builders/assets/
+    import shutil
+    for w in ("morph.html", "turntable.html"):
+        shutil.copy(os.path.join(HERE, "assets", w), os.path.join(OUT, w))
+    vsrc = os.path.join(HERE, "assets", "vendor")
+    if os.path.isdir(vsrc):
+        shutil.copytree(vsrc, os.path.join(OUT, "vendor"), dirs_exist_ok=True)
+    jobs = []
+    with open(input_path or os.path.join(TOP, "data", "nets_pages.txt")) as f:
+        for ln in f:
+            t = ln.split()
+            jobs.append((t[0], t[1]))
+    # morphs are generated by default; set ATLAS_MORPHS=0 to skip morph
+    # generation for this run (a compute choice -- e.g. giant eisenbuddies --
+    # NOT a correctness cap: pages render morphs iff the record has them, and
+    # morphs enter the record only through the certified gate in glb_movies).
+    gen_morphs = os.environ.get("ATLAS_MORPHS", "1") != "0"
+    worker = partial(build_net, morphs=gen_morphs)
+    with Pool(6) as pool:
+        results = pool.map(worker, jobs)
+    fails = [n for n, msg in results if "FAIL" in msg]
+    omitted = [n for n, msg in results if "omitted" in msg]
+    for name, msg in results:
+        print(name, msg, flush=True)
+    print(f"built {len(results) - len(fails)}/{len(results)}"
+          + (f"  morphs omitted (gate): {len(omitted)}" if omitted else "")
+          + (f"  FAILURES: {fails}" if fails else ""), flush=True)
+    return 1 if fails else 0     # G1: a failed net (incl. dented hero) is a
+                                 # failed build -- nonzero exit, never silent
+
+
+if __name__ == "__main__":
+    import sys
+    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+--- glb_movies euclid_end (closure gate) ---
+539-        if not (math.isfinite(eerr) and math.isfinite(cres)) \
+540-                or cres > EDGE_LEN_TOL or eerr > EDGE_LEN_TOL:
+541:            return 0, f"euclid closure/edge err {cres:.2e}/{eerr:.2e}", solved
+542-        mt, dbad = display_min_turn(pos60, rings, bd60)
+543-        if dbad:
+544-            return 0, "uncertified degenerate euclid frame", solved
+545-        if mt < -DENT_TURN_TOL:
+--- backstop + main exit ---
+def build_net(job, morphs=True):
+    """Backstop wrapper: no single net may crash the whole Pool. Any
+    unexpected exception becomes a BUILD-FAIL result for that net so the
+    rest of the sweep continues (main() reports the FAIL list)."""
+    try:
+        return _build_net(job, morphs)
+    except Exception as e:
+        return (f"v?{job[0]}", f"BUILD-FAIL {type(e).__name__}: {e}")
+
+
+def main(input_path=None):
+727:    return 1 if fails else 0     # G1: a failed net (incl. dented hero) is a
+733:    sys.exit(main(sys.argv[1] if len(sys.argv) > 1 else None))
+
+--- EXECUTED TESTS ---
+t2 exit codes: bad input line through real main() -> exit 1; healthy -> exit 0 (both executed).
+t1 v1 (pre-fix): corrupted store (hero bend +0.7) BUILT CLEANLY -- exposed the closure hole.
+t1 v2 (post-fix): 'BUILD-FAIL RuntimeError: hero fails display gates (closure 5.58e-01, eerr 1.11e-16, ...)' -- closure sees the corruption, edge-length blind (vacuousness proof).
+--- FINAL SWEEP (all 2245 stores): hero closure max 8.97e-14, 0 hero failures; ONE morph-carrier flipped: v30 alpha=2.1 normalized err 5.5e-2 vs unnormalized 7.3e-5, points 57% off-hyperboloid (max|(-mdot)-1|=0.57) -- round-1 drift-fooling caught in production; net rebuilt, morphs omitted with reason. Site now consistent with final gates. ---
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+REVISE
+Round-3 residuals are resolved on the normal morph-enabled path: regeneration replaces reuse, storeless heroes pass gates, degree-7 heroes are edge-gated, and the supplied transcript includes executed exit-code and corruption tests.
+`morphs=False` breaks always-regenerate: existing morph GLBs remain, `have` re-advertises them, and stale uncertified bytes may be served. Delete them and suppress their artifact flags on this path.
+A fresh `morphs=False` build also persists an empty morph store; later store-only builds cannot populate it. Do not persist an incomplete store as consumer-ready.
+The Euclidean directed-adjacency closure formula is consistent for a closed, consistently wound triangulation and demonstrably catches the reported vacuity.
+The hyperbolic closure threshold is defective: dividing a global coordinate residual by the largest raw coordinate is frame-dependent and lets one large, unrelated coordinate weaken every closure check.
+Use per-closure normalized Lorentz/hyperbolic discrepancy between the predicted and retained lifts; the normalized retained-edge gate does not itself certify path closure.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+22,856
+REVISE
+Round-3 residuals are resolved on the normal morph-enabled path: regeneration replaces reuse, storeless heroes pass gates, degree-7 heroes are edge-gated, and the supplied transcript includes executed exit-code and corruption tests.
+`morphs=False` breaks always-regenerate: existing morph GLBs remain, `have` re-advertises them, and stale uncertified bytes may be served. Delete them and suppress their artifact flags on this path.
+A fresh `morphs=False` build also persists an empty morph store; later store-only builds cannot populate it. Do not persist an incomplete store as consumer-ready.
+The Euclidean directed-adjacency closure formula is consistent for a closed, consistently wound triangulation and demonstrably catches the reported vacuity.
+The hyperbolic closure threshold is defective: dividing a global coordinate residual by the largest raw coordinate is frame-dependent and lets one large, unrelated coordinate weaken every closure check.
+Use per-closure normalized Lorentz/hyperbolic discrepancy between the predicted and retained lifts; the normalized retained-edge gate does not itself certify path closure.

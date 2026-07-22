@@ -1,0 +1,815 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/atlas
+staged tree: 16c2e834a4268607f71818a16ee05d2b752e58da
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-n40e5caq.txt
+codex exit: 0
+
+final message:
+WARN
+Files reviewed: All 14 staged files.
+Checks run: `git diff --cached --check`; compiled 12 staged Python files; `bash -n` on staged shell script; verified referenced paths; checked residual `neo/atlas2` refs and sensitive additions. No build was run.
+Blocking issues: None.
+Warnings: Commit message/evidence call the audit note the `8ea8b44` transcript, but its header identifies staged tree `1338c63f…`; the stated 13-file diffstat also omits the staged audit note.
+Recommendation: Correct those metadata claims; builder changes are internally consistent.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f87c6-0dd7-7291-8616-89355bc99203
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/projects/atlas
+
+Staged tree:
+16c2e834a4268607f71818a16ee05d2b752e58da
+
+Proposed command:
+git commit -F "/private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad/commit-msg.txt"
+
+Status:
+M  builders/classics.py
+M  builders/classify.py
+M  builders/climb_all.py
+M  builders/decap_search.py
+M  builders/failure_frames.py
+M  builders/failure_pages.py
+M  builders/hinge_sweep.py
+M  builders/icorel_sweep.py
+M  builders/ideal_limit.py
+M  builders/members.py
+M  builders/recognize_sweep.py
+M  builders/slice_solve.py
+M  builders/zenodo_dist.sh
+A  notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+
+
+Staged diff stat:
+ builders/classics.py                               |   2 +-
+ builders/classify.py                               |   2 +-
+ builders/climb_all.py                              |   2 +-
+ builders/decap_search.py                           |   2 +-
+ builders/failure_frames.py                         |   4 +-
+ builders/failure_pages.py                          |   6 +-
+ builders/hinge_sweep.py                            |   2 +-
+ builders/icorel_sweep.py                           |   2 +-
+ builders/ideal_limit.py                            |   2 +-
+ builders/members.py                                |   2 +-
+ builders/recognize_sweep.py                        |   2 +-
+ builders/slice_solve.py                            |   2 +-
+ builders/zenodo_dist.sh                            |   6 +-
+ ...te-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt | 167 +++++++++++++++++++++
+ 14 files changed, 185 insertions(+), 18 deletions(-)
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+2026-07-14-101901-codex-gate-1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4.txt
+2026-07-14-103502-codex-gate-f2fbd863bdd15acccd0bfda262f544637f04d3b8.txt
+2026-07-14-125406-codex-gate-060357cfb98d78330737aca087486f00a7735032.txt
+2026-07-14-132309-codex-gate-50b403ea027bb716b1eaa98db5085a0ed6904b5f.txt
+2026-07-14-133540-codex-gate-fc8d1f6da60dd5b343355c8f61c721c3793a9950.txt
+2026-07-14-134813-codex-gate-93b9d2ec3683d2ba10c2cf0acbfa246f08402c1f.txt
+2026-07-14-152756-codex-gate-122f9d9c38e05751ba3a6842bb2fc8f86e2253eb.txt
+2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt
+2026-07-14-161259-codex-gate-66d65fd3278505edb5d721e97fc7aea6b3ffaee6.txt
+2026-07-14-170958-codex-gate-b605d697b3dbffada21fb08eb97f7eb2cbe22bb9.txt
+2026-07-14-171239-codex-gate-fe3d2dbb95df6b62212d9894f98fe6c875afc1c7.txt
+2026-07-14-172154-codex-gate-1093cbe3bd01aeae93a536fc3b6e923fde88b2bf.txt
+2026-07-14-173029-codex-gate-7c69e7c0e04dbe81732e9649f27e5a35501a4f2b.txt
+2026-07-14-180614-codex-gate-90636b018737efd42f87e55774625919cdd74952.txt
+2026-07-14-183507-codex-gate-00cd11020f300d3cd29523693b057178c1027a2a.txt
+2026-07-14-185544-codex-gate-566d79c294fb5b392c5546570a7ad58e4fb3db6e.txt
+2026-07-14-192549-codex-gate-78924caa5c65110828884bb69282f57972927f6c.txt
+2026-07-14-223200-codex-gate-9efb20903c8b49d889bb8d7e084696009b104d91.txt
+2026-07-14-223658-codex-gate-b15c90098b5e9ff31c01c81b923fa5a325d1cbb5.txt
+2026-07-14-224857-codex-gate-2b36da1c069db914d9aeaa39754a399e380ce884.txt
+2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+2026-07-15-094806-codex-gate-87781ee5d118ed974e5254446f47c3d22f96b8e1.txt
+2026-07-15-102447-codex-gate-82b4ab34a46f52702438751bec3ad7645fd95e84.txt
+2026-07-15-102900-codex-gate-5c23c33f3f533179762462db5136dc5171516d1b.txt
+2026-07-17-114359-codex-gate-ec8b4bf2c2e400c5d21a9f3766fb74b2553d2a51.txt
+2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt
+2026-07-17-193316-codex-gate-79d5db5a2969f60e2cf9d0d36a81e6c31216c307.txt
+2026-07-17-194727-codex-gate-f18f4ccd183e294cba892d646661d4090cb66b78.txt
+2026-07-17-194825-codex-gate-e37f396044b2ca3e9ce1bed180b1a7a7af53346f.txt
+2026-07-17-215425-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-215816-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-233951-codex-gate-8fea647624d147134934551e82af2d2e24c27696.txt
+2026-07-18-180702-codex-gate-03f43a9077c3a3f4c2e7370438a684313cf49c30.txt
+2026-07-19-012944-codex-gate-5c13d51d4fc3a2e1fac1ceb876c51c60670dd91b.txt
+2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — 2026-07-21: builder path-repoint (neo/atlas2 → projects/atlas)
+
+Mechanical path-repoint only. No logic, convention, encoding, or theorem change.
+Atlas was moved out of neo (`neo/atlas2` → `projects/atlas`, sibling of neo);
+these edits repoint the builders afterward.
+
+## Staged tree (13 builders + 1 audit note)
+
+**7 files — absolute self-refs `.../neo/atlas2/...` → `.../atlas/...`** (atlas's own
+data/site/builders moved with it):
+`climb_all.py`, `failure_frames.py`, `failure_pages.py`, `hinge_sweep.py`,
+`ideal_limit.py`, `slice_solve.py`, `zenodo_dist.sh`.
+
+**6 files — `NEO = os.path.dirname(TOP)` → `os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))`**
+(atlas no longer lives inside neo, so `dirname(TOP)` no longer lands on neo; new
+form resolves to the real sibling neo, honoring a `NEO_SRC` override):
+`members.py`, `classics.py`, `decap_search.py`, `classify.py`, `icorel_sweep.py`,
+`recognize_sweep.py`.
+
+**Left intact:** `.../neo/bendprover/...` solver refs — the solver stays in neo.
+
+**Audit note:** `notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f...txt` —
+append-only gate transcript for the `8ea8b44` tree (codex exit 1 was a
+`gpt-5.6-sol` model-cache breakage, since fixed; not a review verdict).
+
+## Verification (run this session)
+
+- Diffstat: 13 files, 18 insertions / 18 deletions — every changed line is a path string.
+- `grep -rn atlas2` over `*.py *.sh`: 0 remaining `neo/atlas2` path refs in builders.
+  (Non-path residue only: a page-`<title>` string in `build.py:245` and two doc lines
+  in `HANDOFF.md` — outside this batch, do not affect resolution.)
+- NEO resolution (executed): `TOP=/Users/doyle/Dropbox/projects/atlas` →
+  `NEO=/Users/doyle/Dropbox/projects/neo`; `data/objs`, `bendprover/csrc`, and
+  `euclid_lm_mp` all exist under it.
+- `neo/bendprover` solver refs confirmed unchanged in climb_all/failure_frames/
+  hinge_sweep/homepage/ideal_limit/personal.
+
+## New conventions / invariants / G1
+
+None — path strings and one env-var fallback only. G1 not applicable. No build system,
+no solver, no numeric convention affected.
+
+
+Staged diff:
+diff --git a/builders/classics.py b/builders/classics.py
+index bd95118..f43c4c7 100644
+--- a/builders/classics.py
++++ b/builders/classics.py
+@@ -20,7 +20,7 @@ import importlib.util
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.expanduser("~/local/antiprism-0.32/bin")
+ 
+ spec = importlib.util.spec_from_file_location(
+diff --git a/builders/classify.py b/builders/classify.py
+index 6af2c2b..fd42ebf 100644
+--- a/builders/classify.py
++++ b/builders/classify.py
+@@ -19,7 +19,7 @@ from scipy.spatial import ConvexHull
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ OBJS = os.path.join(NEO, "data", "objs")
+ FLOPPERS = os.path.join(NEO, "euclid_hp", "explore", "floppers.txt")
+ sys.path.insert(0, HERE)
+diff --git a/builders/climb_all.py b/builders/climb_all.py
+index 176f04b..c69d029 100644
+--- a/builders/climb_all.py
++++ b/builders/climb_all.py
+@@ -13,7 +13,7 @@ EMB = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/embcheck_mp"
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ 
+ CASES = []
+-for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
++for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json')):
+     d = json.load(open(f))
+     for key, bends in d['atlas'].items():
+         if key:
+diff --git a/builders/decap_search.py b/builders/decap_search.py
+index b4e1a9f..6dc289a 100644
+--- a/builders/decap_search.py
++++ b/builders/decap_search.py
+@@ -16,7 +16,7 @@ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ OBJS = os.path.join(NEO, "data", "objs")
+ TOL = 1e-4
+ PHI = (1 + math.sqrt(5)) / 2
+diff --git a/builders/failure_frames.py b/builders/failure_frames.py
+index 6426fbf..c297cab 100644
+--- a/builders/failure_frames.py
++++ b/builders/failure_frames.py
+@@ -16,13 +16,13 @@ OUT = os.path.join(HERE, 'failure_frames')
+ os.makedirs(OUT, exist_ok=True)
+ 
+ name_of = {}
+-for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
++for blk in open('/Users/doyle/Dropbox/projects/atlas/data/records.bends').read().split('net ')[1:]:
+     nm = blk.split()[0]
+     for ln in blk.splitlines():
+         if ln.startswith('faces '): name_of[ln[6:].strip()] = nm
+ 
+ walks = {}
+-for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
++for f in glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json'):
+     d = json.load(open(f))
+     walks[d['netcode']] = d
+ 
+diff --git a/builders/failure_pages.py b/builders/failure_pages.py
+index e1475b6..a1580b2 100644
+--- a/builders/failure_pages.py
++++ b/builders/failure_pages.py
+@@ -6,8 +6,8 @@ import json, glob, math, os, sys
+ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-BUILDERS = '/Users/doyle/Dropbox/projects/neo/atlas2/builders'
+-SITE = '/Users/doyle/Dropbox/projects/neo/atlas2/site/failures'
++BUILDERS = '/Users/doyle/Dropbox/projects/atlas/builders'
++SITE = '/Users/doyle/Dropbox/projects/atlas/site/failures'
+ sys.path.insert(0, BUILDERS)
+ sys.path.insert(0, HERE)
+ import ideal_limit as IL
+@@ -70,7 +70,7 @@ for f in glob.glob(os.path.join(HERE, 'failure_frames', '*.json')):
+     runs.setdefault((d['name'], d['key']), {})[d['kind']] = d
+ 
+ walks = {}
+-for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
++for f in glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json'):
+     d = json.load(open(f))
+     walks[d['netcode']] = d
+ 
+diff --git a/builders/hinge_sweep.py b/builders/hinge_sweep.py
+index 9e7d2db..b521f9b 100644
+--- a/builders/hinge_sweep.py
++++ b/builders/hinge_sweep.py
+@@ -10,7 +10,7 @@ BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ 
+ CASES = []
+-for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
++for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json')):
+     d = json.load(open(f))
+     for key, bends in d['atlas'].items():
+         if key:
+diff --git a/builders/icorel_sweep.py b/builders/icorel_sweep.py
+index 87b99a3..66d4f2c 100644
+--- a/builders/icorel_sweep.py
++++ b/builders/icorel_sweep.py
+@@ -14,7 +14,7 @@ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
+ 
+ DIHED = {"dod": 116.56505117707799, "ico": 138.18968510422141,
+diff --git a/builders/ideal_limit.py b/builders/ideal_limit.py
+index e631492..26e9b45 100644
+--- a/builders/ideal_limit.py
++++ b/builders/ideal_limit.py
+@@ -15,7 +15,7 @@ import json, glob, math, cmath, subprocess, sys
+ import numpy as np
+ 
+ BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+-REC = "/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends"
++REC = "/Users/doyle/Dropbox/projects/atlas/data/records.bends"
+ TWO_PI = 2 * math.pi
+ 
+ 
+diff --git a/builders/members.py b/builders/members.py
+index 60ede9a..7a9a8a8 100644
+--- a/builders/members.py
++++ b/builders/members.py
+@@ -17,7 +17,7 @@ import csv, os, sys, importlib.util
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ sys.path.insert(0, HERE)
+ 
+ spec = importlib.util.spec_from_file_location(
+diff --git a/builders/recognize_sweep.py b/builders/recognize_sweep.py
+index ac5ef6c..621b63a 100644
+--- a/builders/recognize_sweep.py
++++ b/builders/recognize_sweep.py
+@@ -14,7 +14,7 @@ from multiprocessing import Pool
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
+ 
+ # build the LIB exactly as bend_recognize.py does (import its module
+diff --git a/builders/slice_solve.py b/builders/slice_solve.py
+index 6c61716..d8131a8 100644
+--- a/builders/slice_solve.py
++++ b/builders/slice_solve.py
+@@ -83,7 +83,7 @@ def lm_slice(y0, b_wish, N, V, cyc, edges, itmax=400):
+ 
+ def attack(name, dent_key, restarts=60, seed=0):
+     nc = None
+-    for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
++    for blk in open('/Users/doyle/Dropbox/projects/atlas/data/records.bends').read().split('net ')[1:]:
+         if blk.split()[0] == name:
+             for ln in blk.splitlines():
+                 if ln.startswith('faces '):
+diff --git a/builders/zenodo_dist.sh b/builders/zenodo_dist.sh
+index 9c25525..350f5c5 100755
+--- a/builders/zenodo_dist.sh
++++ b/builders/zenodo_dist.sh
+@@ -2,7 +2,7 @@
+ # Package the atlas + create a Zenodo DRAFT with reserved DOI + upload.
+ # NEVER prints the token. Does NOT publish.
+ set -e
+-ATLAS=/Users/doyle/Dropbox/projects/neo/atlas2
++ATLAS=/Users/doyle/Dropbox/projects/atlas
+ STAGE="${ATLAS}/dist"
+ # clear staging but keep the big site tarball (step 3 skips re-tarring it)
+ mkdir -p "$STAGE"
+@@ -11,8 +11,8 @@ find "$STAGE" -mindepth 1 -maxdepth 1 ! -name 'neoplatonic-atlas.tar.gz' -exec /
+ # 1. aggregate records
+ python3 - <<'PYEOF'
+ import json, os
+-NETS = "/Users/doyle/Dropbox/projects/neo/atlas2/site/personal/nets"
+-out = "/Users/doyle/Dropbox/projects/neo/atlas2/data/atlas_records.jsonl"
++NETS = "/Users/doyle/Dropbox/projects/atlas/site/personal/nets"
++out = "/Users/doyle/Dropbox/projects/atlas/data/atlas_records.jsonl"
+ n = 0
+ with open(out, "w") as f:
+     for d in sorted(os.listdir(NETS)):
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’m checking the exact index, commit message, evidence file, and lightweight syntax/path consistency; I’ll make no workspace changes.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --cached --check && git diff --cached --name-status && git diff --cached -- builders/classics.py builders/classify.py builders/climb_all.py builders/decap_search.py builders/failure_frames.py builders/failure_pages.py builders/hinge_sweep.py builders/icorel_sweep.py builders/ideal_limit.py builders/members.py builders/recognize_sweep.py builders/slice_solve.py builders/zenodo_dist.sh && sed -n '1,220p' .session/claude-commit-evidence.md && sed -n '1,160p' /private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad/commit-msg.txt" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+M	builders/classics.py
+M	builders/classify.py
+M	builders/climb_all.py
+M	builders/decap_search.py
+M	builders/failure_frames.py
+M	builders/failure_pages.py
+M	builders/hinge_sweep.py
+M	builders/icorel_sweep.py
+M	builders/ideal_limit.py
+M	builders/members.py
+M	builders/recognize_sweep.py
+M	builders/slice_solve.py
+M	builders/zenodo_dist.sh
+A	notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+diff --git a/builders/classics.py b/builders/classics.py
+index bd95118..f43c4c7 100644
+--- a/builders/classics.py
++++ b/builders/classics.py
+@@ -20,7 +20,7 @@ import importlib.util
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.expanduser("~/local/antiprism-0.32/bin")
+ 
+ spec = importlib.util.spec_from_file_location(
+diff --git a/builders/classify.py b/builders/classify.py
+index 6af2c2b..fd42ebf 100644
+--- a/builders/classify.py
++++ b/builders/classify.py
+@@ -19,7 +19,7 @@ from scipy.spatial import ConvexHull
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ OBJS = os.path.join(NEO, "data", "objs")
+ FLOPPERS = os.path.join(NEO, "euclid_hp", "explore", "floppers.txt")
+ sys.path.insert(0, HERE)
+diff --git a/builders/climb_all.py b/builders/climb_all.py
+index 176f04b..c69d029 100644
+--- a/builders/climb_all.py
++++ b/builders/climb_all.py
+@@ -13,7 +13,7 @@ EMB = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/embcheck_mp"
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ 
+ CASES = []
+-for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
++for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json')):
+     d = json.load(open(f))
+     for key, bends in d['atlas'].items():
+         if key:
+diff --git a/builders/decap_search.py b/builders/decap_search.py
+index b4e1a9f..6dc289a 100644
+--- a/builders/decap_search.py
++++ b/builders/decap_search.py
+@@ -16,7 +16,7 @@ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ OBJS = os.path.join(NEO, "data", "objs")
+ TOL = 1e-4
+ PHI = (1 + math.sqrt(5)) / 2
+diff --git a/builders/failure_frames.py b/builders/failure_frames.py
+index 6426fbf..c297cab 100644
+--- a/builders/failure_frames.py
++++ b/builders/failure_frames.py
+@@ -16,13 +16,13 @@ OUT = os.path.join(HERE, 'failure_frames')
+ os.makedirs(OUT, exist_ok=True)
+ 
+ name_of = {}
+-for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
++for blk in open('/Users/doyle/Dropbox/projects/atlas/data/records.bends').read().split('net ')[1:]:
+     nm = blk.split()[0]
+     for ln in blk.splitlines():
+         if ln.startswith('faces '): name_of[ln[6:].strip()] = nm
+ 
+ walks = {}
+-for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
++for f in glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json'):
+     d = json.load(open(f))
+     walks[d['netcode']] = d
+ 
+diff --git a/builders/failure_pages.py b/builders/failure_pages.py
+index e1475b6..a1580b2 100644
+--- a/builders/failure_pages.py
++++ b/builders/failure_pages.py
+@@ -6,8 +6,8 @@ import json, glob, math, os, sys
+ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+-BUILDERS = '/Users/doyle/Dropbox/projects/neo/atlas2/builders'
+-SITE = '/Users/doyle/Dropbox/projects/neo/atlas2/site/failures'
++BUILDERS = '/Users/doyle/Dropbox/projects/atlas/builders'
++SITE = '/Users/doyle/Dropbox/projects/atlas/site/failures'
+ sys.path.insert(0, BUILDERS)
+ sys.path.insert(0, HERE)
+ import ideal_limit as IL
+@@ -70,7 +70,7 @@ for f in glob.glob(os.path.join(HERE, 'failure_frames', '*.json')):
+     runs.setdefault((d['name'], d['key']), {})[d['kind']] = d
+ 
+ walks = {}
+-for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
++for f in glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json'):
+     d = json.load(open(f))
+     walks[d['netcode']] = d
+ 
+diff --git a/builders/hinge_sweep.py b/builders/hinge_sweep.py
+index 9e7d2db..b521f9b 100644
+--- a/builders/hinge_sweep.py
++++ b/builders/hinge_sweep.py
+@@ -10,7 +10,7 @@ BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ 
+ CASES = []
+-for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
++for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json')):
+     d = json.load(open(f))
+     for key, bends in d['atlas'].items():
+         if key:
+diff --git a/builders/icorel_sweep.py b/builders/icorel_sweep.py
+index 87b99a3..66d4f2c 100644
+--- a/builders/icorel_sweep.py
++++ b/builders/icorel_sweep.py
+@@ -14,7 +14,7 @@ import numpy as np
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
+ 
+ DIHED = {"dod": 116.56505117707799, "ico": 138.18968510422141,
+diff --git a/builders/ideal_limit.py b/builders/ideal_limit.py
+index e631492..26e9b45 100644
+--- a/builders/ideal_limit.py
++++ b/builders/ideal_limit.py
+@@ -15,7 +15,7 @@ import json, glob, math, cmath, subprocess, sys
+ import numpy as np
+ 
+ BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
+-REC = "/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends"
++REC = "/Users/doyle/Dropbox/projects/atlas/data/records.bends"
+ TWO_PI = 2 * math.pi
+ 
+ 
+diff --git a/builders/members.py b/builders/members.py
+index 60ede9a..7a9a8a8 100644
+--- a/builders/members.py
++++ b/builders/members.py
+@@ -17,7 +17,7 @@ import csv, os, sys, importlib.util
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ sys.path.insert(0, HERE)
+ 
+ spec = importlib.util.spec_from_file_location(
+diff --git a/builders/recognize_sweep.py b/builders/recognize_sweep.py
+index ac5ef6c..621b63a 100644
+--- a/builders/recognize_sweep.py
++++ b/builders/recognize_sweep.py
+@@ -14,7 +14,7 @@ from multiprocessing import Pool
+ 
+ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+-NEO = os.path.dirname(TOP)
++NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
+ 
+ # build the LIB exactly as bend_recognize.py does (import its module
+diff --git a/builders/slice_solve.py b/builders/slice_solve.py
+index 6c61716..d8131a8 100644
+--- a/builders/slice_solve.py
++++ b/builders/slice_solve.py
+@@ -83,7 +83,7 @@ def lm_slice(y0, b_wish, N, V, cyc, edges, itmax=400):
+ 
+ def attack(name, dent_key, restarts=60, seed=0):
+     nc = None
+-    for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
++    for blk in open('/Users/doyle/Dropbox/projects/atlas/data/records.bends').read().split('net ')[1:]:
+         if blk.split()[0] == name:
+             for ln in blk.splitlines():
+                 if ln.startswith('faces '):
+diff --git a/builders/zenodo_dist.sh b/builders/zenodo_dist.sh
+index 9c25525..350f5c5 100755
+--- a/builders/zenodo_dist.sh
++++ b/builders/zenodo_dist.sh
+@@ -2,7 +2,7 @@
+ # Package the atlas + create a Zenodo DRAFT with reserved DOI + upload.
+ # NEVER prints the token. Does NOT publish.
+ set -e
+-ATLAS=/Users/doyle/Dropbox/projects/neo/atlas2
++ATLAS=/Users/doyle/Dropbox/projects/atlas
+ STAGE="${ATLAS}/dist"
+ # clear staging but keep the big site tarball (step 3 skips re-tarring it)
+ mkdir -p "$STAGE"
+@@ -11,8 +11,8 @@ find "$STAGE" -mindepth 1 -maxdepth 1 ! -name 'neoplatonic-atlas.tar.gz' -exec /
+ # 1. aggregate records
+ python3 - <<'PYEOF'
+ import json, os
+-NETS = "/Users/doyle/Dropbox/projects/neo/atlas2/site/personal/nets"
+-out = "/Users/doyle/Dropbox/projects/neo/atlas2/data/atlas_records.jsonl"
++NETS = "/Users/doyle/Dropbox/projects/atlas/site/personal/nets"
++out = "/Users/doyle/Dropbox/projects/atlas/data/atlas_records.jsonl"
+ n = 0
+ with open(out, "w") as f:
+     for d in sorted(os.listdir(NETS)):
+# Commit evidence — 2026-07-21: builder path-repoint (neo/atlas2 → projects/atlas)
+
+Mechanical path-repoint only. No logic, convention, encoding, or theorem change.
+Atlas was moved out of neo (`neo/atlas2` → `projects/atlas`, sibling of neo);
+these edits repoint the builders afterward.
+
+## Staged tree (13 builders + 1 audit note)
+
+**7 files — absolute self-refs `.../neo/atlas2/...` → `.../atlas/...`** (atlas's own
+data/site/builders moved with it):
+`climb_all.py`, `failure_frames.py`, `failure_pages.py`, `hinge_sweep.py`,
+`ideal_limit.py`, `slice_solve.py`, `zenodo_dist.sh`.
+
+**6 files — `NEO = os.path.dirname(TOP)` → `os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))`**
+(atlas no longer lives inside neo, so `dirname(TOP)` no longer lands on neo; new
+form resolves to the real sibling neo, honoring a `NEO_SRC` override):
+`members.py`, `classics.py`, `decap_search.py`, `classify.py`, `icorel_sweep.py`,
+`recognize_sweep.py`.
+
+**Left intact:** `.../neo/bendprover/...` solver refs — the solver stays in neo.
+
+**Audit note:** `notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f...txt` —
+append-only gate transcript for the `8ea8b44` tree (codex exit 1 was a
+`gpt-5.6-sol` model-cache breakage, since fixed; not a review verdict).
+
+## Verification (run this session)
+
+- Diffstat: 13 files, 18 insertions / 18 deletions — every changed line is a path string.
+- `grep -rn atlas2` over `*.py *.sh`: 0 remaining `neo/atlas2` path refs in builders.
+  (Non-path residue only: a page-`<title>` string in `build.py:245` and two doc lines
+  in `HANDOFF.md` — outside this batch, do not affect resolution.)
+- NEO resolution (executed): `TOP=/Users/doyle/Dropbox/projects/atlas` →
+  `NEO=/Users/doyle/Dropbox/projects/neo`; `data/objs`, `bendprover/csrc`, and
+  `euclid_lm_mp` all exist under it.
+- `neo/bendprover` solver refs confirmed unchanged in climb_all/failure_frames/
+  hinge_sweep/homepage/ideal_limit/personal.
+
+## New conventions / invariants / G1
+
+None — path strings and one env-var fallback only. G1 not applicable. No build system,
+no solver, no numeric convention affected.
+builders: repoint paths after atlas moved out of neo (neo/atlas2 → projects/atlas)
+
+Follow-on to the reorg that moved atlas from neo/atlas2 to projects/atlas
+(sibling of neo). Mechanical path-repoint only; no logic, convention, or
+theorem change.
+
+- 7 files (climb_all, failure_frames, failure_pages, hinge_sweep, ideal_limit,
+  slice_solve, zenodo_dist.sh): absolute self-refs .../neo/atlas2/... →
+  .../atlas/..., since atlas's own data/site/builders moved with it.
+- 6 files (members, classics, decap_search, classify, icorel_sweep,
+  recognize_sweep): NEO = os.path.dirname(TOP) → os.environ.get("NEO_SRC",
+  os.path.join(os.path.dirname(TOP), "neo")). atlas no longer lives inside neo,
+  so dirname(TOP) no longer lands on neo; the new form resolves to the real
+  sibling neo and honors a NEO_SRC override.
+
+Solver refs (.../neo/bendprover/...) left intact — the solver stays in neo.
+Verified this session: 0 remaining neo/atlas2 path refs in builders; NEO
+resolves to projects/neo with data/objs, bendprover/csrc, euclid_lm_mp present.
+
+Also commits the 8ea8b44 gate transcript under notes/codex-consults/ (append-only
+audit; its codex exit 1 was a gpt-5.6-sol model-cache breakage, since fixed).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git show :notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt | sed -n '1,35p;118,175p'
+printf '%s\\n' 'actual staged diff summary:'
+git diff --cached --shortstat
+git diff --cached --numstat
+printf '%s\\n' 'worktree hash without writing index:'
+git diff --cached --binary | shasum -a 256" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/neo/atlas2
+staged tree: 1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-7cf7wj0n.txt
+codex exit: 1
+
+final message:
+
+raw transcript:
+Reading additional input from stdin...
+2026-07-21T21:44:50.478945Z ERROR codex_models_manager::cache: failed to load models cache: missing field `supports_reasoning_summaries` at line 88 column 5
+OpenAI Codex v0.140.0
+--------
+workdir: /Users/doyle/Dropbox/projects/neo/atlas2
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f86a3-837f-7023-8d45-13bd023cc276
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+2026-07-17-215425-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-215816-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-233951-codex-gate-8fea647624d147134934551e82af2d2e24c27696.txt
+2026-07-18-180702-codex-gate-03f43a9077c3a3f4c2e7370438a684313cf49c30.txt
+2026-07-19-012944-codex-gate-5c13d51d4fc3a2e1fac1ceb876c51c60670dd91b.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — 2026-07-19: path repoint after move to projects/
+
+## Staged tree (9 files, mechanical path substitution only)
+
+`builders/climb_all.py`, `failure_frames.py`, `failure_pages.py`, `hinge_sweep.py`,
+`homepage.py`, `ideal_limit.py`, `personal.py`, `slice_solve.py`, `zenodo_dist.sh`
+— 19 replacements, all the string literal
+`/Users/doyle/Dropbox/neo` → `/Users/doyle/Dropbox/projects/neo`
+(applied via `sed -i '' 's|…|…|g'`). No logic changes.
+
+## Context
+
+`~/Dropbox/neo` was moved (mv, same volume) to `~/Dropbox/projects/neo` as part of
+the projects/ consolidation (Phase 2, per Peter's instruction). These are the only
+*live* files in atlas2 referencing the old absolute path.
+
+Deliberately NOT edited: ~50 tracked gate transcripts under `notes/codex-consults/`
+also contain the old path — they are audit records of past runs and are left as
+history.
+
+## Verification (all run this session, post-sed)
+
+- `rg -c -F '/Users/doyle/Dropbox/neo' builders/` → 0 files.
+- Smoke test 1: `python3 builders/views.py` from the new location →
+  "rendered 2245 pages", exit 0 (its documented idempotent re-render of
+  site/personal/nets/ from net.json records).
+- Smoke test 2: `climb_all.py` inputs resolve at new paths —
+  `data/walks/*.json` glob → 70 files; `bendprover/csrc/euclid_lm_mp` and
+  `embcheck_mp` exist and are executable; `data/records.bends` exists.
+
+## New conventions / invariants / G1
+
+None — path strings only. G1 not applicable. No build system affected.
+
+
+Staged diff:
+</stdin>
+warning: Model metadata for `gpt-5.6-sol` not found. Defaulting to fallback metadata; this can degrade performance and cause issues.
+ERROR: {"type":"error","status":400,"error":{"type":"invalid_request_error","message":"The 'gpt-5.6-sol' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again."}}
+ERROR: {"type":"error","status":400,"error":{"type":"invalid_request_error","message":"The 'gpt-5.6-sol' model requires a newer version of Codex. Please upgrade to the latest app or CLI and try again."}}
+actual staged diff summary:
+ 14 files changed, 185 insertions(+), 18 deletions(-)
+1	1	builders/classics.py
+1	1	builders/classify.py
+1	1	builders/climb_all.py
+1	1	builders/decap_search.py
+2	2	builders/failure_frames.py
+3	3	builders/failure_pages.py
+1	1	builders/hinge_sweep.py
+1	1	builders/icorel_sweep.py
+1	1	builders/ideal_limit.py
+1	1	builders/members.py
+1	1	builders/recognize_sweep.py
+1	1	builders/slice_solve.py
+3	3	builders/zenodo_dist.sh
+167	0	notes/codex-consults/2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+worktree hash without writing index:
+6eeebd647ab86f39b1b788c5b72075c0e259d018975ffc714b5a192e04929910  -
+
+codex
+WARN
+Files reviewed: All 14 staged files.
+Checks run: `git diff --cached --check`; compiled 12 staged Python files; `bash -n` on staged shell script; verified referenced paths; checked residual `neo/atlas2` refs and sensitive additions. No build was run.
+Blocking issues: None.
+Warnings: Commit message/evidence call the audit note the `8ea8b44` transcript, but its header identifies staged tree `1338c63f…`; the stated 13-file diffstat also omits the staged audit note.
+Recommendation: Correct those metadata claims; builder changes are internally consistent.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+25,123
+WARN
+Files reviewed: All 14 staged files.
+Checks run: `git diff --cached --check`; compiled 12 staged Python files; `bash -n` on staged shell script; verified referenced paths; checked residual `neo/atlas2` refs and sensitive additions. No build was run.
+Blocking issues: None.
+Warnings: Commit message/evidence call the audit note the `8ea8b44` transcript, but its header identifies staged tree `1338c63f…`; the stated 13-file diffstat also omits the staged audit note.
+Recommendation: Correct those metadata claims; builder changes are internally consistent.

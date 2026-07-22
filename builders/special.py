@@ -29,7 +29,10 @@ GALLERY_CSS = (
     "background:#f0f0f0;--poster-color:transparent}"
     ".item a{font-family:monospace;font-size:.75em;color:#2255aa;"
     "text-decoration:none;word-break:break-all}.item a:hover{text-decoration:underline}"
-    ".item .v{font-size:.7em;color:#888}")
+    ".item .v{font-size:.7em;color:#888}"
+    ".item .d{font-family:monospace;font-size:.75em;color:#333}"
+    ".item .o{font-size:.7em;color:#888}"
+    "h2 .v{font-size:.8em;color:#888;font-weight:normal}")
 
 FRONT_CSS = (
     "body{font-family:Georgia,serif;max-width:720px;margin:3em auto;"
@@ -419,7 +422,7 @@ def main():
             return c
         SECT = {0: 'Platonic', 1: 'Archimedean', 2: 'Prisms and antiprisms'}
         parts = []
-        for rank in (0, 1, 2):
+        for rank in (0, 1):  # Platonic + Archimedean only; prisms/antiprisms skipped
             sel = [(v, names, r, hyp) for v, names, r, hyp in crows
                    if rank_of(names) == rank]
             if not sel:
@@ -435,18 +438,20 @@ def main():
                 '(builders/classics.py); variants that collapse to the '
                 'same net share a cell. Blue models are the degree-7 '
                 'members: no Euclidean form, realized hyperbolically up '
-                'to &alpha; = 360/7. Johnson '
-                'solids have their own gallery, Odds and ends.',
+                'to &alpha; = 360/7.',
                 ''.join(parts))
 
-        jsel = [(v, names, r, hyp) for v, names, r, hyp in crows
-                if rank_of(names) == 3]
-        gallery('oddsends.html', 'Odds and ends',
-                'Johnson solids and other named constructions in their '
-                'neoplatonic reading. Blue models are degree-7 members, '
-                'realized hyperbolically up to &alpha; = 360/7.',
-                grid([item(r, cap(v, names, hyp))
-                      for v, names, r, hyp in jsel]))
+        # Odds and ends (rank-3 Johnson solids) commented out per PD 2026-07-22:
+        # just Johnson solids, look crappy; the cap-replaced ones are already
+        # covered by the decap ("Cap-replaced convex") gallery.
+        # jsel = [(v, names, r, hyp) for v, names, r, hyp in crows
+        #         if rank_of(names) == 3]
+        # gallery('oddsends.html', 'Odds and ends',
+        #         'Johnson solids and other named constructions in their '
+        #         'neoplatonic reading. Blue models are degree-7 members, '
+        #         'realized hyperbolically up to &alpha; = 360/7.',
+        #         grid([item(r, cap(v, names, hyp))
+        #               for v, names, r, hyp in jsel]))
 
     # -- themed galleries from the old atlas ---------------------------
     tdesc = {}
@@ -476,29 +481,81 @@ def main():
         gallery(f'{tag}.html', title, desc,
                 grid([item(r, f'v={r["v"]}') for r in rows]))
 
-    # dented: old-atlas dent GLBs living in the owning nets' dirs,
-    # thumbnails linking through to the (undented) net page
-    drows = []
-    ddpath = os.path.join(TOP, "data", "dented_old.tsv")
-    if os.path.exists(ddpath):
-        for r in csv.DictReader(open(ddpath), delimiter='\t'):
-            V = (len(r['name']) + 4) // 2
-            rec = byname.get(f"v{V}{r['name']}")
-            if not rec:
+    # -- dentings gallery: regenerated from the certified dent-walk scan
+    #    (data/walks/, committed) via build.py's model_glb. By undented
+    #    original, empty set first, one model per symmetry orbit. Fully
+    #    self-regenerating from committed inputs -- GLBs rebuilt into the
+    #    same-stem pool gallery/dented/, geometry-exact with the published
+    #    bytes (float-drift only; published bytes stay of record, backed up
+    #    + data/dentings.tsv). Ported from build.py::build_dentings, the
+    #    original rerunnable builder.
+    sys.path.insert(0, TOP)
+    import build as _build
+    from walklib import automorphisms as _auts
+    pool = os.path.join(OUT, "gallery", "dented")
+    os.makedirs(pool, exist_ok=True)
+    entries = []
+    for nm, d in sorted(_build.load_walks().items()):
+        if len(d["atlas"]) <= 1:
+            continue
+        Vw = d["V"]
+        wfaces = [tuple(int(x) for x in fc.split(',')) for fc in d["netcode"].split(';')]
+        perms = [tuple(m[v] for v in range(1, Vw + 1)) for m in _auts(wfaces, Vw)]
+        seen = {}
+        for key in sorted(d["atlas"]):
+            if not key:
+                seen[()] = [key, 1]
                 continue
-            nid = rec.get("id", rec["name"])
-            if os.path.exists(os.path.join(NETS, nid, f"dent_v{r['k']}.glb")):
-                drows.append(
-                    f'<div class=item><div class=cell>'
-                    f'<model-viewer src="../nets/{nid}/dent_v{r["k"]}.glb" '
-                    f'camera-orbit="0deg 100deg auto" camera-controls '
-                    f'interaction-prompt=none></model-viewer></div>'
-                    f'<a href="../nets/{nid}/">{display(rec["name"])}</a> '
-                    f'<span class=v>v={V} dent at vertex {r["k"]}</span></div>')
-    title, desc = tdesc.get("dented", ("Dented", ""))
-    gallery('dented.html', title,
-            desc + ' Thumbnails link to the undented realization.',
-            grid(drows))
+            Dk = frozenset(int(x) for x in key.split(','))
+            canon = min(tuple(sorted(p[v - 1] for v in Dk)) for p in perms)
+            if canon in seen:
+                seen[canon][1] += 1
+            else:
+                seen[canon] = [key, 1]
+        row = []
+        for canon, (key, orb) in sorted(seen.items(),
+                                        key=lambda kv: (len(kv[0]), kv[0])):
+            bends = {tuple(int(x) for x in k.split(',')): v
+                     for k, v in d["atlas"][key].items()}
+            tag = "Dempty" if not canon else "D" + "-".join(map(str, canon))
+            fn, gap = _build.model_glb(pool, nm, tag, wfaces, bends, Vw)
+            row.append((list(canon), orb, fn, gap))
+        entries.append((Vw, nm, row))
+    entries.sort(key=lambda e: (e[0], e[1]), reverse=True)   # richest first
+    parts, ndent = [], 0
+    for Vw, nm, row in entries:
+        rec = byname.get(f"v{Vw}{nm}")
+        head = (f'<a href="../nets/{rec.get("id", rec["name"])}/">{nm}</a>'
+                if rec else nm)
+        parts.append(f'<h2>{head} <span class=v>v={Vw}</span></h2>')
+        cells = []
+        for D, orb, fn, gap in row:
+            if not D:
+                label, ann = '&empty;', ''
+            else:
+                label = '{' + ','.join(map(str, D)) + '}'
+                ann = (f'&times;{orb} ' if orb > 1 else '') + f'gap {gap:.3f}'
+                ndent += 1
+            cells.append(
+                f'<div class=item><div class=cell>'
+                f'<model-viewer src="dented/{fn}" '
+                f'camera-orbit="0deg 100deg auto" camera-controls '
+                f'interaction-prompt=none></model-viewer></div>'
+                f'<span class=d>{label}</span>'
+                + (f' <span class=o>{ann}</span>' if ann else '') + '</div>')
+        parts.append('<div class=grid>' + ''.join(cells) + '</div>')
+    gallery('dented.html', 'Dentings',
+            f'Every net with an embedded denting, richest first, showing '
+            f'all of its dentings &mdash; one model per symmetry orbit, '
+            f'starting from the undented realization (&empty;). '
+            f'&times;k marks an orbit of k dent sets; gap is the least '
+            f'distance between vertex-disjoint faces, in edge lengths. '
+            f'{len(entries)} nets, {ndent} dentings, every model embedded and '
+            f'certified &mdash; regenerated from the dent-walk scan '
+            f'(data/walks/), which walked which vertex subsets can be dented '
+            f'together without breaking the embedding; adding dents in '
+            f'different orders never gave unequal results.',
+            ''.join(parts))
 
     # -- by-v listing pages -------------------------------------------
     byv = {}
@@ -551,6 +608,7 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/small.html">Primes v&le;12</a>
 <a href="by-v/13.html">Primes v=13</a>
 <a href="by-v/14.html">Primes v=14</a>
+<a href="gallery/nonprime.html">Non-prime</a>
 <a href="gallery/convex.html">Convex</a>
 <a href="gallery/dented.html">Dented</a>
 <a href="gallery/buried.html">Hull-buried</a>
@@ -561,22 +619,21 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
 <a href="gallery/classics.html">Classics</a>
-<a href="gallery/oddsends.html">Odds and ends</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>
 <a href="gallery/phyllo51.html">(5,1)</a>
 <a href="gallery/preapproved.html">Preapproved</a>
-<a href="gallery/nonprime.html">Non-prime</a>
 <a href="gallery/flops.html">Tough cases</a>
 </div>
 <h2>Example</h2>
 <div class="example-row">
   <div class="blurb">
     Each neoplatonic has its own page &mdash; the Euclidean solid, the
-    morph from the ideal limit in the Poincar&eacute; and Klein models,
-    the ideal net, and the CLERS triangulation. <strong>Click the CLERS
-    code under the model to the right</strong> to open its page.
+    ideal net, the CLERS triangulation, and, where the development from
+    the ideal limit is certified, the morph in the Poincar&eacute; and
+    Klein models. <strong>Click the CLERS code under the model to the
+    right</strong> to open its page.
   </div>
   <div class="thumb">
     <model-viewer src="nets/{ex}/rb.glb"

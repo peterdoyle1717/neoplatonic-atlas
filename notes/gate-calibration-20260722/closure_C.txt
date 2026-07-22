@@ -1,0 +1,3 @@
+clean-frame closure events sampled: 756001
+C_obs = |q-1|/(eps*s^2):  median 0.384   p99 7.611   max 23594.433
+  at s>1e5 only: n=3881, max C_obs 61.586

@@ -141,7 +141,7 @@ def render_page(netdir):
                                 f'&alpha;={amax:.2f}&deg;'))
     # 2x2 block:  Euclidean | Poincare morph
     #             Klein morph | ideal net
-    if art.get("morph_p"):
+    if art.get("morph_p") and art.get("morph_k"):   # both or neither (G1)
         lab = ''
         end = 'Euclidean'
         if amax:

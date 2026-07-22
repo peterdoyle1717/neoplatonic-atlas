@@ -1,0 +1,31 @@
+smallest NONDEGENERATE max|num| across all frames: 1.130e-07
+  (COPLANAR_NUM_TOL = 1e-12; separation x1.1e+05)
+skipped vertices total: 4449, on 117 nets
+skipped WITHOUT flat-bends certificate: 0
+   v=100 v100CCACCCACCACACCACCACACCACACACCACA skips=60
+   v=102 v102h63135343ab206f3b skips=48
+   v=116 v116he2a8f2ee792f4030 skips=2
+   v=127 v127h4fa99ecb0de114a9 skips=60
+   v=128 v128h918f570260220c9b skips=2
+   v=12 v12CCCACACCAACACACCAABE skips=12
+   v=130 v130h4da8aa291a5b8b58 skips=84
+   v=13 v13CCCACCACACCACACACAAABE skips=1
+   v=14 v14CCCCACCACACACACACAACAAAE skips=2
+   v=152 v152hcdb06f26767a9fee skips=152
+   v=152 v152he09dd528bd007438 skips=72
+   v=15 v15CCCACACCACCACACACCACAABABE skips=15
+   v=162 v162h9b09eec5168e9243 skips=60
+   v=164 v164h1268c85b083401b2 skips=112
+   v=164 v164h269ae2cb791779bd skips=38
+
+verdict deltas vs built site: 56
+   v=102 v102h248728676c88abd7 has_morphs=False note=None
+   v=102 v102ha0145080ab94fac9 has_morphs=False note=None
+   v=102 v102hae056372ee7b85b8 has_morphs=False note=None
+   v=102 v102he0fc26d1f37f5c66 has_morphs=False note=None
+   v=107 v107h025ed392ab598a98 has_morphs=False note=None
+   v=110 v110h4b2c5a85b94cfcfa has_morphs=False note=None
+   v=116 v116he2a8f2ee792f4030 has_morphs=False note=None
+   v=122 v122h8fe939a1353d3843 has_morphs=False note=None
+   v=128 v128h0a8234b313980563 has_morphs=False note=None
+   v=128 v128h918f570260220c9b has_morphs=False note=None
