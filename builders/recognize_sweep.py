@@ -14,7 +14,7 @@ from multiprocessing import Pool
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
 
 # build the LIB exactly as bend_recognize.py does (import its module

@@ -19,7 +19,7 @@ from scipy.spatial import ConvexHull
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 OBJS = os.path.join(NEO, "data", "objs")
 FLOPPERS = os.path.join(NEO, "euclid_hp", "explore", "floppers.txt")
 sys.path.insert(0, HERE)

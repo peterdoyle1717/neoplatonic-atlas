@@ -15,7 +15,7 @@ import json, glob, math, cmath, subprocess, sys
 import numpy as np
 
 BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
-REC = "/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends"
+REC = "/Users/doyle/Dropbox/projects/atlas/data/records.bends"
 TWO_PI = 2 * math.pi
 
 

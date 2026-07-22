@@ -14,7 +14,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 BIN = os.path.join(NEO, "bendprover", "csrc", "euclid_lm_mp")
 
 DIHED = {"dod": 116.56505117707799, "ico": 138.18968510422141,

@@ -16,7 +16,7 @@ import numpy as np
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 OBJS = os.path.join(NEO, "data", "objs")
 TOL = 1e-4
 PHI = (1 + math.sqrt(5)) / 2

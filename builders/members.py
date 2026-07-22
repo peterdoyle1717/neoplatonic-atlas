@@ -17,7 +17,7 @@ import csv, os, sys, importlib.util
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 sys.path.insert(0, HERE)
 
 spec = importlib.util.spec_from_file_location(

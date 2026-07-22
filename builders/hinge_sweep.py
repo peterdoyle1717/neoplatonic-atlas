@@ -10,7 +10,7 @@ BIN = "/Users/doyle/Dropbox/projects/neo/bendprover/csrc/euclid_lm_mp"
 HERE = os.path.dirname(os.path.abspath(__file__))
 
 CASES = []
-for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json')):
+for f in sorted(glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json')):
     d = json.load(open(f))
     for key, bends in d['atlas'].items():
         if key:

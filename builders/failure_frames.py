@@ -16,13 +16,13 @@ OUT = os.path.join(HERE, 'failure_frames')
 os.makedirs(OUT, exist_ok=True)
 
 name_of = {}
-for blk in open('/Users/doyle/Dropbox/projects/neo/atlas2/data/records.bends').read().split('net ')[1:]:
+for blk in open('/Users/doyle/Dropbox/projects/atlas/data/records.bends').read().split('net ')[1:]:
     nm = blk.split()[0]
     for ln in blk.splitlines():
         if ln.startswith('faces '): name_of[ln[6:].strip()] = nm
 
 walks = {}
-for f in glob.glob('/Users/doyle/Dropbox/projects/neo/atlas2/data/walks/*.json'):
+for f in glob.glob('/Users/doyle/Dropbox/projects/atlas/data/walks/*.json'):
     d = json.load(open(f))
     walks[d['netcode']] = d
 

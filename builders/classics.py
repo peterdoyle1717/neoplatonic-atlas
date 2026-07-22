@@ -20,7 +20,7 @@ import importlib.util
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
-NEO = os.path.dirname(TOP)
+NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 BIN = os.path.expanduser("~/local/antiprism-0.32/bin")
 
 spec = importlib.util.spec_from_file_location(
