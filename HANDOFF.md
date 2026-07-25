@@ -54,13 +54,17 @@ Correspondence: notes/FOR_NEO_morph_frames.md / FOR_ATLAS_frames_ready.md.
 
 ## Site content (2026-07-25)
 
-2,249 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
+2,251 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
 v≤12 / v=13 / v=14 · Non-prime · Platonic & Archimedean · Convex ·
 Hyperbolic · Dented · Hull-buried · Pancakes · Floppy · Symmetry ·
 Eisenstein subdivisions · … Non-prime is organized by the paper's three
-types via G1-audited clique-sum decomposition, 8/8/8: tet assemblies /
-stacks of ≥2 octs / prime-core+tets — the octahedron core complete (all
-eight attachment classes up to symmetry; four minted 2026-07-25 via the
+types via G1-audited clique-sum decomposition, 11/8/8: tet assemblies /
+stacks of ≥2 octs / prime-core+tets. The tet-assembly family is
+complete through 11 tets = v≤14 (BFS + canonical-CLERS enumeration):
+one class at 2 and at 3 tets, three at 4 and at 5, helix-only from 6
+through 11; captions carry the dual-tree shape (around an edge /
+path / branched; G1-audited). The octahedron core is complete (all eight
+attachment classes up to symmetry; four minted 2026-07-25 via the
 canonical CLERS encoder in neo/clers). Convex opens with the eight
 no-coplanar-faces solids (Rausenberger, later Freudenthal & van der
 Waerden). Hyperbolic = the 25 degree-7 nets (Klein heroes). Dentings =
@@ -112,4 +116,6 @@ draft is BEHIND the live site. Promotion formalities not yet done:
   (floppers), title.
 - 2026-07-25: octahedron-core exemplars (4 minted), 8/8/8 non-prime,
   symmetry/conway census completion (+57), gate-record correction,
-  hook fixes (diff cap 250k, BLOCK vs ERROR distinguished).
+  hook fixes (diff cap 250k, BLOCK vs ERROR distinguished); then
+  tet-assembly completion → 11/8/8 (2 minted, the all-faces-capped
+  tetrahedron promoted from themeless, shape captions).

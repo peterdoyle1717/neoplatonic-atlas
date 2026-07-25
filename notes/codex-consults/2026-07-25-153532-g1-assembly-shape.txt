@@ -1,0 +1,820 @@
+G1 design audit: assembly_shape (dual-tree shape captions, type-1 non-prime gallery)
+Verdict: APPROVE
+Run: codex exec --sandbox read-only, this session, after the 0c7495a gate BLOCK
+
+===== PROMPT BUNDLE =====
+G1 DESIGN AUDIT REQUEST: assembly_shape — dual-tree shape captions for
+the type-1 (all-tet) non-prime gallery (builders/special.py).
+
+Context: the clique-sum decomposition (recursive splitting along the
+lexicographically-least separating triangle, both sides keeping the
+triangle as a face, closed-2-manifold certification per factor) is
+G1-APPROVED (r3, notes/codex-consults/2026-07-24-220707-g1r3-nonprime-
+decomposition.txt). This audit covers ONLY the new caption-level
+classifier layered on top of it. Display-caption classification only:
+no solver, metric, or trust-base code consumes it.
+
+5-POINT SPEC
+
+1. Exact formulas. Input: the factors of an all-tet assembly, as
+   vertex sets F_1..F_n (each |F_i| = 4) from the approved recursion.
+   - Dual adjacency: A(i,j) iff |F_i ∩ F_j| = 3.
+   - dual_deg(i) = #{j != i : A(i,j)}.
+   - shape = None                if n < 3   (no caption tag)
+           = 'branched'          if max_i dual_deg(i) > 2
+           = 'around an edge'    elif |∩_i F_i| = 2
+           = 'path'              otherwise.
+   Precedence is as listed (branched tested before around-an-edge).
+
+2. Conventions. Purely combinatorial on vertex labels; factors
+   unordered; no orientation, frames, coordinates, or volume anywhere.
+   The common pair in the around-an-edge case is automatically an edge:
+   both vertices lie in every factor and every factor is a tetrahedron.
+
+3. Strongest validation invariant (executable checker, run this
+   session, output below):
+   (T) tree-ness: sum_i dual_deg(i) = 2(n-1) for every member — the
+       dual graph of a clique-sum of spheres along separating
+       triangles is a tree; any spurious A(i,j) (3 shared vertices
+       without a shared separating triangle) breaks this sum.
+   (S) expected-shape table on all 11 gallery members from independent
+       structural knowledge: the helix family ((CA)^k CLERS tail) =
+       path; the 3- and 4-around-an-axis-edge forms = around an edge;
+       the partial/full stars and star+leaf forms = branched.
+   (O) precedence never hides ambiguity on real members: every
+       'branched' verdict also fails the around-an-edge test
+       (|∩_i F_i| != 2).
+
+4. Failure modes caught. Spurious dual adjacency (T); factor-count or
+   recursion drift (S, via n per member); misclassification of any
+   member (S); precedence masking (O).
+
+5. Files: builders/special.py only (assembly_shape + caption wiring +
+   section blurb). Test: python3.13 g1_shape_checker.py from the
+   session scratchpad; exits nonzero on any failure.
+
+CLAIM-SCOPE NOTE (the paired wording fix, same remediation round):
+the gallery blurb will claim completeness only for the verified range
+— all gluings through eleven tets (v <= 14; v = n+3 exactly for these
+stacked spheres), enumerated by BFS with degree-6 pruning and
+canonical-CLERS dedup, counts 1,1,3,3,1,1,... with only the helical
+path from six through eleven tets. No unbounded 'survives forever'
+claim.
+
+CHECKER OUTPUT (this session):
+OK  v5CCACAE                       n= 2 (exp  2) shape=None            (exp None           ) tree=Y order=Y
+OK  v6CCACACAE                     n= 3 (exp  3) shape=around an edge  (exp around an edge ) tree=Y order=Y
+OK  v7CCACACACAE                   n= 4 (exp  4) shape=path            (exp path           ) tree=Y order=Y
+OK  v7CCACACCABE                   n= 4 (exp  4) shape=around an edge  (exp around an edge ) tree=Y order=Y
+OK  v7CCACCABCAE                   n= 4 (exp  4) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v8CCACACACACAE                 n= 5 (exp  5) shape=path            (exp path           ) tree=Y order=Y
+OK  v8CCACACCACABE                 n= 5 (exp  5) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v8CCACCCABCABE                 n= 5 (exp  5) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v9CCACACACACACAE               n= 6 (exp  6) shape=path            (exp path           ) tree=Y order=Y
+OK  v10CCACACACACACACAE            n= 7 (exp  7) shape=path            (exp path           ) tree=Y order=Y
+OK  v14CCACACACACACACACACACACAE    n=11 (exp 11) shape=path            (exp path           ) tree=Y order=Y
+
+11/11 members pass all assertions
+
+CHECKER SOURCE:
+#!/usr/bin/env python3.13
+"""Executable checker for the assembly_shape G1 spec.
+
+Runs the shipped classifier (builders/special.py logic, reproduced via
+the same clique-sum recursion) over all 11 type-1 members and asserts:
+  (T) tree-ness: sum of dual degrees == 2(n-1)  [dual graph of a
+      clique-sum of spheres along separating triangles is a tree;
+      catches spurious |V_i ∩ V_j|=3 adjacencies]
+  (S) shape matches the independently-known structure of each member:
+      helix family -> path; n-around-an-axis-edge -> around an edge
+      with the common pair = the axis pair; stars/branched forms ->
+      branched.
+  (O) check order: every 'branched' verdict would NOT also satisfy the
+      around-an-edge test (|common| != 2), i.e. the precedence never
+      hides an ambiguity on real members.
+"""
+import json, sys
+from itertools import combinations
+
+def factors_with_verts(faces):
+    def rec(fs):
+        fset = {frozenset(f) for f in fs}
+        adj = {}
+        for a, b, c in fs:
+            adj.setdefault(a, set()).update((b, c))
+            adj.setdefault(b, set()).update((a, c))
+            adj.setdefault(c, set()).update((a, b))
+        seps = [t for t in {frozenset(t) for v in adj
+                for t in combinations(sorted(adj[v] | {v}), 3)
+                if all(y in adj[x] for x, y in combinations(t, 2))}
+                if t not in fset]
+        if not seps:
+            return [fs]
+        T = sorted(min(seps, key=lambda t: tuple(sorted(t))))
+        cut = {frozenset(e) for e in combinations(T, 2)}
+        e2f = {}
+        for i, f in enumerate(fs):
+            for e in zip(f, f[1:] + f[:1]):
+                e2f.setdefault(frozenset(e), []).append(i)
+        fadj = {i: set() for i in range(len(fs))}
+        for e, ff in e2f.items():
+            if e in cut: continue
+            for i in ff: fadj[i].update(j for j in ff if j != i)
+        comps, seen = [], set()
+        for i in range(len(fs)):
+            if i in seen: continue
+            comp, st = set(), [i]
+            while st:
+                k = st.pop()
+                if k not in comp: comp.add(k); st.extend(fadj[k] - comp)
+            seen |= comp; comps.append(comp)
+        out = []
+        for comp in comps:
+            out.extend(rec([fs[i] for i in sorted(comp)] + [tuple(T)]))
+        return out
+    return [frozenset(v for f in fac for v in f) for fac in rec(faces)]
+
+def shape(fv):
+    if len(fv) < 3:
+        return None
+    dd = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+          for i, v in enumerate(fv)]
+    if max(dd) > 2:
+        return 'branched'
+    if len(frozenset.intersection(*fv)) == 2:
+        return 'around an edge'
+    return 'path'
+
+# expected shapes from independent structural knowledge:
+# helix family (CLERS (CA)^k pattern) = path; the 3- and 4-around-an-
+# axis-edge forms; the partial/full stars and the star+leaf forms.
+EXPECT = {
+    'v5CCACAE':                    (2, None),
+    'v6CCACACAE':                  (3, 'around an edge'),
+    'v7CCACACACAE':                (4, 'path'),
+    'v7CCACACCABE':                (4, 'around an edge'),
+    'v7CCACCABCAE':                (4, 'branched'),
+    'v8CCACACACACAE':              (5, 'path'),
+    'v8CCACACCACABE':              (5, 'branched'),
+    'v8CCACCCABCABE':              (5, 'branched'),
+    'v9CCACACACACACAE':            (6, 'path'),
+    'v10CCACACACACACACAE':         (7, 'path'),
+    'v14CCACACACACACACACACACACAE': (11, 'path'),
+}
+
+fail = 0
+for nid, (n_exp, sh_exp) in EXPECT.items():
+    rec = json.load(open(f'site/personal/nets/{nid}/net.json'))
+    faces = [tuple(int(x) for x in f.split(','))
+             for f in rec['netcode'].split(';')]
+    fv = factors_with_verts(faces)
+    n = len(fv)
+    dd = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+          for i, v in enumerate(fv)]
+    tree_ok = (sum(dd) == 2 * (n - 1))
+    sh = shape(fv)
+    order_ok = True
+    if sh == 'branched':
+        order_ok = (len(frozenset.intersection(*fv)) != 2)
+    axis_ok = True
+    if sh == 'around an edge':
+        common = frozenset.intersection(*fv)
+        # the common pair must be an edge: both vertices in every factor,
+        # and (in a tet list) adjacent -- every factor is a tet containing
+        # both, so they are adjacent in it by definition of a tet.
+        axis_ok = (len(common) == 2)
+    ok = (n == n_exp and sh == sh_exp and tree_ok and order_ok and axis_ok)
+    fail += 0 if ok else 1
+    print(f"{'OK ' if ok else 'FAIL'} {nid:30} n={n:2} (exp {n_exp:2}) "
+          f"shape={str(sh):15} (exp {str(sh_exp):15}) "
+          f"tree={'Y' if tree_ok else 'N'} order={'Y' if order_ok else 'N'}")
+print(f"\n{len(EXPECT) - fail}/{len(EXPECT)} members pass all assertions")
+sys.exit(1 if fail else 0)
+
+SHIPPED IMPLEMENTATION (builders/special.py, committed 0c7495a):
+    def assembly_shape(pieces):
+        """dual-tree shape of an all-tet assembly: 'around an edge'
+        (a common edge in every factor), 'path' (the 3NA helix family),
+        or 'branched' (a factor glued to three or more others)."""
+        fv = [v for _, v in pieces]
+        if len(fv) < 3:
+            return None
+        dual_deg = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+                    for i, v in enumerate(fv)]
+        if max(dual_deg) > 2:
+            return 'branched'
+        if len(frozenset.intersection(*fv)) == 2:
+            return 'around an edge'
+        return 'path'
+
+===== CODEX OUTPUT =====
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9ac5-6559-7ee0-a8f5-6e7fac41ec53
+--------
+user
+G1 DESIGN AUDIT REQUEST: assembly_shape — dual-tree shape captions for
+the type-1 (all-tet) non-prime gallery (builders/special.py).
+
+Context: the clique-sum decomposition (recursive splitting along the
+lexicographically-least separating triangle, both sides keeping the
+triangle as a face, closed-2-manifold certification per factor) is
+G1-APPROVED (r3, notes/codex-consults/2026-07-24-220707-g1r3-nonprime-
+decomposition.txt). This audit covers ONLY the new caption-level
+classifier layered on top of it. Display-caption classification only:
+no solver, metric, or trust-base code consumes it.
+
+5-POINT SPEC
+
+1. Exact formulas. Input: the factors of an all-tet assembly, as
+   vertex sets F_1..F_n (each |F_i| = 4) from the approved recursion.
+   - Dual adjacency: A(i,j) iff |F_i ∩ F_j| = 3.
+   - dual_deg(i) = #{j != i : A(i,j)}.
+   - shape = None                if n < 3   (no caption tag)
+           = 'branched'          if max_i dual_deg(i) > 2
+           = 'around an edge'    elif |∩_i F_i| = 2
+           = 'path'              otherwise.
+   Precedence is as listed (branched tested before around-an-edge).
+
+2. Conventions. Purely combinatorial on vertex labels; factors
+   unordered; no orientation, frames, coordinates, or volume anywhere.
+   The common pair in the around-an-edge case is automatically an edge:
+   both vertices lie in every factor and every factor is a tetrahedron.
+
+3. Strongest validation invariant (executable checker, run this
+   session, output below):
+   (T) tree-ness: sum_i dual_deg(i) = 2(n-1) for every member — the
+       dual graph of a clique-sum of spheres along separating
+       triangles is a tree; any spurious A(i,j) (3 shared vertices
+       without a shared separating triangle) breaks this sum.
+   (S) expected-shape table on all 11 gallery members from independent
+       structural knowledge: the helix family ((CA)^k CLERS tail) =
+       path; the 3- and 4-around-an-axis-edge forms = around an edge;
+       the partial/full stars and star+leaf forms = branched.
+   (O) precedence never hides ambiguity on real members: every
+       'branched' verdict also fails the around-an-edge test
+       (|∩_i F_i| != 2).
+
+4. Failure modes caught. Spurious dual adjacency (T); factor-count or
+   recursion drift (S, via n per member); misclassification of any
+   member (S); precedence masking (O).
+
+5. Files: builders/special.py only (assembly_shape + caption wiring +
+   section blurb). Test: python3.13 g1_shape_checker.py from the
+   session scratchpad; exits nonzero on any failure.
+
+CLAIM-SCOPE NOTE (the paired wording fix, same remediation round):
+the gallery blurb will claim completeness only for the verified range
+— all gluings through eleven tets (v <= 14; v = n+3 exactly for these
+stacked spheres), enumerated by BFS with degree-6 pruning and
+canonical-CLERS dedup, counts 1,1,3,3,1,1,... with only the helical
+path from six through eleven tets. No unbounded 'survives forever'
+claim.
+
+CHECKER OUTPUT (this session):
+OK  v5CCACAE                       n= 2 (exp  2) shape=None            (exp None           ) tree=Y order=Y
+OK  v6CCACACAE                     n= 3 (exp  3) shape=around an edge  (exp around an edge ) tree=Y order=Y
+OK  v7CCACACACAE                   n= 4 (exp  4) shape=path            (exp path           ) tree=Y order=Y
+OK  v7CCACACCABE                   n= 4 (exp  4) shape=around an edge  (exp around an edge ) tree=Y order=Y
+OK  v7CCACCABCAE                   n= 4 (exp  4) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v8CCACACACACAE                 n= 5 (exp  5) shape=path            (exp path           ) tree=Y order=Y
+OK  v8CCACACCACABE                 n= 5 (exp  5) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v8CCACCCABCABE                 n= 5 (exp  5) shape=branched        (exp branched       ) tree=Y order=Y
+OK  v9CCACACACACACAE               n= 6 (exp  6) shape=path            (exp path           ) tree=Y order=Y
+OK  v10CCACACACACACACAE            n= 7 (exp  7) shape=path            (exp path           ) tree=Y order=Y
+OK  v14CCACACACACACACACACACACAE    n=11 (exp 11) shape=path            (exp path           ) tree=Y order=Y
+
+11/11 members pass all assertions
+
+CHECKER SOURCE:
+#!/usr/bin/env python3.13
+"""Executable checker for the assembly_shape G1 spec.
+
+Runs the shipped classifier (builders/special.py logic, reproduced via
+the same clique-sum recursion) over all 11 type-1 members and asserts:
+  (T) tree-ness: sum of dual degrees == 2(n-1)  [dual graph of a
+      clique-sum of spheres along separating triangles is a tree;
+      catches spurious |V_i ∩ V_j|=3 adjacencies]
+  (S) shape matches the independently-known structure of each member:
+      helix family -> path; n-around-an-axis-edge -> around an edge
+      with the common pair = the axis pair; stars/branched forms ->
+      branched.
+  (O) check order: every 'branched' verdict would NOT also satisfy the
+      around-an-edge test (|common| != 2), i.e. the precedence never
+      hides an ambiguity on real members.
+"""
+import json, sys
+from itertools import combinations
+
+def factors_with_verts(faces):
+    def rec(fs):
+        fset = {frozenset(f) for f in fs}
+        adj = {}
+        for a, b, c in fs:
+            adj.setdefault(a, set()).update((b, c))
+            adj.setdefault(b, set()).update((a, c))
+            adj.setdefault(c, set()).update((a, b))
+        seps = [t for t in {frozenset(t) for v in adj
+                for t in combinations(sorted(adj[v] | {v}), 3)
+                if all(y in adj[x] for x, y in combinations(t, 2))}
+                if t not in fset]
+        if not seps:
+            return [fs]
+        T = sorted(min(seps, key=lambda t: tuple(sorted(t))))
+        cut = {frozenset(e) for e in combinations(T, 2)}
+        e2f = {}
+        for i, f in enumerate(fs):
+            for e in zip(f, f[1:] + f[:1]):
+                e2f.setdefault(frozenset(e), []).append(i)
+        fadj = {i: set() for i in range(len(fs))}
+        for e, ff in e2f.items():
+            if e in cut: continue
+            for i in ff: fadj[i].update(j for j in ff if j != i)
+        comps, seen = [], set()
+        for i in range(len(fs)):
+            if i in seen: continue
+            comp, st = set(), [i]
+            while st:
+                k = st.pop()
+                if k not in comp: comp.add(k); st.extend(fadj[k] - comp)
+            seen |= comp; comps.append(comp)
+        out = []
+        for comp in comps:
+            out.extend(rec([fs[i] for i in sorted(comp)] + [tuple(T)]))
+        return out
+    return [frozenset(v for f in fac for v in f) for fac in rec(faces)]
+
+def shape(fv):
+    if len(fv) < 3:
+        return None
+    dd = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+          for i, v in enumerate(fv)]
+    if max(dd) > 2:
+        return 'branched'
+    if len(frozenset.intersection(*fv)) == 2:
+        return 'around an edge'
+    return 'path'
+
+# expected shapes from independent structural knowledge:
+# helix family (CLERS (CA)^k pattern) = path; the 3- and 4-around-an-
+# axis-edge forms; the partial/full stars and the star+leaf forms.
+EXPECT = {
+    'v5CCACAE':                    (2, None),
+    'v6CCACACAE':                  (3, 'around an edge'),
+    'v7CCACACACAE':                (4, 'path'),
+    'v7CCACACCABE':                (4, 'around an edge'),
+    'v7CCACCABCAE':                (4, 'branched'),
+    'v8CCACACACACAE':              (5, 'path'),
+    'v8CCACACCACABE':              (5, 'branched'),
+    'v8CCACCCABCABE':              (5, 'branched'),
+    'v9CCACACACACACAE':            (6, 'path'),
+    'v10CCACACACACACACAE':         (7, 'path'),
+    'v14CCACACACACACACACACACACAE': (11, 'path'),
+}
+
+fail = 0
+for nid, (n_exp, sh_exp) in EXPECT.items():
+    rec = json.load(open(f'site/personal/nets/{nid}/net.json'))
+    faces = [tuple(int(x) for x in f.split(','))
+             for f in rec['netcode'].split(';')]
+    fv = factors_with_verts(faces)
+    n = len(fv)
+    dd = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+          for i, v in enumerate(fv)]
+    tree_ok = (sum(dd) == 2 * (n - 1))
+    sh = shape(fv)
+    order_ok = True
+    if sh == 'branched':
+        order_ok = (len(frozenset.intersection(*fv)) != 2)
+    axis_ok = True
+    if sh == 'around an edge':
+        common = frozenset.intersection(*fv)
+        # the common pair must be an edge: both vertices in every factor,
+        # and (in a tet list) adjacent -- every factor is a tet containing
+        # both, so they are adjacent in it by definition of a tet.
+        axis_ok = (len(common) == 2)
+    ok = (n == n_exp and sh == sh_exp and tree_ok and order_ok and axis_ok)
+    fail += 0 if ok else 1
+    print(f"{'OK ' if ok else 'FAIL'} {nid:30} n={n:2} (exp {n_exp:2}) "
+          f"shape={str(sh):15} (exp {str(sh_exp):15}) "
+          f"tree={'Y' if tree_ok else 'N'} order={'Y' if order_ok else 'N'}")
+print(f"\n{len(EXPECT) - fail}/{len(EXPECT)} members pass all assertions")
+sys.exit(1 if fail else 0)
+
+SHIPPED IMPLEMENTATION (builders/special.py, committed 0c7495a):
+    def assembly_shape(pieces):
+        """dual-tree shape of an all-tet assembly: 'around an edge'
+        (a common edge in every factor), 'path' (the 3NA helix family),
+        or 'branched' (a factor glued to three or more others)."""
+        fv = [v for _, v in pieces]
+        if len(fv) < 3:
+            return None
+        dual_deg = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+                    for i, v in enumerate(fv)]
+        if max(dual_deg) > 2:
+            return 'branched'
+        if len(frozenset.intersection(*fv)) == 2:
+            return 'around an edge'
+        return 'path'
+
+VERDICT REQUEST: APPROVE or REVISE, with specifics. Judge the spec's
+formulas, the invariant strength, and whether the scoped completeness
+wording resolves the overreach.
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll audit this against the live baton, the cited r3 approval, the committed implementation and gallery wording, then rerun an equivalent checker from the repository data if the scratchpad script is unavailable.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "pwd && rg --files -g 'TEAMWORK.md' -g 'TEAMWORK_LOG.md' -g 'TEAMWORK_V2_DESIGN.md' -g 'builders/special.py' -g 'g1_shape_checker.py' -g 'notes/codex-consults/2026-07-24-220707-g1r3-nonprime-decomposition.txt' -g 'NO_UNMEASURED_DIAGNOSES.md' && git status --short && git show --stat --oneline 0c7495a && git show --format=fuller --no-ext-diff 0c7495a -- builders/special.py" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+/Users/doyle/Dropbox/projects/atlas
+builders/special.py
+notes/codex-consults/2026-07-24-220707-g1r3-nonprime-decomposition.txt
+?? notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt
+0c7495a tet assemblies complete: 11/8/8 non-prime, shape captions
+ HANDOFF.md                                         |    16 +-
+ builders/special.py                                |    38 +-
+ data/bends/v7CCACCABCAE.json                       |     1 +
+ data/bends/v8CCACACCACABE.json                     |     1 +
+ data/conway.tsv                                    |     2 +
+ data/nets_pages.txt                                |     2 +
+ data/symmetry.tsv                                  |     2 +
+ data/theme_nonprime.txt                            |     3 +
+ data/themes.tsv                                    |     3 +
+ .../2026-07-25-135030-g2retro-024d34d.txt          |  1195 ++
+ notes/regen-verification-20260725b/README.md       |    20 +
+ notes/regen-verification-20260725b/regen_A.log     |  2300 +++
+ notes/regen-verification-20260725b/regen_B.log     |  2300 +++
+ .../site_manifest_A.txt                            | 20492 +++++++++++++++++++
+ .../site_manifest_B.txt                            | 20492 +++++++++++++++++++
+ 15 files changed, 46854 insertions(+), 13 deletions(-)
+commit 0c7495a3612f6c3bb8347f834f91fdac7465b07e
+Author:     Peter Doyle <peterdoyle1717@gmail.com>
+AuthorDate: Sat Jul 25 15:21:50 2026 -0400
+Commit:     Peter Doyle <peterdoyle1717@gmail.com>
+CommitDate: Sat Jul 25 15:21:50 2026 -0400
+
+    tet assemblies complete: 11/8/8 non-prime, shape captions
+    
+    Type-1 (all-tet) family completed by BFS enumeration over stacked
+    spheres under the degree bound (canonical-CLERS dedup): one class at
+    2 and at 3 tets, three at 4 and at 5, helix-only from 6 on (confirmed
+    through 11 tets / v14). Two nets minted (v7CCACCABCAE, v8CCACACCACABE),
+    and the all-faces-capped tetrahedron v8CCACCCABCABE promoted from
+    themeless to nonprime. Captions carry the dual-tree shape (around an
+    edge / path / branched) computed from the clique-sum factors; the
+    section blurb states the classification.
+    
+    - builders/special.py: nonprime_pieces returns (label, vertex-set)
+      pairs; assembly_shape (dual degrees + common-edge test); type-1
+      captions + blurb.
+    - data: nets_pages +2, themes/theme_nonprime +3, symmetry/conway +2,
+      bends for the two minted nets.
+    - notes/regen-verification-20260725b: build-twice manifests,
+      byte-identical at this tree.
+    - HANDOFF.md: counts and history updated.
+
+diff --git a/builders/special.py b/builders/special.py
+index 6680bb2..c904204 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -635,16 +635,32 @@ def main():
+                 for v in f:
+                     deg[v] += 1
+             if len(V) == 4 and len(fac) == 4:
+-                pieces.append('tet')
++                pieces.append(('tet', frozenset(V)))
+             elif len(V) == 6 and len(fac) == 8 and all(d == 4 for d in deg.values()):
+-                pieces.append('oct')
++                pieces.append(('oct', frozenset(V)))
+             else:
+-                pieces.append('core')
++                pieces.append(('core', frozenset(V)))
+         return pieces
+ 
++    def assembly_shape(pieces):
++        """dual-tree shape of an all-tet assembly: 'around an edge'
++        (a common edge in every factor), 'path' (the 3NA helix family),
++        or 'branched' (a factor glued to three or more others)."""
++        fv = [v for _, v in pieces]
++        if len(fv) < 3:
++            return None
++        dual_deg = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
++                    for i, v in enumerate(fv)]
++        if max(dual_deg) > 2:
++            return 'branched'
++        if len(frozenset.intersection(*fv)) == 2:
++            return 'around an edge'
++        return 'path'
++
+     np_rows = {1: [], 2: [], 3: []}
+     for r in theme_list("nonprime"):
+-        pieces = nonprime_pieces(r["netcode"])
++        pairs = nonprime_pieces(r["netcode"])
++        pieces = [l for l, _ in pairs]
+         kinds = set(pieces)
+         no, nt = pieces.count('oct'), pieces.count('tet')
+         # type 2 = STACKS of two or more octs +- caps; type 3 = a prime
+@@ -658,13 +674,19 @@ def main():
+         else:
+             typ = 3
+         nt, no = pieces.count('tet'), pieces.count('oct')
+-        cap = (f"{nt} tets" if typ == 1 else
+-               (f"{no} oct{'s' if no > 1 else ''}"
+-                + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else "")))
++        if typ == 1:
++            sh = assembly_shape(pairs)
++            cap = f"{nt} tets" + (f", {sh}" if sh else "")
++        else:
++            cap = (f"{no} oct{'s' if no > 1 else ''}"
++                   + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else ""))
+         np_rows[typ].append((r["v"], r, cap))
+     NP_SECT = (
+         (1, 'Assemblies of regular tetrahedra',
+-         'Two to four sharing an axis edge, or helical stacks.'),
++         'Every face-to-face gluing of tetrahedra within the degree '
++         'bound: one form with two and with three tets, three with '
++         'four, three with five; from six on only the helical path '
++         'survives (shown to eleven).'),
+         (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
+          'Two or more octahedra glued face to face.'),
+         (3, 'A prime neoplatonic core with attached tetrahedra',
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "sed -n '1,260p' notes/codex-consults/2026-07-24-220707-g1r3-nonprime-decomposition.txt; rg -n \"assembly_shape|Every face-to-face|from six|eleven|BFS|degree-6|canonical-CLERS|type-1|all-tet\" HANDOFF.md TEAMWORK.md TEAMWORK_LOG.md TEAMWORK_V2_DESIGN.md builders notes data 2>/dev/null | head -240; git status --short; git log -1 --format='%H %s'" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9706-b798-7d01-ba34-3ca55962a71f
+--------
+user
+G1 round 3 (atlas nonprime decomposition). Round-2 findings were the frozenset non-total-order canonicality bug and the Euler-only sphere check. Bundle shows: min with sorted-tuple key (your prescription), and sphere_check upgraded to closed-2-manifold certification (edge double-incidence, connected dual, single-cycle vertex links, Euler 2). Audit ONLY whether these two are resolved. First line exactly one of: APPROVE / REVISE / BLOCK. Max 8 lines.
+
+<stdin>
+=== G1 ROUND 3: the two round-2 findings ===
+1. Canonical split: min(seps, key=lambda t: tuple(sorted(t))) -- your exact prescription (frozenset sort was subset-order, not total).
+2. sphere_check now certifies closed 2-manifold + Euler 2: every edge exactly two incident faces; connected face dual; every vertex link verified a SINGLE cycle (branch-free, full traversal); then V-E+F=2. Assertions fail the build.
+
+--- the two regions ---
+        def sphere_check(fs):
+            """closed-2-manifold + Euler 2 => sphere (G1 r2): every edge
+            exactly two incident faces, connected face dual, every vertex
+            link a single cycle, V - E + F = 2."""
+            V = {v for f in fs for v in f}
+            e2f = {}
+            for i, f in enumerate(fs):
+                for e in zip(f, f[1:] + f[:1]):
+                    e2f.setdefault(frozenset(e), []).append(i)
+            assert all(len(ff) == 2 for ff in e2f.values()), \
+                "factor edge without exactly two faces"
+            dual = {i: set() for i in range(len(fs))}
+            for ff in e2f.values():
+                dual[ff[0]].add(ff[1]); dual[ff[1]].add(ff[0])
+            comp, stack = set(), [0]
+            while stack:
+                k = stack.pop()
+                if k not in comp:
+                    comp.add(k); stack.extend(dual[k] - comp)
+            assert len(comp) == len(fs), "factor dual not connected"
+            for v in V:
+                nbr = {}
+                for f in fs:
+                    if v in f:
+                        i = f.index(v)
+                        a, b = f[(i + 1) % 3], f[(i + 2) % 3]
+                        nbr.setdefault(a, set()).add(b)
+                        nbr.setdefault(b, set()).add(a)
+                assert all(len(x) == 2 for x in nbr.values()), \
+                    "vertex link not a cycle (branching)"
+                start = next(iter(nbr))
+                seen, cur, prev = {start}, next(iter(nbr[start])), start
+                while cur != start:
+                    seen.add(cur)
+                    nxt = next(x for x in nbr[cur] if x != prev)
+                    prev, cur = cur, nxt
+                assert len(seen) == len(nbr), "vertex link not a single cycle"
+            assert len(V) - len(e2f) + len(fs) == 2, "Euler characteristic != 2"
+            return V, e2f.keys()
+596-            # frozensets have no total order (subset comparison only) --
+597-            # canonical choice needs an explicit sorted-tuple key (G1 r2)
+598:            T = sorted(min(seps, key=lambda t: tuple(sorted(t))))
+599-            cut = {frozenset(e) for e in combinations(T, 2)}
+600-            edge2f = {}
+
+--- reproduction: full site regenerated; every factor of all 21 gallery nets passed the manifold assertions; census unchanged 8/13/0 ---
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+APPROVE
+Canonical split now uses the required total lexicographic sorted-tuple key.
+`sphere_check` certifies connected closed triangulated 2-manifold structure before applying Euler characteristic 2.
+The supplied regeneration reports all factors passing with census unchanged at 8/13/0.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+21,224
+APPROVE
+Canonical split now uses the required total lexicographic sorted-tuple key.
+`sphere_check` certifies connected closed triangulated 2-manifold structure before applying Euler characteristic 2.
+The supplied regeneration reports all factors passing with census unchanged at 8/13/0.
+HANDOFF.md:63:complete under the degree bound (BFS + canonical-CLERS enumeration):
+data/theme_desc.tsv:2:bucky	Bucky	Primes in which every vertex has degree 5 or 6 &mdash; the duals of fullerenes. By Euler there are always exactly 12 degree-5 vertices and (<em>v</em>&minus;12) degree-6 vertices. v=12 is the icosahedron (dual of C<sub>20</sub>); C<sub>60</sub>'s dual is at v=32. Shown: all 342 such nets with v&nbsp;&le;&nbsp;25.
+builders/personal.py:197:    any single BFS's closure events. Edge scale is 1, so this bounds the
+builders/special.py:645:    def assembly_shape(pieces):
+builders/special.py:646:        """dual-tree shape of an all-tet assembly: 'around an edge'
+builders/special.py:678:            sh = assembly_shape(pairs)
+builders/special.py:686:         'All face-to-face gluings of tetrahedra through eleven tets '
+builders/special.py:688:         'two and at three tets, three at four and at five; from six '
+builders/special.py:689:         'through eleven, only the helical path.'),
+notes/FOR_NEO_morph_frames.md:11:model). Per-step float64 rounding is amplified ~ e^(ell(alpha) * BFS
+notes/FOR_NEO_morph_frames.md:61:  cosh(ell) = cos(alpha)/(1-cos(alpha)); BFS from faces[0] with the
+builders/horoz_c.c:279:/* ── horoz BFS ───────────────────────────────────────────────────────────── */
+builders/horoz_c.c:282: * Fixes v=2 at (0,0) and v=3 at (1,0); BFS to place remaining vertices.
+builders/horoz_c.c:312:    /* cleanup: place any vertex not reached by BFS */
+notes/codex-consults/2026-07-22-180254-g2retro-1c4fcf6.txt:114:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:11:Blocking issues: `assembly_shape` introduces a new local classification predicate without a G1 consult covering its formulas or validation. The cited 2026-07-24 decomposition consult does not cover shape/path/branched/common-edge classification. Evidence incorrectly says no new invariant. Also, “complete” and “helix-only from 6 on” exceed the stated computational evidence, which only confirms through 11 tets.
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:13:Recommendation: Obtain and cite G1 approval for `assembly_shape`; either substantiate the unbounded completeness claim or limit wording to the verified range; then restage and resubmit.
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:186:Completes the non-prime type-1 (all-tet assemblies) gallery family:
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:193:BFS gluing of tetrahedra on free faces with degree-6 pruning (a
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:203:assembly_shape): dual degree max > 2 → branched; common intersection
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:236:None new. assembly_shape is display-caption classification computed
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:261:+complete under the degree bound (BFS + canonical-CLERS enumeration):
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:295:+    def assembly_shape(pieces):
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:296:+        """dual-tree shape of an all-tet assembly: 'around an edge'
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:326:+            sh = assembly_shape(pairs)
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:335:+         'Every face-to-face gluing of tetrahedra within the degree '
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:337:+         'four, three with five; from six on only the helical path '
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:338:+         'survives (shown to eleven).'),
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:3005:Blocking issues: `assembly_shape` introduces a new local classification predicate without a G1 consult covering its formulas or validation. The cited 2026-07-24 decomposition consult does not cover shape/path/branched/common-edge classification. Evidence incorrectly says no new invariant. Also, “complete” and “helix-only from 6 on” exceed the stated computational evidence, which only confirms through 11 tets.
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:3007:Recommendation: Obtain and cite G1 approval for `assembly_shape`; either substantiate the unbounded completeness claim or limit wording to the verified range; then restage and resubmit.
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:3017:Blocking issues: `assembly_shape` introduces a new local classification predicate without a G1 consult covering its formulas or validation. The cited 2026-07-24 decomposition consult does not cover shape/path/branched/common-edge classification. Evidence incorrectly says no new invariant. Also, “complete” and “helix-only from 6 on” exceed the stated computational evidence, which only confirms through 11 tets.
+notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:3019:Recommendation: Obtain and cite G1 approval for `assembly_shape`; either substantiate the unbounded completeness claim or limit wording to the verified range; then restage and resubmit.
+notes/codex-consults/2026-07-22-180129-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt:5108:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:5674:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:6861:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt:589:+/* ── horoz BFS ───────────────────────────────────────────────────────────── */
+notes/codex-consults/2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt:592:+ * Fixes v=2 at (0,0) and v=3 at (1,0); BFS to place remaining vertices.
+notes/codex-consults/2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt:622:+    /* cleanup: place any vertex not reached by BFS */
+notes/codex-consults/2026-07-24-215321-g1-nonprime-decomposition.txt:22:3. STRONGEST VALIDATION INVARIANT: piece census must reproduce the paper's three types over the 21-net gallery list, with vertex-count conservation: for a type-1/2 net, V = sum over pieces of (4 or 6) minus shared separating-triangle vertices (3 per gluing).
+notes/codex-consults/2026-07-24-215321-g1-nonprime-decomposition.txt:24:5. FILES/TESTS: builders/special.py::nonprime_pieces (build-time, gallery-only -- no record or solver data touched). Verified classification of all 21 gallery nets: 8 type-1 (2..7 and 11 tets, incl. both v7 forms and helical stacks), 13 type-2 (1..4 octs with 0..4 caps, incl. prime oct as one-stack base and the subdivided tet), 0 type-3 (stated on the page). Anomalies resolved during development: two nets initially showed single-face 'cores' -- the debris artifact -- and reclassified correctly under the rule.
+notes/codex-consults/2026-07-22-175729-g1r7-display-gates.txt:434:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-22-175729-g1r7-display-gates.txt:972:builders/personal.py:197:    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-22-175729-g1r7-display-gates.txt:1003:notes/codex-consults/2026-07-22-175729-g1r7-display-gates.txt:434:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-22-163649-g1r4-display-gates.txt:72:    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/codex-consults/2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt:54:ls site/personal/nets | wc -l; curl -s -o /dev/null -w "removed page now: %{http_code}\n" "http://localhost:8765/atlas2/personal/nets/v42$(grep -P '^rhombicuboctahedron\t' data/classics.tsv | cut -f3)/"; git add builders/special.py builders/classics.py data/classics.tsv data/theme_classics.txt data/themes.tsv data/nets_pages.txt && git commit -q -m "classics: degree-6 filter -- 25 of 91 are not 6-nets at all
+notes/codex-consults/2026-07-24-220827-g2retro2-540ac2a.txt:1254:+3. STRONGEST VALIDATION INVARIANT: piece census must reproduce the paper's three types over the 21-net gallery list, with vertex-count conservation: for a type-1/2 net, V = sum over pieces of (4 or 6) minus shared separating-triangle vertices (3 per gluing).
+notes/codex-consults/2026-07-24-220827-g2retro2-540ac2a.txt:1256:+5. FILES/TESTS: builders/special.py::nonprime_pieces (build-time, gallery-only -- no record or solver data touched). Verified classification of all 21 gallery nets: 8 type-1 (2..7 and 11 tets, incl. both v7 forms and helical stacks), 13 type-2 (1..4 octs with 0..4 caps, incl. prime oct as one-stack base and the subdivided tet), 0 type-3 (stated on the page). Anomalies resolved during development: two nets initially showed single-face 'cores' -- the debris artifact -- and reclassified correctly under the rule.
+notes/codex-consults/2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:987:+    any single BFS's closure events. Edge scale is 1, so this bounds the
+notes/FOR_ATLAS_frames_ready.md:29:- Solve precision is sized up front from the net's face-BFS depth:
+ M builders/special.py
+?? notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt
+0c7495a3612f6c3bb8347f834f91fdac7465b07e tet assemblies complete: 11/8/8 non-prime, shape captions
+
+codex
+The repository already contains the proposed bounded wording as an uncommitted edit, so I’m separating two questions: the classifier design itself and whether that exact edit cures the earlier claim. One technical issue needs close scrutiny: the checker labels an edge-count equality “tree-ness,” but edge count alone is not a tree certificate.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff -- builders/special.py; sed -n '40,90p' HANDOFF.md; sed -n '610,700p' builders/special.py; find . -name 'g1_shape_checker.py' -print; rg -n \"v5CCACAE|v14CCACACACACACACACACACACAE\" . --glob '*.py' --glob '*.md' --glob '*.txt' --glob '*.log' | head -100" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 298ms:
+./notes/regen-verification-20260725b/regen_B.log:2:v5CCACAE OK morphs built 11 frames
+./notes/regen-verification-20260725b/regen_B.log:100:v14CCACACACACACACACACACACAE OK morphs built 11 frames
+./builders/special.py:247:             ("v5CCACAE", "triangular bipyramid"),
+./notes/regen-verification-20260725b/regen_A.log:2:v5CCACAE OK morphs built 11 frames
+./notes/regen-verification-20260725b/regen_A.log:100:v14CCACACACACACACACACACACAE OK morphs built 11 frames
+./notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:463:+v5CCACAE OK morphs built 11 frames
+./notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:561:+v14CCACACACACACACACACACACAE OK morphs built 11 frames
+./notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:2769:+v5CCACAE OK morphs built 11 frames
+./notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:2867:+v14CCACACACACACACACACACACAE OK morphs built 11 frames
+./notes/codex-consults/2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt:2984:notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:1152:1:<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Non-prime neoplatonics</title><style>body{font-family:Georgia,serif;max-width:1000px;margin:2em auto;line-height:1.6;color:#222;padding:0 1em}h1{font-size:1.3em}h1 a{color:inherit;text-decoration:none}h1 a:hover{text-decoration:underline}h2{font-size:1em;margin-top:1.6em}p.desc{font-size:.9em;color:#555}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5em;margin-top:1em}.item{text-align:center}.item .cell{position:relative;width:100%;padding-bottom:100%}.item .cell model-viewer{position:absolute;top:0;left:0;width:100%;height:100%;background:#f0f0f0;--poster-color:transparent}.item a{font-family:monospace;font-size:.75em;color:#2255aa;text-decoration:none;word-break:break-all}.item a:hover{text-decoration:underline}.item .v{font-size:.7em;color:#888}.item .d{font-family:monospace;font-size:.75em;color:#333}.item .o{font-size:.7em;color:#888}h2 .v{font-size:.8em;color:#888;font-weight:normal}</style><script type="module" src="../vendor/model-viewer.min.js"></script></head><body><nav style="font-size:.9em"><a href="../index.html">neoplatonic solids</a></nav><h1>Non-prime neoplatonics</h1><p class=desc>A net is prime if every triangular circuit bounds a face. Non-prime neoplatonics decompose along their separating triangles into prime pieces; the three construction types below follow the paper. Captions give the decomposition.</p><h2>Assemblies of regular tetrahedra</h2><p class=desc>Two to four sharing an axis edge, or helical stacks.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v5CCACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v5CCACAE/">v5CCACAE</a> <span class=v>2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v6CCACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v6CCACACAE/">v6CCACACAE</a> <span class=v>3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACACAE/">v7CCACACACAE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACCABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACCABE/">v7CCACACCABE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACACACACAE/">v8CCACACACACAE</a> <span class=v>5 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACACACACACAE/">v9CCACACACACACAE</a> <span class=v>6 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACACACACACACAE/">v10CCACACACACACACAE</a> <span class=v>7 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACACACACACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACACACACACACACACACACAE/">v14CCACACACACACACACACACACAE</a> <span class=v>11 tets</span></div></div><h2>Stacks of regular octahedra, optionally capped by tetrahedra</h2><p class=desc>Two or more octahedra glued face to face.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v9CCCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCCACAACCACAAE/">v9CCCACAACCACAAE</a> <span class=v>2 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCACAACCACAAE/">v10CCACCACAACCACAAE</a> <span class=v>2 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v11CCACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v11CCACCACAACCACAACAE/">v11CCACCACAACCACAACAE</a> <span class=v>2 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v12CCCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v12CCCACAACCACAACCACAAE/">v12CCCACAACCACAACCACAAE</a> <span class=v>3 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v13CCACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v13CCACCACAACCACAACCACAAE/">v13CCACCACAACCACAACCACAAE</a> <span class=v>3 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACCACAACCACAACCACAACAE/">v14CCACCACAACCACAACCACAACAE</a> <span class=v>3 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v15CCCACAACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v15CCCACAACCACAACCACAACCACAAE/">v15CCCACAACCACAACCACAACCACAAE</a> <span class=v>4 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v17CCACCACAACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v17CCACCACAACCACAACCACAACCACAACAE/">v17CCACCACAACCACAACCACAACCACAACAE</a> <span class=v>4 octs + 2 tets</span></div></div><h2>A prime neoplatonic core with attached tetrahedra</h2><p class=desc>One to four tetrahedra on the faces of a prime core other than the tetrahedron. The octahedron core is complete: all eight attachment classes up to symmetry.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v7CCACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACCACAAE/">v7CCACCACAAE</a> <span class=v>1 oct + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACAACAE/">v8CCACCACAACAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACACABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACACABE/">v8CCACCACACABE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACCABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACCABAE/">v8CCACCACCABAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACACABCAE/">v9CCACCACACABCAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACCACABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACCACABAE/">v9CCACCACCACABAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCABCACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCABCACABCAE/">v10CCACCCABCACABCAE</a> <span class=v>1 oct + 4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCACCACABDEE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCACCACABDEE/">v10CCACCCACCACABDEE</a> <span class=v>1 oct + 4 tets</span></div></div></body></html>
+./notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:678: data/bends/v14CCACACACACACACACACACACAE.json        |    1 +
+./notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:2762: data/bends/v5CCACAE.json                           |    1 +
+./notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:2947:A	data/bends/v14CCACACACACACACACACACACAE.json
+./notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:5031:A	data/bends/v5CCACAE.json
+./notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:5215:1	0	data/bends/v14CCACACACACACACACACACACAE.json
+./notes/regen-verification-20260725/site_manifest_B.txt:1336:4782844e49b3d6c7e6d8a2b2421d71dce6d3aecaad87ce7e605a5a22a1a9f45e  site/personal/nets/v14CCACACACACACACACACACACAE/clers.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:1337:0c1c30c942bba5f8a1dbd515b09f37eff0560b368932ce0d2e5c1e82a0948d1f  site/personal/nets/v14CCACACACACACACACACACACAE/clers_layout.svg
+./notes/regen-verification-20260725/site_manifest_B.txt:1338:dc9c73b2da5e17cdbe9abbfa56144f8ac9ddf64067bd312ddfb661fd4eda3ca4  site/personal/nets/v14CCACACACACACACACACACACAE/ideal_net.svg
+./notes/regen-verification-20260725/site_manifest_B.txt:1339:3f27c8e5955ac0f10a0a427d07e25332a6868af81e58eef9f6fb1546c0756eb2  site/personal/nets/v14CCACACACACACACACACACACAE/index.html
+./notes/regen-verification-20260725/site_manifest_B.txt:1340:e93e3833aa7a68da55e241cb82947d0091d5a2d527e554932a8ea823b832df32  site/personal/nets/v14CCACACACACACACACACACACAE/morph_k.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:1341:c3bb51e0ea51e9ed682df453c6d29cdf60641183eb03260712600ef74044776d  site/personal/nets/v14CCACACACACACACACACACACAE/morph_p.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:1342:f7301006014146b7d05731d01ae08040a01d34bdd1da041831a26f01bb358280  site/personal/nets/v14CCACACACACACACACACACACAE/net.json
+./notes/regen-verification-20260725/site_manifest_B.txt:1343:018c44bdf7c9fa8a3b9c53c7d5f3337c6dc96943d7abad69700e44e55bc7732e  site/personal/nets/v14CCACACACACACACACACACACAE/rb.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:1344:1cab2986e1feaf4b834cf5c9cc4fc71a46aa8b4e1c17d044866bbaee455f82d7  site/personal/nets/v14CCACACACACACACACACACACAE/smooth.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:19987:87ab1a0572d47ae7e1331ae5907bfa49775831e8a07cac1b7b193c34935a6961  site/personal/nets/v5CCACAE/clers.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:19988:ce2b6585a8a2b97b3302deb791ec5f7f916ec95bdf223e590711e451d472bbfb  site/personal/nets/v5CCACAE/clers_layout.svg
+./notes/regen-verification-20260725/site_manifest_B.txt:19989:1d96023692de0a0c2701ec7821fe737dab77850a5ba88511e116b10c37825087  site/personal/nets/v5CCACAE/ideal_net.svg
+./notes/regen-verification-20260725/site_manifest_B.txt:19990:a8a6513a5c349b763e017c6584774b99a5d5613eada42c59ebc68478cf285c71  site/personal/nets/v5CCACAE/index.html
+./notes/regen-verification-20260725/site_manifest_B.txt:19991:f6ee2f06e21800a698eef07f9fabe96174c6f47f465e1c2b008903e1abae2daa  site/personal/nets/v5CCACAE/morph_k.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:19992:b6ab5dfc16b7d56a70ed2b56aea3fa198cdc497c916c331b3493c130a4878ab9  site/personal/nets/v5CCACAE/morph_p.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:19993:44883628f167ebe5bb9d7e731af7132e040cbf8f7741bbae1b9c79214046dea5  site/personal/nets/v5CCACAE/net.json
+./notes/regen-verification-20260725/site_manifest_B.txt:19994:58de8b79ae3ed9d02f142e64c7131113e6dd5f6b5af763bcfc7e2217a2a9f3f2  site/personal/nets/v5CCACAE/rb.glb
+./notes/regen-verification-20260725/site_manifest_B.txt:19995:47270f1a4cd97b04be6ccdf9c1fd97a3b15ba19b537a2c7a9fe9b3539b83a9d8  site/personal/nets/v5CCACAE/smooth.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:1327:4782844e49b3d6c7e6d8a2b2421d71dce6d3aecaad87ce7e605a5a22a1a9f45e  site/personal/nets/v14CCACACACACACACACACACACAE/clers.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:1328:0c1c30c942bba5f8a1dbd515b09f37eff0560b368932ce0d2e5c1e82a0948d1f  site/personal/nets/v14CCACACACACACACACACACACAE/clers_layout.svg
+./notes/regen-verification-20260724/site_manifest_B.txt:1329:dc9c73b2da5e17cdbe9abbfa56144f8ac9ddf64067bd312ddfb661fd4eda3ca4  site/personal/nets/v14CCACACACACACACACACACACAE/ideal_net.svg
+./notes/regen-verification-20260724/site_manifest_B.txt:1330:3f27c8e5955ac0f10a0a427d07e25332a6868af81e58eef9f6fb1546c0756eb2  site/personal/nets/v14CCACACACACACACACACACACAE/index.html
+./notes/regen-verification-20260724/site_manifest_B.txt:1331:e93e3833aa7a68da55e241cb82947d0091d5a2d527e554932a8ea823b832df32  site/personal/nets/v14CCACACACACACACACACACACAE/morph_k.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:1332:c3bb51e0ea51e9ed682df453c6d29cdf60641183eb03260712600ef74044776d  site/personal/nets/v14CCACACACACACACACACACACAE/morph_p.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:1333:f7301006014146b7d05731d01ae08040a01d34bdd1da041831a26f01bb358280  site/personal/nets/v14CCACACACACACACACACACACAE/net.json
+./notes/regen-verification-20260724/site_manifest_B.txt:1334:018c44bdf7c9fa8a3b9c53c7d5f3337c6dc96943d7abad69700e44e55bc7732e  site/personal/nets/v14CCACACACACACACACACACACAE/rb.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:1335:1cab2986e1feaf4b834cf5c9cc4fc71a46aa8b4e1c17d044866bbaee455f82d7  site/personal/nets/v14CCACACACACACACACACACACAE/smooth.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:19978:87ab1a0572d47ae7e1331ae5907bfa49775831e8a07cac1b7b193c34935a6961  site/personal/nets/v5CCACAE/clers.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:19979:ce2b6585a8a2b97b3302deb791ec5f7f916ec95bdf223e590711e451d472bbfb  site/personal/nets/v5CCACAE/clers_layout.svg
+./notes/regen-verification-20260724/site_manifest_B.txt:19980:1d96023692de0a0c2701ec7821fe737dab77850a5ba88511e116b10c37825087  site/personal/nets/v5CCACAE/ideal_net.svg
+./notes/regen-verification-20260724/site_manifest_B.txt:19981:a8a6513a5c349b763e017c6584774b99a5d5613eada42c59ebc68478cf285c71  site/personal/nets/v5CCACAE/index.html
+./notes/regen-verification-20260724/site_manifest_B.txt:19982:f6ee2f06e21800a698eef07f9fabe96174c6f47f465e1c2b008903e1abae2daa  site/personal/nets/v5CCACAE/morph_k.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:19983:b6ab5dfc16b7d56a70ed2b56aea3fa198cdc497c916c331b3493c130a4878ab9  site/personal/nets/v5CCACAE/morph_p.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:19984:44883628f167ebe5bb9d7e731af7132e040cbf8f7741bbae1b9c79214046dea5  site/personal/nets/v5CCACAE/net.json
+./notes/regen-verification-20260724/site_manifest_B.txt:19985:58de8b79ae3ed9d02f142e64c7131113e6dd5f6b5af763bcfc7e2217a2a9f3f2  site/personal/nets/v5CCACAE/rb.glb
+./notes/regen-verification-20260724/site_manifest_B.txt:19986:47270f1a4cd97b04be6ccdf9c1fd97a3b15ba19b537a2c7a9fe9b3539b83a9d8  site/personal/nets/v5CCACAE/smooth.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:1336:4782844e49b3d6c7e6d8a2b2421d71dce6d3aecaad87ce7e605a5a22a1a9f45e  ./nets/v14CCACACACACACACACACACACAE/clers.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:1337:0c1c30c942bba5f8a1dbd515b09f37eff0560b368932ce0d2e5c1e82a0948d1f  ./nets/v14CCACACACACACACACACACACAE/clers_layout.svg
+./notes/regen-verification-20260725b/site_manifest_B.txt:1338:dc9c73b2da5e17cdbe9abbfa56144f8ac9ddf64067bd312ddfb661fd4eda3ca4  ./nets/v14CCACACACACACACACACACACAE/ideal_net.svg
+./notes/regen-verification-20260725b/site_manifest_B.txt:1339:3f27c8e5955ac0f10a0a427d07e25332a6868af81e58eef9f6fb1546c0756eb2  ./nets/v14CCACACACACACACACACACACAE/index.html
+./notes/regen-verification-20260725b/site_manifest_B.txt:1340:e93e3833aa7a68da55e241cb82947d0091d5a2d527e554932a8ea823b832df32  ./nets/v14CCACACACACACACACACACACAE/morph_k.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:1341:c3bb51e0ea51e9ed682df453c6d29cdf60641183eb03260712600ef74044776d  ./nets/v14CCACACACACACACACACACACAE/morph_p.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:1342:f7301006014146b7d05731d01ae08040a01d34bdd1da041831a26f01bb358280  ./nets/v14CCACACACACACACACACACACAE/net.json
+./notes/regen-verification-20260725b/site_manifest_B.txt:1343:018c44bdf7c9fa8a3b9c53c7d5f3337c6dc96943d7abad69700e44e55bc7732e  ./nets/v14CCACACACACACACACACACACAE/rb.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:1344:1cab2986e1feaf4b834cf5c9cc4fc71a46aa8b4e1c17d044866bbaee455f82d7  ./nets/v14CCACACACACACACACACACACAE/smooth.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:19987:87ab1a0572d47ae7e1331ae5907bfa49775831e8a07cac1b7b193c34935a6961  ./nets/v5CCACAE/clers.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:19988:ce2b6585a8a2b97b3302deb791ec5f7f916ec95bdf223e590711e451d472bbfb  ./nets/v5CCACAE/clers_layout.svg
+./notes/regen-verification-20260725b/site_manifest_B.txt:19989:1d96023692de0a0c2701ec7821fe737dab77850a5ba88511e116b10c37825087  ./nets/v5CCACAE/ideal_net.svg
+./notes/regen-verification-20260725b/site_manifest_B.txt:19990:a8a6513a5c349b763e017c6584774b99a5d5613eada42c59ebc68478cf285c71  ./nets/v5CCACAE/index.html
+./notes/regen-verification-20260725b/site_manifest_B.txt:19991:f6ee2f06e21800a698eef07f9fabe96174c6f47f465e1c2b008903e1abae2daa  ./nets/v5CCACAE/morph_k.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:19992:b6ab5dfc16b7d56a70ed2b56aea3fa198cdc497c916c331b3493c130a4878ab9  ./nets/v5CCACAE/morph_p.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:19993:44883628f167ebe5bb9d7e731af7132e040cbf8f7741bbae1b9c79214046dea5  ./nets/v5CCACAE/net.json
+./notes/regen-verification-20260725b/site_manifest_B.txt:19994:58de8b79ae3ed9d02f142e64c7131113e6dd5f6b5af763bcfc7e2217a2a9f3f2  ./nets/v5CCACAE/rb.glb
+./notes/regen-verification-20260725b/site_manifest_B.txt:19995:47270f1a4cd97b04be6ccdf9c1fd97a3b15ba19b537a2c7a9fe9b3539b83a9d8  ./nets/v5CCACAE/smooth.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:1336:4782844e49b3d6c7e6d8a2b2421d71dce6d3aecaad87ce7e605a5a22a1a9f45e  site/personal/nets/v14CCACACACACACACACACACACAE/clers.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:1337:0c1c30c942bba5f8a1dbd515b09f37eff0560b368932ce0d2e5c1e82a0948d1f  site/personal/nets/v14CCACACACACACACACACACACAE/clers_layout.svg
+./notes/regen-verification-20260725/site_manifest_A.txt:1338:dc9c73b2da5e17cdbe9abbfa56144f8ac9ddf64067bd312ddfb661fd4eda3ca4  site/personal/nets/v14CCACACACACACACACACACACAE/ideal_net.svg
+./notes/regen-verification-20260725/site_manifest_A.txt:1339:3f27c8e5955ac0f10a0a427d07e25332a6868af81e58eef9f6fb1546c0756eb2  site/personal/nets/v14CCACACACACACACACACACACAE/index.html
+./notes/regen-verification-20260725/site_manifest_A.txt:1340:e93e3833aa7a68da55e241cb82947d0091d5a2d527e554932a8ea823b832df32  site/personal/nets/v14CCACACACACACACACACACACAE/morph_k.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:1341:c3bb51e0ea51e9ed682df453c6d29cdf60641183eb03260712600ef74044776d  site/personal/nets/v14CCACACACACACACACACACACAE/morph_p.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:1342:f7301006014146b7d05731d01ae08040a01d34bdd1da041831a26f01bb358280  site/personal/nets/v14CCACACACACACACACACACACAE/net.json
+./notes/regen-verification-20260725/site_manifest_A.txt:1343:018c44bdf7c9fa8a3b9c53c7d5f3337c6dc96943d7abad69700e44e55bc7732e  site/personal/nets/v14CCACACACACACACACACACACAE/rb.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:1344:1cab2986e1feaf4b834cf5c9cc4fc71a46aa8b4e1c17d044866bbaee455f82d7  site/personal/nets/v14CCACACACACACACACACACACAE/smooth.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:19987:87ab1a0572d47ae7e1331ae5907bfa49775831e8a07cac1b7b193c34935a6961  site/personal/nets/v5CCACAE/clers.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:19988:ce2b6585a8a2b97b3302deb791ec5f7f916ec95bdf223e590711e451d472bbfb  site/personal/nets/v5CCACAE/clers_layout.svg
+./notes/regen-verification-20260725/site_manifest_A.txt:19989:1d96023692de0a0c2701ec7821fe737dab77850a5ba88511e116b10c37825087  site/personal/nets/v5CCACAE/ideal_net.svg
+./notes/regen-verification-20260725/site_manifest_A.txt:19990:a8a6513a5c349b763e017c6584774b99a5d5613eada42c59ebc68478cf285c71  site/personal/nets/v5CCACAE/index.html
+./notes/regen-verification-20260725/site_manifest_A.txt:19991:f6ee2f06e21800a698eef07f9fabe96174c6f47f465e1c2b008903e1abae2daa  site/personal/nets/v5CCACAE/morph_k.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:19992:b6ab5dfc16b7d56a70ed2b56aea3fa198cdc497c916c331b3493c130a4878ab9  site/personal/nets/v5CCACAE/morph_p.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:19993:44883628f167ebe5bb9d7e731af7132e040cbf8f7741bbae1b9c79214046dea5  site/personal/nets/v5CCACAE/net.json
+./notes/regen-verification-20260725/site_manifest_A.txt:19994:58de8b79ae3ed9d02f142e64c7131113e6dd5f6b5af763bcfc7e2217a2a9f3f2  site/personal/nets/v5CCACAE/rb.glb
+./notes/regen-verification-20260725/site_manifest_A.txt:19995:47270f1a4cd97b04be6ccdf9c1fd97a3b15ba19b537a2c7a9fe9b3539b83a9d8  site/personal/nets/v5CCACAE/smooth.glb
+./notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:380: v14CCACACACACACACACACACACAE	22
+./notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:527:@@ -2151,7 +2195,9 @@ v5CCACAE	*322
+./notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:629: v14CCACACACACACACACACACACAE	v14CCACACACACACACACACACACAE	14	2	2	0
+./notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:776:@@ -2151,7 +2195,9 @@ v5CCACAE	v5CCACAE	5	12	6	6
+./notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt:1152:1:<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Non-prime neoplatonics</title><style>body{font-family:Georgia,serif;max-width:1000px;margin:2em auto;line-height:1.6;color:#222;padding:0 1em}h1{font-size:1.3em}h1 a{color:inherit;text-decoration:none}h1 a:hover{text-decoration:underline}h2{font-size:1em;margin-top:1.6em}p.desc{font-size:.9em;color:#555}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5em;margin-top:1em}.item{text-align:center}.item .cell{position:relative;width:100%;padding-bottom:100%}.item .cell model-viewer{position:absolute;top:0;left:0;width:100%;height:100%;background:#f0f0f0;--poster-color:transparent}.item a{font-family:monospace;font-size:.75em;color:#2255aa;text-decoration:none;word-break:break-all}.item a:hover{text-decoration:underline}.item .v{font-size:.7em;color:#888}.item .d{font-family:monospace;font-size:.75em;color:#333}.item .o{font-size:.7em;color:#888}h2 .v{font-size:.8em;color:#888;font-weight:normal}</style><script type="module" src="../vendor/model-viewer.min.js"></script></head><body><nav style="font-size:.9em"><a href="../index.html">neoplatonic solids</a></nav><h1>Non-prime neoplatonics</h1><p class=desc>A net is prime if every triangular circuit bounds a face. Non-prime neoplatonics decompose along their separating triangles into prime pieces; the three construction types below follow the paper. Captions give the decomposition.</p><h2>Assemblies of regular tetrahedra</h2><p class=desc>Two to four sharing an axis edge, or helical stacks.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v5CCACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v5CCACAE/">v5CCACAE</a> <span class=v>2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v6CCACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v6CCACACAE/">v6CCACACAE</a> <span class=v>3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACACAE/">v7CCACACACAE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACCABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACCABE/">v7CCACACCABE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACACACACAE/">v8CCACACACACAE</a> <span class=v>5 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACACACACACAE/">v9CCACACACACACAE</a> <span class=v>6 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACACACACACACAE/">v10CCACACACACACACAE</a> <span class=v>7 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACACACACACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACACACACACACACACACACAE/">v14CCACACACACACACACACACACAE</a> <span class=v>11 tets</span></div></div><h2>Stacks of regular octahedra, optionally capped by tetrahedra</h2><p class=desc>Two or more octahedra glued face to face.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v9CCCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCCACAACCACAAE/">v9CCCACAACCACAAE</a> <span class=v>2 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCACAACCACAAE/">v10CCACCACAACCACAAE</a> <span class=v>2 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v11CCACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v11CCACCACAACCACAACAE/">v11CCACCACAACCACAACAE</a> <span class=v>2 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v12CCCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v12CCCACAACCACAACCACAAE/">v12CCCACAACCACAACCACAAE</a> <span class=v>3 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v13CCACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v13CCACCACAACCACAACCACAAE/">v13CCACCACAACCACAACCACAAE</a> <span class=v>3 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACCACAACCACAACCACAACAE/">v14CCACCACAACCACAACCACAACAE</a> <span class=v>3 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v15CCCACAACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v15CCCACAACCACAACCACAACCACAAE/">v15CCCACAACCACAACCACAACCACAAE</a> <span class=v>4 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v17CCACCACAACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v17CCACCACAACCACAACCACAACCACAACAE/">v17CCACCACAACCACAACCACAACCACAACAE</a> <span class=v>4 octs + 2 tets</span></div></div><h2>A prime neoplatonic core with attached tetrahedra</h2><p class=desc>One to four tetrahedra on the faces of a prime core other than the tetrahedron. The octahedron core is complete: all eight attachment classes up to symmetry.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v7CCACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACCACAAE/">v7CCACCACAAE</a> <span class=v>1 oct + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACAACAE/">v8CCACCACAACAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACACABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACACABE/">v8CCACCACACABE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACCABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACCABAE/">v8CCACCACCABAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACACABCAE/">v9CCACCACACABCAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACCACABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACCACABAE/">v9CCACCACCACABAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCABCACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCABCACABCAE/">v10CCACCCABCACABCAE</a> <span class=v>1 oct + 4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCACCACABDEE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCACCACABDEE/">v10CCACCCACCACABDEE</a> <span class=v>1 oct + 4 tets</span></div></div></body></html>
+./notes/regen-verification-20260724/site_manifest_A.txt:1327:4782844e49b3d6c7e6d8a2b2421d71dce6d3aecaad87ce7e605a5a22a1a9f45e  site/personal/nets/v14CCACACACACACACACACACACAE/clers.glb
+./notes/regen-verification-20260724/site_manifest_A.txt:1328:0c1c30c942bba5f8a1dbd515b09f37eff0560b368932ce0d2e5c1e82a0948d1f  site/personal/nets/v14CCACACACACACACACACACACAE/clers_layout.svg
+./notes/regen-verification-20260724/site_manifest_A.txt:1329:dc9c73b2da5e17cdbe9abbfa56144f8ac9ddf64067bd312ddfb661fd4eda3ca4  site/personal/nets/v14CCACACACACACACACACACACAE/ideal_net.svg
+./notes/regen-verification-20260724/site_manifest_A.txt:1330:3f27c8e5955ac0f10a0a427d07e25332a6868af81e58eef9f6fb1546c0756eb2  site/personal/nets/v14CCACACACACACACACACACACAE/index.html
+./notes/regen-verification-20260724/site_manifest_A.txt:1331:e93e3833aa7a68da55e241cb82947d0091d5a2d527e554932a8ea823b832df32  site/personal/nets/v14CCACACACACACACACACACACAE/morph_k.glb
+./notes/regen-verification-20260724/site_manifest_A.txt:1332:c3bb51e0ea51e9ed682df453c6d29cdf60641183eb03260712600ef74044776d  site/personal/nets/v14CCACACACACACACACACACACAE/morph_p.glb
+./notes/regen-verification-20260724/site_manifest_A.txt:1333:f7301006014146b7d05731d01ae08040a01d34bdd1da041831a26f01bb358280  site/personal/nets/v14CCACACACACACACACACACACAE/net.json
+./notes/regen-verification-20260724/site_manifest_A.txt:1334:018c44bdf7c9fa8a3b9c53c7d5f3337c6dc96943d7abad69700e44e55bc7732e  site/personal/nets/v14CCACACACACACACACACACACAE/rb.glb
+
+codex
+APPROVE
+
+The formulas are deterministic, label-invariant, orientation-free, and the stated precedence is correct. Given the approved recursive clique-sum construction supplies connectivity, (T)’s degree sum certifies exactly \(n-1\) dual edges and therefore tree-ness; stating that connectivity dependency explicitly would improve the checker comment but is not required.
+
+The supplied 11/11 table covers every caption branch, factor counts, and the real-member precedence ambiguity check. The revised bounded wording now in `builders/special.py`—“through eleven tets” and “from six through eleven”—resolves the previous unbounded overreach.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+47,454
+APPROVE
+
+The formulas are deterministic, label-invariant, orientation-free, and the stated precedence is correct. Given the approved recursive clique-sum construction supplies connectivity, (T)’s degree sum certifies exactly \(n-1\) dual edges and therefore tree-ness; stating that connectivity dependency explicitly would improve the checker comment but is not required.
+
+The supplied 11/11 table covers every caption branch, factor counts, and the real-member precedence ambiguity check. The revised bounded wording now in `builders/special.py`—“through eleven tets” and “from six through eleven”—resolves the previous unbounded overreach.

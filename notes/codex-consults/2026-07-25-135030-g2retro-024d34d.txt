@@ -1,0 +1,1195 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9a66-6a75-7a92-86ef-7c5094371a50
+--------
+user
+RETROACTIVE commit-gate review (atlas, commit 024d34d, tree f0fe48f; the live gate reviewed a stale pre-add snapshot -- that evasion is now fixed in the hook itself, disclosed in the bundle). Batch: four octahedron-core exemplar nets minted through the display gates (census file edits + bend stores), non-prime typing corrections per architect instruction (8/8/8), symmetry/conway census completion (+57 each, floppy untouched per architect), HANDOFF rewrite, gate-record correction, build-twice byte-identity at this tree. Review as a commit gate: diff correctness, undisclosed changes, message-vs-diff consistency, evidence adequacy. First line exactly one of: PASS / WARN / BLOCK. Max 20 lines.
+
+<stdin>
+=== RETROACTIVE G2: commit 024d34d, tree f0fe48f (the PreToolUse gate snapshotted the pre-add tree -- evasion hole now fixed in the hook: add+commit compounds are blocked) ===
+--- commit message ---
+oct-core exemplars: 8/8/8 non-prime + census completion + records
+
+- Four octahedron-core exemplars minted (canonical CLERS names via
+  neo/clers, encoder round-trip verified; producer builds through the
+  display gates; stores committed): the non-prime type-3 family is
+  COMPLETE -- all eight attachment classes of the oct core up to
+  symmetry (k=1:1, k=2:3, k=3:2, k=4:2, enumerated against the 48
+  automorphisms with the degree-validity constraint).
+- Typing per PD: type 2 = stacks of >=2 octs (bare oct removed -- it
+  is prime and belongs in this gallery not at all); type 3 = a prime
+  core other than the tet with 1-4 attached tets. Gallery reads 8/8/8.
+- Census completion (floppers untouched per PD): symmetry.tsv and
+  conway.tsv +57 rows each (53 old gaps + the 4 new nets).
+- HANDOFF.md rewritten to current reality. MORPH_GATE_TODO.md: gate
+  record corrected -- the commit gate is advisory BY DESIGN outside
+  TEAMWORK repos (PD 2026-06-11), always fires, always logs; the
+  "fail-open / didn't fire" claims were my observation error. Hook
+  fixes landed in ~/.claude (diff cap 250k; BLOCK vs ERROR
+  distinguished) -- outside this tree.
+- Build-twice at this tree: byte-identical manifests
+  (notes/regen-verification-20260725/, diff EMPTY, 2249 nets).
+
+Evidence: .session/claude-commit-evidence.md.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+--- FULL DIFF ed1365b..024d34d EXCLUDING bulk/audit paths (4 bend stores summarized below; consult transcripts are append-only audit) ---
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 07b1669..200bc77 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -1,119 +1,115 @@
+ # Atlas HANDOFF (chat bootstrap)
+ 
+-## Charter (what this chat is about)
++## Charter
+ 
+ This is the ATLAS chat: it owns the site — records, views, galleries,
+-eisenmaps, per-net artifacts, regeneration, and eventually hosting.
+-Success = every net Peter wants visible has a correct, beautiful,
+-regenerable page. NOT this chat: proving things (prover chat:
+-~/Dropbox/neo/bendq_sandbox/boundary_cert/HANDOFF.md) or Lean (lob:
+-~/Dropbox/lob/TEAMWORK.md). It CONSUMES their outputs as committed
+-data files (classifications, certificates, specimen lists) and turns
+-them into pages and galleries.
+-
+-Pick-up for a fresh atlas chat: read this + `git log --oneline -15`.
+-
+-## What this is
+-
+-The personal atlas of neoplatonic solids, record/view architecture:
+-one directory per net under `site/personal/nets/<id>/` — `net.json`
+-is the database record (identity, netcode, flags, themes, eisenstein,
+-artifact inventory) beside its artifacts (rb/clers GLBs, morph_p/k,
+-ideal_net.svg, clers_layout.svg, eismap.svg, dent_v<k>.glb). id =
+-`v{V}{CLERS}` when ≤ 200 chars, else `v{V}h`+sha1-16 (`views.net_id`).
+-Display names always from the record, `v13CC…` style.
+-
+-## Pipeline (from scratch: `./regen_personal.sh`)
+-
+-classify.py (79,349 primes v≤30 from neo/data/objs → class_v30.tsv)
+-→ members.py (page-worthy list + themes.tsv + eisenstein.tsv)
+-→ personal.py (records + artifacts + pages; solver = bendprover
+-euclid_lm_mp, MAXV 512) → fetch_dents.py → symmetry.py →
+-special.py (stamps records; galleries; by-v; front; about; eisenmaps
+-via eisenmap.py; re-renders all pages via views.py).
+-
+-views.py is the only place that knows what a net page looks like;
+-re-render everything in seconds (`python3 builders/views.py`).
+-
+-Serve: `python3 -m http.server 8765` in ~/Dropbox/neo →
+-http://localhost:8765/atlas2/personal/
+-
+-## State (2026-07-14)
+-
+-2,133 nets built (all primes v≤14; pancake/convex/floppy classes and
+-8-deepest+depth≥0.1 buried to v≤30; Eisenstein families to v≤164, tet
+-filled to T≤60 via subdiv.py+Antiprism; old-atlas theme harvests).
+-16+ galleries incl. symmetry (19 classes). Old-atlas galleries all
+-carried over with their descriptions (data/theme_desc.tsv).
+-
+-## Pending
+-
+-- Recognition sweep (recognize_sweep.py → data/recognized_v30.tsv,
+-  all-recognized + ≥1 icosahedral-atom criterion v1): if the TSV is
+-  complete, add members to members.py's page-worthy set, build pages,
+-  rerun special.py (gallery/recognized.html is pre-wired). PD expects
+-  criterion tinkering.
+-- Unbuilt Eisenstein giants (v>164: ico T16..27 to v=272 etc.) —
+-  buildable since bendprover MAXV=512; raise SUBDIV_VCAP + build.
+-- Dented: currently the 26 old-atlas GLBs; a regeneration pipeline
+-  (punch + --dents solve) would replace/extend them.
+-- Hosting decision (GitHub Pages + Zenodo DOI was the recommendation;
+-  Dartmouth redirects; next arXiv version).
+-- Buried wholesale (13k more classified nets could get pages).
+-
+-## Distribution (2026-07-15, commit e95d48f)
+-
+-Zenodo DRAFT deposition 21367250, DOI 10.5281/zenodo.21367250
+-reserved (live once Peter publishes). Two verified artifacts (site
+-tarball three-way md5 local = doob = Zenodo; db tarball two-way,
+-local = Zenodo — it was uploaded from home, small enough):
+-- neoplatonic-atlas.tar.gz 2,614,014,412 B, d57df591ef9dd03654da1a4db521b609
+-- neoplatonic-atlas-database.tar.gz 3,664,510 B, e526e00459623f6d2b7f0a45011f6b2d
+-Pipeline: builders/zenodo_dist.sh (token: ~/.config/zenodo/token —
+-also copied to doob; multi-GB PUTs from home failed repeatedly
+-(502s/resets), from doob succeeded first try in ~1 min — upload big
+-files from doob). Paper cites the DOI (neo.tex:209, compile-checked).
+-Remaining: Peter reviews + publishes; arXiv comments line.
+-2026-07-15 later: gauss SWAPPED (docs/atlas = new atlas, old at
+-docs/atlas_old; web/<v>/<NAME>.html 301-redirects via .htaccess;
+-all 5 paper URLs verified 200). primes_v4-60.tar.gz (208,670,491 B,
+-md5 a1a2b6a9...) added to the record — 3 files total, all
+-checksum-verified. Paper: bipyramid href canonicalized; zzz now
+-packages figures (compiled clean standalone on doob).
+-
+-## Freeze + deploy (2026-07-15)
+-
+-Public repos: github.com/peterdoyle1717/neoplatonic-atlas (this repo:
+-builders + data, MIT, README points at the DOI) and
+-github.com/peterdoyle1717/idealprover (boundary-cert scripts +
+-reports, copied from bendq_sandbox — originals untouched);
+-bendprover pushed current (ae6f915). Deployed to gauss docs/atlas2,
+-then SWAPPED to docs/atlas (see Distribution above); OLD atlas (131G)
+-parked at gauss docs/atlas_old pending final retirement — its
+-downloads/ tarballs are superseded by the record's primes_v4-60
+-(objs tarballs still unique there). Local cleanup: retirees in
+-neo/_trash-20260715/ (5.9G; fleet pushed and/or tarballed first),
+-full-tree tarballs in neo/retired/ (310M, 14 tarballs).
+-
+-## Tinkering round (2026-07-17, commits 9e9f4b4..af142c8)
+-
+-Site now 2,215 nets. Tet rays: (1,0) to T=225, (2,1) to T=252
+-(V=506), (1,1) to T=192, (3,1) to T=208 -- built via the alpha-walk
+-fallback in solve_prove_60 (canonical -> walk 59.9/59/57/54 seeded ->
+-relabel retries). tri2 family = cut double-covered triangles (exact
+-pancakes; uncut is unrepresentable: doubled corner edges, measured
+-build_topology failure). smooth.glb on every net (welded, no borders,
+-no normals). Galleries: primes-labeled links; fullerene/icosym/
+-geodesic/deg7 pages gone; classics+deg7 merged; eisenstein after
+-symmetry; hyperbolics only in classics/oddsends/by-v(marked).
+-Ray-limit measurements (flat ray exactly tet at T64/T121; (2,1)-ray
+-corner-collar/flat-core profile): bendq_sandbox/ray_limit/REPORT.md.
+-Zenodo draft REFRESHED (site a1e44da7..., db b41a39f0..., 3-way md5
+-verified) -- same deposition 21367250. gauss redeployed (old at
+-docs/atlas_pretinker, legacy at docs/atlas_old); 6 URL checks 200/301.
+-
+-## Conventions
+-
+-Evidence discipline per user CLAUDE.md; link nets by their personal
+-page (memory: link-atlas-when-discussing-nets); codex Stop-hook review
+-applies (cwd under ~/Dropbox/neo).
++eisenmaps, per-net artifacts, regeneration, deployment. Success = every
++net Peter wants visible has a correct, beautiful, regenerable page. NOT
++this chat: proving things or Lean. The atlas CONSUMES committed solver
++output (producer→consumer rule); it never re-runs the solver at build.
++
++Pick-up for a fresh atlas chat: read this + `git log --oneline -15` +
++the auto-memory index. Live design record: `MORPH_GATE_TODO.md`.
++
++## Architecture
++
++Record/view: one directory per net under `site/personal/nets/<id>/` —
++`net.json` is the record (identity, netcode, flags, themes, eisenstein,
++artifact inventory, morph_note/caveat) beside its artifacts (rb/clers
++GLBs, morph_p/k, ideal_net.svg, clers_layout.svg, eismap.svg). id =
++`v{V}{CLERS}` when ≤200 chars else `v{V}h`+sha1-16 (`views.net_id`).
++`views.py` is the only renderer.
++
++Committed data is the source of truth:
++- `data/bends/` (2,249 json) — the bend store: hero + morph-ladder
++  bends per net, persisted by producer runs, consumed at build.
++  Store-only rule: with a store present the solver is NEVER invoked.
++- `data/*.tsv` — census pins (class_v30, symmetry, conway, classics,
++  eisenstein, themes, floppers, …). Editorial: refresh deliberately,
++  never as a build side effect.
++- `data/walks/` — the dent-walk scan; the dentings gallery regenerates
++  from it.
++
++Two tiers:
++- `./regen_personal.sh` — CONSUMER regen, the whole atlas from scratch:
++  numpy-only, no solver/neo/network/scipy; personal.py + special.py;
++  ~2.5 min; byte-deterministic (build-twice-diff proven; manifests in
++  `notes/regen-verification-*/`).
++- `./producer_census.sh` — PRODUCER census sweep (classify/members/
++  symmetry; needs the neo tree + scipy): attended, editorial; its
++  header records the measured drift semantics.
++
++Display gates (G1-audited, seven rounds; specs + calibration in
++MORPH_GATE_TODO.md and notes/gate-calibration-20260722/): every
++displayed edge within 1% of exact (normalized Lorentz metric, per-event
++closure, certify-where-resolvable at float64 limits); dent_index
++link-turning on displayed coordinates (NEVER volume sign).
++Certification is only meaningful AT the solved alpha — read alphas from
++the store, never retype them.
++
++Morph policy: movies only for v ≤ 30 (MORPH_VMAX; PD 2026-07-24).
++bendprover `--frames` (672a603) emits any finite realization on demand
++(Klein-normalized, mp development); the atlas owns assembly.
++Correspondence: notes/FOR_NEO_morph_frames.md / FOR_ATLAS_frames_ready.md.
++
++## Site content (2026-07-25)
++
++2,249 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
++v≤12 / v=13 / v=14 · Non-prime · Platonic & Archimedean · Convex ·
++Hyperbolic · Dented · Hull-buried · Pancakes · Floppy · Symmetry ·
++Eisenstein subdivisions · … Non-prime is organized by the paper's three
++types via G1-audited clique-sum decomposition, 8/8/8: tet assemblies /
++stacks of ≥2 octs / prime-core+tets — the octahedron core complete (all
++eight attachment classes up to symmetry; four minted 2026-07-25 via the
++canonical CLERS encoder in neo/clers). Convex opens with the eight
++no-coplanar-faces solids (Rausenberger, later Freudenthal & van der
++Waerden). Hyperbolic = the 25 degree-7 nets (Klein heroes). Dentings =
++per-net dent SETS, ∅ first, from data/walks.
++
++## Process
++
++- Commit gate: PreToolUse hook (~/.claude/hooks/codex-commit-gate.py →
++  codex-review) fires on every `git commit` and always logs to
++  notes/codex-consults/<ts>-codex-gate-<tree>.txt. In this repo (no
++  TEAMWORK.md) verdicts are mandatory-but-ADVISORY (PD 2026-06-11):
++  READ THE TRANSCRIPT after every commit; approval = PASS/WARN for the
++  exact tree (or a matching .git/claude-codex-approval stamp). Write
++  .session/claude-commit-evidence.md before committing.
++- G1 design audits for new conventions via `codex exec`, logged under
++  notes/codex-consults/.
++- Serve locally: persistent `python3 -m http.server 8765 --directory
++  site` (root redirects to personal/). Deploy: rsync site/personal/ →
++  gauss.dartmouth.edu:public_html/docs/atlas/ (preserve
++  atlas_records.jsonl); old atlas parked at docs/atlas_old.
++- Builders run under python3.13 (numpy 2.4.4, scipy 1.18.0).
++
++## State (2026-07-25)
++
++Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
++landed round. Floppy census kept as pinned (PD): the 67 flags trace to
++data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo
++refresh deliberately deferred (PD: "never mind zenodo for now") — the
++draft is BEHIND the live site. Promotion formalities not yet done:
++`next` unpushed, unmerged, untagged.
++
++## History (compressed; details in git log and MORPH_GATE_TODO.md)
++
++- 2026-07-15 freeze+deploy: public repos
++  github.com/peterdoyle1717/neoplatonic-atlas (MIT) + idealprover;
++  gauss docs/atlas swapped in, old 131G atlas at docs/atlas_old.
++  Zenodo DRAFT 21367250 (DOI 10.5281/zenodo.21367250 reserved):
++  site + db + primes_v4-60 tarballs, md5-verified; upload big files
++  from doob (home PUTs 502). Pipeline builders/zenodo_dist.sh, token
++  ~/.config/zenodo/token. Draft refreshed 2026-07-17; STALE since the
++  2026-07-22+ rounds.
++- 2026-07-17 tinkering: 2,215 nets, tet rays to T=252 (v506),
++  smooth.glb everywhere, gallery consolidation.
++- 2026-07-22 (c0a599a): display gates + committed bend store +
++  always-regenerate + gallery round; seven G1 rounds; two production
++  catches by the audited gates.
++- 2026-07-24 (ed1365b): galleries by paper types, morph v≤30 policy,
++  consumer/producer regen split with build-twice proof, census pin
++  (floppers), title.
++- 2026-07-25: octahedron-core exemplars (4 minted), 8/8/8 non-prime,
++  symmetry/conway census completion (+57), gate-record correction,
++  hook fixes (diff cap 250k, BLOCK vs ERROR distinguished).
+diff --git a/MORPH_GATE_TODO.md b/MORPH_GATE_TODO.md
+index 1f89f04..52b0df1 100644
+--- a/MORPH_GATE_TODO.md
++++ b/MORPH_GATE_TODO.md
+@@ -329,3 +329,20 @@ classify output is now sorted (imap_unordered completion order was the
+ measured ~3.1k-row reorder). The committed census stands unchanged --
+ no science moved, a file did. (PD: floppy mattered before frozen-0-bend
+ handling; the gallery stays for now, census pinned.)
++
++## Gate record CORRECTED (2026-07-25)
++
++My "fail-open bug / hook didn't fire" claims were wrong. The commit gate
++fires on every git commit and always logs
++(notes/codex-consults/<ts>-codex-gate-<tree>.txt); outside TEAMWORK
++repos a BLOCK or codex error is mandatory-but-ADVISORY per PD's
++2026-06-11 ruling. The July-24 commits both received codex BLOCK
++verdicts (transcripts ...220734-...ee9d3c1b and ...221602-...7cf8fe9),
++advisory-allowed by design, and those BLOCKs AGREE with the retroactive
++reviews run on the same trees -- two channels, same findings, final
++tree approved (retro-3 PASS on ed1365b). My "didn't fire" observation
++error: piping commit output through tail ate the hook stderr. Real
++defects fixed today in ~/.claude/hooks/codex-commit-gate.py:
++MAX_DIFF_CHARS 700k -> 250k (model context is the binding limit,
++measured 2026-07-22) and the advisory message now distinguishes codex
++BLOCK from codex ERROR.
+diff --git a/builders/special.py b/builders/special.py
+index c3c982d..6680bb2 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -646,8 +646,17 @@ def main():
+     for r in theme_list("nonprime"):
+         pieces = nonprime_pieces(r["netcode"])
+         kinds = set(pieces)
+-        typ = (1 if kinds <= {'tet'} else
+-               2 if kinds <= {'oct', 'tet'} else 3)
++        no, nt = pieces.count('oct'), pieces.count('tet')
++        # type 2 = STACKS of two or more octs +- caps; type 3 = a prime
++        # core OTHER THAN THE TET with attached tets (single oct + tets
++        # is the first core family). The bare oct is prime and belongs
++        # in this gallery not at all (PD 2026-07-24).
++        if kinds <= {'tet'}:
++            typ = 1
++        elif kinds <= {'oct', 'tet'} and no >= 2:
++            typ = 2
++        else:
++            typ = 3
+         nt, no = pieces.count('tet'), pieces.count('oct')
+         cap = (f"{nt} tets" if typ == 1 else
+                (f"{no} oct{'s' if no > 1 else ''}"
+@@ -657,10 +666,11 @@ def main():
+         (1, 'Assemblies of regular tetrahedra',
+          'Two to four sharing an axis edge, or helical stacks.'),
+         (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
+-         'The octahedron itself (prime) is the one-stack base case.'),
++         'Two or more octahedra glued face to face.'),
+         (3, 'A prime neoplatonic core with attached tetrahedra',
+-         'Up to four tetrahedra on the faces of a prime core. No '
+-         'exemplars built yet.'))
++         'One to four tetrahedra on the faces of a prime core other '
++         'than the tetrahedron. The octahedron core is complete: all '
++         'eight attachment classes up to symmetry.'))
+     parts = []
+     for typ, title, sub in NP_SECT:
+         parts.append(f'<h2>{title}</h2><p class=desc>{sub}</p>')
+diff --git a/data/conway.tsv b/data/conway.tsv
+index c6a0739..bd04f7c 100644
+--- a/data/conway.tsv
++++ b/data/conway.tsv
+@@ -11,6 +11,7 @@ v106hb125deb358f972a7	332
+ v107h025ed392ab598a98	522
+ v10CCACACACACACACAE	22
+ v10CCACCACAACCACAAE	*33
++v10CCACCCABCACABCAE	*222
+ v10CCACCCACCACAADEE	*33
+ v10CCACCCACCACABDEE	*332
+ v10CCCACACACACACAAE	22
+@@ -40,6 +41,7 @@ v11CCCACCACACCACAADEE	*22
+ v122h8fe939a1353d3843	*532
+ v127h4fa99ecb0de114a9	*522
+ v128h0a8234b313980563	222
++v128h4f77b7f274aa28f7	332
+ v128h918f570260220c9b	622
+ v12CCCACAACCACAACCACAAE	2*3
+ v12CCCACACACACACACACAAE	22
+@@ -64,6 +66,8 @@ v12CCCACCACACCACACDEABE	*222
+ v12CCCACCACCACACAACADEE	2*2
+ v12CCCACCACCACACACAAAAE	*322
+ v12CCCCACCACACACAACAAAE	*532
++v130h4da8aa291a5b8b58	*332
++v130hb37a8a4bf1c4c5b2	22
+ v132h1603e125d77882ba	532
+ v135h092af6d7c2f7fe27	22
+ v137hb0c7acff201fd2bd	*522
+@@ -101,6 +105,7 @@ v13CCCACCACCACACAACAACAAE	22
+ v13CCCACCACCACACACAACAAAE	*22
+ v13CCCACCACCACCACAACADEBE	*22
+ v13CCCACCACCACCACACAADEBE	*33
++v146he2cde65e82df9e58	1
+ v149h5d70922ce66c392b	22
+ v14CCACACACACACACACACACACAE	22
+ v14CCACCACAACCACAACCACAACAE	2*3
+@@ -163,6 +168,7 @@ v14CCCACCACCACCACACAACDEDEE	*22
+ v14CCCACCACCACCACACACAAADEE	222
+ v14CCCACCCACCACCACAACDEDEBE	*432
+ v14CCCCACCACACACACACAACAAAE	2*6
++v152h166d825fa3770887	*332
+ v152hcdb06f26767a9fee	*622
+ v152he09dd528bd007438	2*2
+ v15CCCACAACCACAACCACAACCACAAE	*322
+@@ -172,6 +178,9 @@ v15CCCACACCACCACACACCACAABABE	*322
+ v15CCCACCACACCACACCAACACDEABE	*22
+ v15CCCCACCACACACACACACAACAAAE	*322
+ v162h9b09eec5168e9243	*532
++v164h1268c85b083401b2	*332
++v164h269ae2cb791779bd	*622
++v164h64e816f04127fc46	*222
+ v164he26c84ccf7059402	2*2
+ v164he3e705f0721b3784	*622
+ v16CCACCCACCACACCABCACABCACABAE	332
+@@ -194,6 +203,7 @@ v17CCCACCCACCACCACAACCAACDECAAAAE	*522
+ v17CCCCACCACACACAACCACACACAACAAAE	*522
+ v17CCCCACCACACACACACACACACAACAAAE	*22
+ v17CCCCACCACACACCACACACACAACAAAAE	*22
++v182h4d83f7c1fdef10d3	*522
+ v18CCCACACACACACACACACACACACACACAAE	22
+ v18CCCACACACCAACACACCAACACACCAACAAE	*222
+ v18CCCACACACCACACAACCACACAACACACAAE	*22
+@@ -237,6 +247,9 @@ v19CCCCACCACACACCACACACACAACACAACAAAE	*
+ v19CCCCACCACACACCACACACACACACAAACAAAE	22
+ v19CCCCACCACACCACACACACACACAACAACAAAE	22
+ v19CCCCACCACACCACACACACACACAACACAAABE	*33
++v200h135a0caf146869c8	*222
++v202hb84cee6a728cdd59	*332
++v202hd5d3d1cdcaa902c7	22
+ v20CCACCCACCACACCACCACACCACACABCADEADEE	*332
+ v20CCCACACACACACACACACACACACACACACACAAE	22
+ v20CCCACACACCAACACACCAACACACCAACACACAAE	2*2
+@@ -272,6 +285,8 @@ v20CCCCACCACACCACACACCACACACAACAACAAAAE	22
+ v20CCCCACCACCACACCACACACACAACACAAACAAAE	2*2
+ v20CCCCACCACCACACCACACCAACAACACAAACAAAE	*622
+ v212h09ca41a41819f9c3	532
++v218h402a30a79d0fc4aa	*332
++v218h97ef229a70240d1e	2*2
+ v21CCCACACACACACACACACACACACACACACACACAAE	22
+ v21CCCACACACCAACACACCAACACACCAACACACCAABE	*22
+ v21CCCACACACCACACAACCACACAACCACACAACACAAE	1
+@@ -305,6 +320,8 @@ v21CCCCACCACACCACACACCACACACACAACACAAAABE	1
+ v21CCCCACCACACCACACACCACACACCAAACACAAAABE	*22
+ v21CCCCACCACACCACCACACCACACACAACAAACAAAAE	*33
+ v21CCCCACCACCACACCACACACACAACACAACAACAAAE	22
++v226he5c99f0254e9d767	332
++v227hcf33e781a0512bdd	1
+ v22CCCACACACACACACACACACACACACACACACACACAAE	22
+ v22CCCACACACCAACACACCAACACACCAACACACCAACAAE	*222
+ v22CCCACACACCACACACACACACACACACACACAACACAAE	1
+@@ -361,6 +378,7 @@ v22CCCCACCACCACACCACACACACACAACACAACAACAAAE	22
+ v22CCCCACCACCACACCACACACACACAACACACAACAAAAE	*22
+ v22CCCCACCACCACACCACACACACACAACCAACAACAAABE	222
+ v22CCCCACCACCACACCACACACACACAACCAACAACADEAE	2*5
++v236hc60ae96a0a268dcd	332
+ v23CCCACACACACACACACACACACACACACACACACACACAAE	22
+ v23CCCACACACCAACACACCAACACACCAACACACCAACACAAE	*22
+ v23CCCACACACCACACAACCACACAACCACACAACCACACAABE	*
+@@ -428,6 +446,7 @@ v23CCCCACCACCACACCACACACACACAACACACAACACAAABE	*
+ v23CCCCACCACCACACCACACACACACAACACACACAACAAAAE	22
+ v23CCCCACCACCACACCACACACACACAACCAACACAACAADEE	1
+ v23CCCCACCACCACACCACACACACACACACAACACAACAAAAE	322
++v244hdbc3e108e5770529	*332
+ v24CCCACACACACACACACACACACACACACACACACACACACAAE	22
+ v24CCCACACACCAACACACCAACACACCAACACACCAACACACAAE	2*2
+ v24CCCACACCAACACACCAACACACCAACACACCAACACACCAABE	*222
+@@ -1197,6 +1216,12 @@ v28CCCCACCACACACCACACCACACACACCAACACCACAACACACDEACADEAE	*222
+ v28CCCCACCACACCACACACACAACCACACACACAACCACACACACAACAAAAE	*33
+ v28CCCCACCACACCACCACACCACACACACACACACACACAACACAAACAAAAE	*33
+ v28CCCCACCACCACACCACACCACACCACACACAAACCACAACAACADECAAAE	*222
++v290h0f7992414bbac49e	*622
++v290h1a2f90bc498c4723	*332
++v290h790855371f37b776	22
++v290h8594802cf9ae1430	*222
++v296hc23f324403ace6be	*332
++v296hcb57467ec7a6dde6	2*2
+ v29CCCACACACACACACACACACACACACACACACACACACACACACACACACAAE	22
+ v29CCCACACACCACACAACCACACAACCACACAACCACACAACCACACAACACAAE	1
+ v29CCCACACACCACACACACACACACACACACACACACACACACACAACACACAAE	22
+@@ -2104,28 +2129,45 @@ v30CCCACCCACCACCCACCACCCAACAACCAACCDECDECCAACACAACAADECADEE	2*3
+ v30CCCACCCACCACCCACCACCCAACAACCAACCDECDECCAACACAACACDEAADEE	*322
+ v30CCCCACCACACCACACACACAACCACACACACAACCACACACACAACACAACAAAE	322
+ v30CCCCACCACACCACCACACCACACACCACACACACACACACAACACAAACAAADEE	*332
++v326h3013f2c13feab50a	1
+ v32CCCACCCACCACCCACCACCAACCAACAACCCAACCDECACACACAABCAACAADECAAE	2*5
+ v32CCCACCCACCACCCACCACCACCDECCACAACCCAACCDEDECCAACDBECAACAAAABE	*522
+ v32CCCCACCCACCACCACCACACACCAACCAACCAACCAACACACAACAACAACAAACAAAE	*532
++v340hc710a10a3524ab46	*332
+ v34CCACCCACCACACCACCACACCACACACCACACCACACACCACACACABCACADEACADEADEE	*332
++v34CCCACCCACCACCACACCAACACACACACACACCAACACACACACACACCAACAACAADECAAE	22
+ v34CCCACCCACCACCCACCACCACCACACCACAACCDECDECACAACDECCACAACDEACADEBBE	422
++v352h1f6724b95fe9acdb	332
++v354h6a0cce6a517ee928	*222
++v35CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAABABABABE	*322
+ v37CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACDEACCAACAACACCAACAABBAAE	522
+ v37CCCACCCACCACCCACCACCACACACACAACCCAACCDECACACACACAACCAACAACAACAADECAAAE	*55
+ v37CCCACCCACCACCCACCACCACCAACCACAACCCAACCDECAACCAACCAAACCAACAACAACDEDEAAE	*55
++v386h0d9207355457defd	*332
++v386h287604456b213e70	2*2
++v38CCCACCCACCACCACACCAACACACACCACACACCAACACACACCACACACACCAACAACAACAADECAAAE	1
+ v38CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACAACADECACAACAACAAACAAE	*432
++v394h12be35569acb08a2	*332
++v394h7a36d28c75939de2	22
+ v40CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCABACACCACABABACCACABABADEE	332
++v418h89ce987010a54cbd	332
+ v42CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACAACDECCACAACCAACAACACACAACDBECAAADEE	522
+ v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACAACCAACAACACAACCDEABAACADEE	2*4
+ v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACACCDECCACAACACAACDDEEDEBDEE	*432
+ v42CCCCACCCACCACCACCACACACCACACACACACACACACACACCAACACACACACACAACAACCAACAACAACAAABBE	*522
+ v42CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCAACAACAACAADECAAAE	*532
++v443h91956484cfa84d32	1
+ v44CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACABCACACACABCACACACABABCADEADEE	332
+ v44CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCAACAACACCAACACCAACACCAAAABDAEAE	222
+ v44CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACDEACCACACAACACCACACACAABCACADAEACADEE	622
++v452h66b0eea56a6b673b	*332
++v452hd5300f29debcd56d	*222
++v452hdf751e9c22065e97	*622
+ v47CCCACCCACCACCACACCACCACACCACACCACACACACACCACACAACACACACACAACACACCACACAACACACADEAABCACAAABE	*
+ v47CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACAACACAACCACAACACACACAACAACCACAABABACAAE	*522
+ v47CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACACACAACCACAACCAACAACACACACAACCAAACCAAACAADEDEE	55
+ v47CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADEACAADEAE	*322
++v48CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACAABABABABABE	*322
+ v48CCCACCACCACACACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACADEACAAAAE	*
+ v48CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACACACACAACCAAACACAAACACAAAABDEE	*33
+ v49CCCACCACCACACACCACACCACACACACCAACACCACACACACACCAACACCACACACACACACCAACACCACADEACACACDEACCADEABE	*22
+@@ -2133,6 +2175,7 @@ v49CCCACCCACCACCACAACCACACCACACCACAACCACACACACACACACAACCACACACACACACACAACCAACACA
+ v49CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACACACAACACAACACACACAACACACAACAACACAAAABAE	*
+ v49CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACACACAACCACAACAACACACAAACACAAABAE	*33
+ v4CCAE	*332
++v506h1cd81128f5b89efd	332
+ v50CCCACCACCACCACACCACACCAACCACACACCACACACCAACCACACACACCACACACACCAACCAACACACACACACACAAAABCAACADEABE	*
+ v50CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACDEACCADEACCADEACCADEACAACDEDEBE	*432
+ v51CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCACACAACACCAACACCAACACCACACAAACCAAACDAEACADEBE	22
+@@ -2141,6 +2184,7 @@ v52CCCACCCCACCCACCCACCAACCCAACCAACCCAACCCAACCAACAACCCACAACACCCAACAACCCACAACACACA
+ v52CCCACCCCACCCACCCACCAACCCAACCAACCCAACCCAACCAACACCCAACAACACCCAACAACCCACAADECCACACADEBCAACACAADBBECAABE	2*5
+ v52CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACACACACACACAACACAACAACAACAAACAAAE	522
+ v54CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACDEACACDEACACDEACAACACAACAACAAACAAE	432
++v552hbdf5d5a762252e37	*222
+ v56CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACABABACCACACABABABCACACABABABE	*332
+ v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACAACCACAACACACACACACACAACCACAACACACACACACAABCADEADEE	2*2
+ v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACCACACAACACACACCACAACACACCACACAACACACACCACAABABACCACACAABABABE	*622
+@@ -2151,7 +2195,9 @@ v5CCACAE	*322
+ v62CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCADEACCACAACACCADEACACCAACACDECACAACACDEABCAADEAE	*522
+ v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACACACACAACCCACACACACACCDECCACACACACACAACCCAACAACAACCDECCAACAACAACAACDCAAAEDEBCAAAE	*522
+ v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACCAACCACAACCCACACACACACCDECCAACCAACCAACAACCCAACAACAACCDECCAACDECAACAACDCAAAEDEBDEE	2*5
++v63CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACAABABABABABABE	*322
+ v64CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACABCACACACACABCACACACACABABCACADEACADEADEE	332
++v650h05db026f45f32a95	*222
+ v65CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCADEACAACADEADEBE	*22
+ v66CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACAACACACAACACADECACACAACACAACACAACAACACAACAACAAACAAE	*432
+ v67CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACDEACACCAACACAACACACCAACACAACACCAACAACACADCAACAABEAAE	522
+@@ -2159,33 +2205,44 @@ v6CCACACAE	*22
+ v6CCCACAAE	*432
+ v72CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACACACCAACACCAACACCAACACCAACACACACACCAACACCAACACCAACACCAACACACAACCAAACCAAACCAAACCAAACAACDEDEDEBE	532
+ v74CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACABCACACACADEACACACADEACACADEACADEADEE	*332
++v74CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCACACACACCACADEACACACCACACACACACCADEACACCACACACACACACDEACCACACACACACACAACCACACACACACACAAACAADEAE	*222
++v74CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACAACACAACADECACAACAACAAACAAE	22
+ v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACAACACCADEACACCAACACCACAACACCACAACACDEACCAACAACAACAACAADECAAAAE	2*2
+ v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCADEACCACACACACCADEACACCACACACACDECACACACACACDEABCACACACADEACACADEACADEE	*622
++v74CCCCACCCACCACCACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACAACACACAACACACACACAACAACCACACAACACAACACACACAAACCAACAACAACAADECAAAE	*622
+ v76CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACABABACACCACACABABABACCACACABABABADEE	332
+ v78CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCADEACCACADEACCACADEACCACADEACACDECADECADECADEACAAE	432
++v794hbcdfcb6da5470a44	*222
+ v7CCACACACAE	22
+ v7CCACACCABE	*22
+ v7CCACCACAAE	*33
+ v7CCCACACAAE	*522
+ v80CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCABACACACACCACABABACACACCACABABACACADEACADEADEE	332
++v80CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACAABABABABABABABE	*322
+ v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCAACACAACACACCAACACACCAACACACCAACAACACACCAACACACCAACACACCAAAABADBAEBAE	222
+ v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCACACACACDEACACCACACACAACACACCACACACACAACACCACACACAACACACCACACACACAABABCACADABAEACADEE	622
+ v82CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACAACACACAACCACACAACACACACACACAACACAACCACACAACACACACACAACAACCACACAABABABACAAE	*522
++v83CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACCACACACACCACAACACACACACACCACACACACACCACAACACACACACACCACACACACACACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	1
+ v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACACACACCADEACACCAACACCACAACACCACACACACACDEACCAACACACAACAACACACACADECAACACAAACACACAAADEE	*22
+ v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACDEACACACDEACACACDEACACAACACACAACACAACACAACAACACAACAACAAACAAE	432
+ v88CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACABCACACACACACABCACACACACACABABCACACADEACACADEACADEADEE	332
+ v8CCACACACACAE	22
++v8CCACCACAACAE	2*3
+ v8CCACCACACABE	*22
++v8CCACCACCABAE	*22
+ v8CCACCCABCABE	*332
+ v8CCCACACACAAE	2*2
+ v8CCCACACCAABE	*622
++v90CCCACCCACCACCACACCAACACCACACACACACCAACACCACACACACACACDEACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACAACACACAAACCACAABABE	*222
+ v92CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	*532
+ v93CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAAACACCAAACADBAECACACADEADBEE	22
+ v97CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCAACACACCADEACACCACAACACACCADEACACACCAACACACDEACCACAACACACDEACACCAACACAABCACAACACAABABBAE	522
+ v98CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACABABABACCACACACABABABABCACACACABABABABE	*332
+ v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACACACACAACCACACAACACACACACACACACACACAACCACACAACACACACACACACACACAACCACACAACACACACACACACACAABCACADEACADEADEE	2*2
+ v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAABABABACCACACACAABABABABE	*622
++v99CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACACCACACACACACACACAABABABABABABABABE	*322
+ v9CCACACACACACAE	22
++v9CCACCACACABCAE	*
+ v9CCACCACCACABAE	*33
+ v9CCCACAACCACAAE	*322
+ v9CCCACACACACAAE	*22
+diff --git a/data/nets_pages.txt b/data/nets_pages.txt
+index ac3a34b..a497166 100644
+--- a/data/nets_pages.txt
++++ b/data/nets_pages.txt
+@@ -2243,3 +2243,7 @@ CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACA
+ CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACCACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACAACACACAACCACACACACAACACACACACACACACAACACAACCACACACACAACACACACACACACAACAACCACACACACAACACACACACACAAACCACACACACAABABABABABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,8;2,8,3;3,8,9;3,9,10;3,10,4;4,10,11;4,11,12;4,12,5;5,12,13;5,13,6;6,13,14;6,14,15;6,15,7;7,15,16;7,16,17;7,17,8;8,17,18;8,18,9;9,18,19;9,19,20;9,20,10;10,20,21;10,21,11;11,21,22;11,22,23;11,23,12;12,23,24;12,24,13;13,24,25;13,25,14;14,25,26;14,26,27;14,27,15;15,27,28;15,28,16;16,28,29;16,29,30;16,30,17;17,30,31;17,31,18;18,31,32;18,32,19;19,32,33;19,33,34;19,34,20;20,34,35;20,35,21;21,35,36;21,36,22;22,36,37;22,37,38;22,38,23;23,38,39;23,39,24;24,39,40;24,40,25;25,40,41;25,41,26;26,41,42;26,42,43;26,43,27;27,43,44;27,44,28;28,44,45;28,45,29;29,45,46;29,46,47;29,47,30;30,47,48;30,48,31;31,48,49;31,49,32;32,49,50;32,50,33;33,50,51;33,51,52;33,52,34;34,52,53;34,53,35;35,53,54;35,54,36;36,54,55;36,55,37;37,55,56;37,56,57;37,57,38;38,57,58;38,58,39;39,58,59;39,59,40;40,59,60;40,60,41;41,60,61;41,61,42;42,61,62;42,62,63;42,63,43;43,63,64;43,64,44;44,64,65;44,65,45;45,65,66;45,66,46;46,66,47;47,66,67;47,67,48;48,67,68;48,68,49;49,68,69;49,69,50;50,69,70;50,70,51;51,70,71;51,71,72;51,72,52;52,72,73;52,73,53;53,73,74;53,74,54;54,74,75;54,75,55;55,75,76;55,76,56;56,76,77;56,77,57;57,77,78;57,78,58;58,78,79;58,79,59;59,79,80;59,80,60;60,80,81;60,81,61;61,81,82;61,82,62;62,82,83;62,83,84;62,84,63;63,84,85;63,85,64;64,85,86;64,86,65;65,86,87;65,87,66;66,87,67;67,87,88;67,88,68;68,88,89;68,89,69;69,89,90;69,90,70;70,90,91;70,91,71;71,91,92;71,92,93;71,93,72;72,93,94;72,94,73;73,94,95;73,95,74;74,95,96;74,96,75;75,96,97;75,97,76;76,97,98;76,98,77;77,98,99;77,99,78;78,99,100;78,100,79;79,100,101;79,101,80;80,101,102;80,102,81;81,102,103;81,103,82;82,103,104;82,104,83;83,104,105;83,105,106;83,106,84;84,106,107;84,107,85;85,107,108;85,108,86;86,108,109;86,109,87;87,109,88;88,109,110;88,110,89;89,110,111;89,111,90;90,111,112;90,112,91;91,112,113;91,113,92;92,113,114;92,114,115;92,115,93;93,115,116;93,116,94;94,116,117;94,117,95;95,117,118;95,118,96;96,118,119;96,119,97;97,119,120;97,120,98;98,120,121;98,121,99;99,121,122;99,122,100;100,122,123;100,123,101;101,123,124;101,124,102;102,124,125;102,125,103;103,125,126;103,126,104;104,126,127;104,127,105;105,127,128;105,128,129;105,129,106;106,129,130;106,130,107;107,130,131;107,131,108;108,131,132;108,132,109;109,132,110;110,132,133;110,133,111;111,133,134;111,134,112;112,134,135;112,135,113;113,135,136;113,136,114;114,136,137;114,137,138;114,138,115;115,138,139;115,139,116;116,139,140;116,140,117;117,140,141;117,141,118;118,141,142;118,142,119;119,142,143;119,143,120;120,143,144;120,144,121;121,144,145;121,145,122;122,145,146;122,146,123;123,146,147;123,147,124;124,147,148;124,148,125;125,148,149;125,149,126;126,149,150;126,150,127;127,150,151;127,151,128;128,151,152;128,152,153;128,153,129;129,153,154;129,154,130;130,154,155;130,155,131;131,155,156;131,156,132;132,156,133;133,156,157;133,157,134;134,157,158;134,158,135;135,158,159;135,159,136;136,159,160;136,160,137;137,160,161;137,161,162;137,162,138;138,162,163;138,163,139;139,163,164;139,164,140;140,164,165;140,165,141;141,165,166;141,166,142;142,166,167;142,167,143;143,167,168;143,168,144;144,168,169;144,169,145;145,169,170;145,170,146;146,170,171;146,171,147;147,171,172;147,172,148;148,172,173;148,173,149;149,173,174;149,174,150;150,174,175;150,175,151;151,175,176;151,176,152;152,176,177;152,177,178;152,178,153;153,178,179;153,179,154;154,179,180;154,180,155;155,180,157;157,180,158;158,180,181;158,181,159;159,181,182;159,182,160;160,182,183;160,183,161;161,183,184;161,184,185;161,185,162;162,185,186;162,186,163;163,186,187;163,187,164;164,187,188;164,188,165;165,188,189;165,189,166;166,189,190;166,190,167;167,190,191;167,191,168;168,191,192;168,192,169;169,192,193;169,193,170;170,193,194;170,194,171;171,194,195;171,195,172;172,195,196;172,196,173;173,196,197;173,197,174;174,197,198;174,198,175;175,198,199;175,199,176;176,199,200;176,200,177;177,200,201;177,201,202;177,202,178;178,202,203;178,203,179;179,203,181;181,203,182;182,203,204;182,204,183;183,204,205;183,205,184;184,205,206;184,206,207;184,207,185;185,207,208;185,208,186;186,208,209;186,209,187;187,209,210;187,210,188;188,210,211;188,211,189;189,211,212;189,212,190;190,212,213;190,213,191;191,213,214;191,214,192;192,214,215;192,215,193;193,215,216;193,216,194;194,216,217;194,217,195;195,217,218;195,218,196;196,218,219;196,219,197;197,219,220;197,220,198;198,220,221;198,221,199;199,221,222;199,222,200;200,222,223;200,223,201;201,223,224;201,224,225;201,225,202;202,225,204;204,225,205;205,225,226;205,226,206;206,226,227;206,227,228;206,228,207;207,228,229;207,229,208;208,229,230;208,230,209;209,230,231;209,231,210;210,231,232;210,232,211;211,232,233;211,233,212;212,233,234;212,234,213;213,234,235;213,235,214;214,235,236;214,236,215;215,236,237;215,237,216;216,237,238;216,238,217;217,238,239;217,239,218;218,239,240;218,240,219;219,240,241;219,241,220;220,241,242;220,242,221;221,242,243;221,243,222;222,243,244;222,244,223;223,244,245;223,245,224;224,245,246;224,246,226;226,246,227;227,246,247;227,247,248;227,248,228;228,248,249;228,249,229;229,249,250;229,250,230;230,250,251;230,251,231;231,251,252;231,252,232;232,252,253;232,253,233;233,253,254;233,254,234;234,254,255;234,255,235;235,255,256;235,256,236;236,256,257;236,257,237;237,257,258;237,258,238;238,258,259;238,259,239;239,259,260;239,260,240;240,260,261;240,261,241;241,261,262;241,262,242;242,262,263;242,263,243;243,263,264;243,264,244;244,264,265;244,265,245;245,265,266;245,266,246;246,266,247;247,266,267;247,267,268;247,268,248;248,268,269;248,269,249;249,269,270;249,270,250;250,270,271;250,271,251;251,271,272;251,272,252;252,272,273;252,273,253;253,273,274;253,274,254;254,274,275;254,275,255;255,275,276;255,276,256;256,276,277;256,277,257;257,277,278;257,278,258;258,278,279;258,279,259;259,279,280;259,280,260;260,280,281;260,281,261;261,281,282;261,282,262;262,282,283;262,283,263;263,283,284;263,284,264;264,284,285;264,285,265;265,285,286;265,286,266;266,286,267;267,286,287;267,287,288;267,288,268;268,288,289;268,289,269;269,289,290;269,290,270;270,290,291;270,291,271;271,291,292;271,292,272;272,292,293;272,293,273;273,293,294;273,294,274;274,294,295;274,295,275;275,295,296;275,296,276;276,296,297;276,297,277;277,297,298;277,298,278;278,298,299;278,299,279;279,299,300;279,300,280;280,300,301;280,301,281;281,301,302;281,302,282;282,302,303;282,303,283;283,303,304;283,304,284;284,304,305;284,305,285;285,305,306;285,306,286;286,306,287;287,306,307;287,307,308;287,308,288;288,308,309;288,309,289;289,309,310;289,310,290;290,310,311;290,311,291;291,311,312;291,312,292;292,312,313;292,313,293;293,313,314;293,314,294;294,314,315;294,315,295;295,315,316;295,316,296;296,316,317;296,317,297;297,317,318;297,318,298;298,318,319;298,319,299;299,319,320;299,320,300;300,320,321;300,321,301;301,321,322;301,322,302;302,322,323;302,323,303;303,323,324;303,324,304;304,324,325;304,325,305;305,325,326;305,326,306;306,326,307;307,326,327;307,327,328;307,328,308;308,328,329;308,329,309;309,329,330;309,330,310;310,330,331;310,331,311;311,331,332;311,332,312;312,332,333;312,333,313;313,333,334;313,334,314;314,334,335;314,335,315;315,335,336;315,336,316;316,336,337;316,337,317;317,337,338;317,338,318;318,338,339;318,339,319;319,339,340;319,340,320;320,340,341;320,341,321;321,341,342;321,342,322;322,342,343;322,343,323;323,343,344;323,344,324;324,344,345;324,345,325;325,345,346;325,346,326;326,346,327;327,346,347;327,347,348;327,348,328;328,348,349;328,349,329;329,349,350;329,350,330;330,350,351;330,351,331;331,351,352;331,352,332;332,352,353;332,353,333;333,353,354;333,354,334;334,354,355;334,355,335;335,355,356;335,356,336;336,356,357;336,357,337;337,357,358;337,358,338;338,358,359;338,359,339;339,359,360;339,360,340;340,360,361;340,361,341;341,361,362;341,362,342;342,362,363;342,363,343;343,363,364;343,364,344;344,364,365;344,365,345;345,365,366;345,366,346;346,366,347;347,366,367;347,367,368;347,368,348;348,368,369;348,369,349;349,369,370;349,370,350;350,370,371;350,371,351;351,371,372;351,372,352;352,372,373;352,373,353;353,373,374;353,374,354;354,374,375;354,375,355;355,375,376;355,376,356;356,376,377;356,377,357;357,377,378;357,378,358;358,378,379;358,379,359;359,379,380;359,380,360;360,380,381;360,381,361;361,381,382;361,382,362;362,382,383;362,383,363;363,383,384;363,384,364;364,384,385;364,385,365;365,385,386;365,386,366;366,386,367;367,386,387;367,387,388;367,388,368;368,388,389;368,389,369;369,389,390;369,390,370;370,390,391;370,391,371;371,391,392;371,392,372;372,392,393;372,393,373;373,393,394;373,394,374;374,394,395;374,395,375;375,395,396;375,396,376;376,396,397;376,397,377;377,397,398;377,398,378;378,398,399;378,399,379;379,399,400;379,400,380;380,400,401;380,401,381;381,401,402;381,402,382;382,402,403;382,403,383;383,403,404;383,404,384;384,404,405;384,405,385;385,405,406;385,406,386;386,406,387;387,406,407;387,407,408;387,408,388;388,408,409;388,409,389;389,409,410;389,410,390;390,410,411;390,411,391;391,411,412;391,412,392;392,412,413;392,413,393;393,413,414;393,414,394;394,414,415;394,415,395;395,415,416;395,416,396;396,416,417;396,417,397;397,417,418;397,418,398;398,418,419;398,419,399;399,419,420;399,420,400;400,420,421;400,421,401;401,421,422;401,422,402;402,422,423;402,423,403;403,423,424;403,424,404;404,424,425;404,425,405;405,425,426;405,426,406;406,426,407;407,426,427;407,427,428;407,428,408;408,428,429;408,429,409;409,429,430;409,430,410;410,430,431;410,431,411;411,431,432;411,432,412;412,432,433;412,433,413;413,433,434;413,434,414;414,434,435;414,435,415;415,435,436;415,436,416;416,436,437;416,437,417;417,437,438;417,438,418;418,438,439;418,439,419;419,439,440;419,440,420;420,440,441;420,441,421;421,441,442;421,442,422;422,442,443;422,443,423;423,443,444;423,444,424;424,444,445;424,445,425;425,445,446;425,446,426;426,446,427;427,446,447;427,447,448;427,448,428;428,448,449;428,449,429;429,449,450;429,450,430;430,450,451;430,451,431;431,451,452;431,452,432;432,452,453;432,453,433;433,453,454;433,454,434;434,454,455;434,455,435;435,455,456;435,456,436;436,456,457;436,457,437;437,457,458;437,458,438;438,458,459;438,459,439;439,459,460;439,460,440;440,460,461;440,461,441;441,461,462;441,462,442;442,462,463;442,463,443;443,463,464;443,464,444;444,464,465;444,465,445;445,465,466;445,466,446;446,466,447;447,466,467;447,467,468;447,468,448;448,468,469;448,469,449;449,469,470;449,470,450;450,470,471;450,471,451;451,471,472;451,472,452;452,472,473;452,473,453;453,473,474;453,474,454;454,474,475;454,475,455;455,475,476;455,476,456;456,476,477;456,477,457;457,477,478;457,478,458;458,478,479;458,479,459;459,479,480;459,480,460;460,480,481;460,481,461;461,481,482;461,482,462;462,482,483;462,483,463;463,483,484;463,484,464;464,484,485;464,485,465;465,485,486;465,486,466;466,486,467;467,486,487;467,487,488;467,488,468;468,488,489;468,489,469;469,489,490;469,490,470;470,490,491;470,491,471;471,491,492;471,492,472;472,492,473;473,492,493;473,493,474;474,493,494;474,494,475;475,494,495;475,495,476;476,495,496;476,496,477;477,496,497;477,497,478;478,497,498;478,498,479;479,498,499;479,499,480;480,499,500;480,500,481;481,500,501;481,501,482;482,501,483;483,501,502;483,502,484;484,502,503;484,503,485;485,503,504;485,504,486;486,504,487;487,504,505;487,505,506;487,506,488;488,506,507;488,507,489;489,507,508;489,508,490;490,508,509;490,509,491;491,509,510;491,510,492;492,510,493;493,510,511;493,511,494;494,511,512;494,512,495;495,512,513;495,513,496;496,513,514;496,514,497;497,514,515;497,515,498;498,515,516;498,516,499;499,516,517;499,517,500;500,517,518;500,518,501;501,518,502;502,518,519;502,519,503;503,519,520;503,520,504;504,520,505;505,520,521;505,521,522;505,522,506;506,522,523;506,523,507;507,523,524;507,524,508;508,524,525;508,525,509;509,525,526;509,526,510;510,526,511;511,526,527;511,527,512;512,527,528;512,528,513;513,528,529;513,529,514;514,529,530;514,530,515;515,530,531;515,531,516;516,531,532;516,532,517;517,532,533;517,533,518;518,533,519;519,533,534;519,534,520;520,534,521;521,534,535;521,535,536;521,536,522;522,536,537;522,537,523;523,537,538;523,538,524;524,538,539;524,539,525;525,539,540;525,540,526;526,540,527;527,540,541;527,541,528;528,541,542;528,542,529;529,542,543;529,543,530;530,543,544;530,544,531;531,544,545;531,545,532;532,545,546;532,546,533;533,546,534;534,546,535;535,546,547;535,547,548;535,548,536;536,548,549;536,549,537;537,549,550;537,550,538;538,550,551;538,551,539;539,551,552;539,552,540;540,552,541;541,552,551;541,551,542;542,551,550;542,550,543;543,550,549;543,549,544;544,549,548;544,548,545;545,548,547;545,547,546;224,226,225;202,204,203;179,181,180;155,157,156
+ CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACACACACACACACACACACACACACCACACACACACACACCACACACACACACACACACACACACACACACACACACCACACACACACACACACCACACACACACACACACACACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACADEACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACADEACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACADEACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACADEACACACACACACACACCACACACACACACACACACACACACACACACACCACACACACACADEACACACACACACACCACACACACACACACACACACACACACACACACACCACACACACADEACACACACACACCACACACACACACACACACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAAACACACACACAACACACACADEACACACACAACACACADEACACACAACACADEACACAACADEACAADEAE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,8;2,8,3;3,8,9;3,9,10;3,10,4;4,10,11;4,11,12;4,12,5;5,12,13;5,13,6;6,13,14;6,14,15;6,15,7;7,15,16;7,16,17;7,17,8;8,17,18;8,18,9;9,18,19;9,19,20;9,20,10;10,20,21;10,21,11;11,21,22;11,22,23;11,23,12;12,23,24;12,24,13;13,24,25;13,25,14;14,25,26;14,26,27;14,27,15;15,27,28;15,28,16;16,28,29;16,29,30;16,30,17;17,30,31;17,31,18;18,31,32;18,32,19;19,32,33;19,33,34;19,34,20;20,34,35;20,35,21;21,35,36;21,36,22;22,36,37;22,37,38;22,38,23;23,38,39;23,39,24;24,39,40;24,40,25;25,40,41;25,41,26;26,41,42;26,42,43;26,43,27;27,43,44;27,44,28;28,44,45;28,45,29;29,45,46;29,46,47;29,47,30;30,47,48;30,48,31;31,48,49;31,49,32;32,49,50;32,50,33;33,50,51;33,51,52;33,52,34;34,52,53;34,53,35;35,53,54;35,54,36;36,54,55;36,55,37;37,55,56;37,56,57;37,57,38;38,57,58;38,58,39;39,58,59;39,59,40;40,59,60;40,60,41;41,60,61;41,61,42;42,61,62;42,62,63;42,63,43;43,63,64;43,64,44;44,64,65;44,65,45;45,65,66;45,66,46;46,66,67;46,67,68;46,68,47;47,68,69;47,69,48;48,69,70;48,70,49;49,70,71;49,71,50;50,71,72;50,72,51;51,72,73;51,73,74;51,74,52;52,74,75;52,75,53;53,75,76;53,76,54;54,76,77;54,77,55;55,77,78;55,78,56;56,78,79;56,79,80;56,80,57;57,80,81;57,81,58;58,81,82;58,82,59;59,82,83;59,83,60;60,83,84;60,84,61;61,84,85;61,85,62;62,85,86;62,86,87;62,87,63;63,87,88;63,88,64;64,88,89;64,89,65;65,89,90;65,90,66;66,90,91;66,91,67;67,91,92;67,92,68;68,92,93;68,93,69;69,93,94;69,94,70;70,94,95;70,95,71;71,95,96;71,96,72;72,96,97;72,97,73;73,97,98;73,98,74;74,98,99;74,99,75;75,99,100;75,100,76;76,100,101;76,101,77;77,101,102;77,102,78;78,102,103;78,103,79;79,103,104;79,104,105;79,105,80;80,105,106;80,106,81;81,106,107;81,107,82;82,107,108;82,108,83;83,108,109;83,109,84;84,109,110;84,110,85;85,110,111;85,111,86;86,111,112;86,112,113;86,113,87;87,113,114;87,114,88;88,114,115;88,115,89;89,115,116;89,116,90;90,116,117;90,117,91;91,117,118;91,118,92;92,118,119;92,119,93;93,119,120;93,120,94;94,120,121;94,121,95;95,121,122;95,122,96;96,122,123;96,123,97;97,123,124;97,124,98;98,124,125;98,125,99;99,125,126;99,126,100;100,126,127;100,127,101;101,127,128;101,128,102;102,128,129;102,129,103;103,129,130;103,130,104;104,130,131;104,131,132;104,132,105;105,132,133;105,133,106;106,133,134;106,134,107;107,134,135;107,135,108;108,135,136;108,136,109;109,136,137;109,137,110;110,137,138;110,138,111;111,138,139;111,139,112;112,139,140;112,140,141;112,141,113;113,141,142;113,142,114;114,142,143;114,143,115;115,143,144;115,144,116;116,144,145;116,145,117;117,145,146;117,146,118;118,146,147;118,147,119;119,147,148;119,148,120;120,148,149;120,149,121;121,149,150;121,150,122;122,150,151;122,151,123;123,151,152;123,152,124;124,152,153;124,153,125;125,153,154;125,154,126;126,154,155;126,155,127;127,155,156;127,156,128;128,156,157;128,157,129;129,157,158;129,158,130;130,158,159;130,159,131;131,159,160;131,160,161;131,161,132;132,161,162;132,162,133;133,162,163;133,163,134;134,163,164;134,164,135;135,164,165;135,165,136;136,165,166;136,166,137;137,166,167;137,167,138;138,167,168;138,168,139;139,168,169;139,169,140;140,169,170;140,170,171;140,171,141;141,171,172;141,172,142;142,172,173;142,173,143;143,173,174;143,174,144;144,174,175;144,175,145;145,175,176;145,176,146;146,176,177;146,177,147;147,177,178;147,178,148;148,178,179;148,179,149;149,179,180;149,180,150;150,180,181;150,181,151;151,181,182;151,182,152;152,182,183;152,183,153;153,183,184;153,184,154;154,184,185;154,185,155;155,185,186;155,186,156;156,186,187;156,187,157;157,187,188;157,188,158;158,188,189;158,189,159;159,189,190;159,190,160;160,190,191;160,191,192;160,192,161;161,192,193;161,193,162;162,193,194;162,194,163;163,194,195;163,195,164;164,195,196;164,196,165;165,196,197;165,197,166;166,197,198;166,198,167;167,198,199;167,199,168;168,199,200;168,200,169;169,200,201;169,201,170;170,201,202;170,202,203;170,203,171;171,203,204;171,204,172;172,204,205;172,205,173;173,205,206;173,206,174;174,206,207;174,207,175;175,207,208;175,208,176;176,208,209;176,209,177;177,209,210;177,210,178;178,210,211;178,211,179;179,211,212;179,212,180;180,212,213;180,213,181;181,213,214;181,214,182;182,214,215;182,215,183;183,215,216;183,216,184;184,216,217;184,217,185;185,217,218;185,218,186;186,218,219;186,219,187;187,219,220;187,220,188;188,220,221;188,221,189;189,221,222;189,222,190;190,222,223;190,223,191;191,223,224;191,224,225;191,225,192;192,225,226;192,226,193;193,226,227;193,227,194;194,227,228;194,228,195;195,228,229;195,229,196;196,229,230;196,230,197;197,230,231;197,231,198;198,231,232;198,232,199;199,232,233;199,233,200;200,233,234;200,234,201;201,234,235;201,235,202;202,235,236;202,236,237;202,237,203;203,237,238;203,238,204;204,238,239;204,239,205;205,239,240;205,240,206;206,240,241;206,241,207;207,241,242;207,242,208;208,242,243;208,243,209;209,243,244;209,244,210;210,244,245;210,245,211;211,245,246;211,246,212;212,246,247;212,247,213;213,247,248;213,248,214;214,248,249;214,249,215;215,249,250;215,250,216;216,250,251;216,251,217;217,251,252;217,252,218;218,252,253;218,253,219;219,253,254;219,254,220;220,254,255;220,255,221;221,255,256;221,256,222;222,256,257;222,257,223;223,257,258;223,258,224;224,258,259;224,259,260;224,260,225;225,260,261;225,261,226;226,261,262;226,262,227;227,262,263;227,263,228;228,263,264;228,264,229;229,264,265;229,265,230;230,265,266;230,266,231;231,266,267;231,267,232;232,267,268;232,268,233;233,268,269;233,269,234;234,269,270;234,270,235;235,270,271;235,271,236;236,271,272;236,272,273;236,273,237;237,273,274;237,274,238;238,274,275;238,275,239;239,275,276;239,276,240;240,276,277;240,277,241;241,277,278;241,278,242;242,278,279;242,279,243;243,279,280;243,280,244;244,280,281;244,281,245;245,281,282;245,282,246;246,282,248;248,282,249;249,282,283;249,283,250;250,283,284;250,284,251;251,284,285;251,285,252;252,285,286;252,286,253;253,286,287;253,287,254;254,287,288;254,288,255;255,288,289;255,289,256;256,289,290;256,290,257;257,290,291;257,291,258;258,291,292;258,292,259;259,292,293;259,293,294;259,294,260;260,294,295;260,295,261;261,295,296;261,296,262;262,296,297;262,297,263;263,297,298;263,298,264;264,298,299;264,299,265;265,299,300;265,300,266;266,300,301;266,301,267;267,301,302;267,302,268;268,302,303;268,303,269;269,303,304;269,304,270;270,304,305;270,305,271;271,305,306;271,306,272;272,306,307;272,307,308;272,308,273;273,308,309;273,309,274;274,309,310;274,310,275;275,310,311;275,311,276;276,311,312;276,312,277;277,312,313;277,313,278;278,313,314;278,314,279;279,314,315;279,315,280;280,315,316;280,316,281;281,316,283;283,316,284;284,316,317;284,317,285;285,317,318;285,318,286;286,318,319;286,319,287;287,319,320;287,320,288;288,320,321;288,321,289;289,321,322;289,322,290;290,322,323;290,323,291;291,323,324;291,324,292;292,324,325;292,325,293;293,325,326;293,326,327;293,327,294;294,327,328;294,328,295;295,328,329;295,329,296;296,329,330;296,330,297;297,330,331;297,331,298;298,331,332;298,332,299;299,332,333;299,333,300;300,333,334;300,334,301;301,334,335;301,335,302;302,335,336;302,336,303;303,336,337;303,337,304;304,337,338;304,338,305;305,338,339;305,339,306;306,339,340;306,340,307;307,340,341;307,341,342;307,342,308;308,342,343;308,343,309;309,343,344;309,344,310;310,344,345;310,345,311;311,345,346;311,346,312;312,346,347;312,347,313;313,347,348;313,348,314;314,348,349;314,349,315;315,349,317;317,349,318;318,349,350;318,350,319;319,350,351;319,351,320;320,351,352;320,352,321;321,352,353;321,353,322;322,353,354;322,354,323;323,354,355;323,355,324;324,355,356;324,356,325;325,356,357;325,357,326;326,357,358;326,358,359;326,359,327;327,359,360;327,360,328;328,360,361;328,361,329;329,361,362;329,362,330;330,362,363;330,363,331;331,363,364;331,364,332;332,364,365;332,365,333;333,365,366;333,366,334;334,366,367;334,367,335;335,367,368;335,368,336;336,368,369;336,369,337;337,369,370;337,370,338;338,370,371;338,371,339;339,371,372;339,372,340;340,372,373;340,373,341;341,373,374;341,374,375;341,375,342;342,375,376;342,376,343;343,376,377;343,377,344;344,377,378;344,378,345;345,378,379;345,379,346;346,379,380;346,380,347;347,380,381;347,381,348;348,381,350;350,381,351;351,381,382;351,382,352;352,382,383;352,383,353;353,383,384;353,384,354;354,384,385;354,385,355;355,385,386;355,386,356;356,386,387;356,387,357;357,387,388;357,388,358;358,388,389;358,389,390;358,390,359;359,390,391;359,391,360;360,391,392;360,392,361;361,392,393;361,393,362;362,393,394;362,394,363;363,394,395;363,395,364;364,395,396;364,396,365;365,396,397;365,397,366;366,397,398;366,398,367;367,398,399;367,399,368;368,399,400;368,400,369;369,400,401;369,401,370;370,401,402;370,402,371;371,402,403;371,403,372;372,403,404;372,404,373;373,404,405;373,405,374;374,405,406;374,406,407;374,407,375;375,407,408;375,408,376;376,408,409;376,409,377;377,409,410;377,410,378;378,410,411;378,411,379;379,411,412;379,412,380;380,412,382;382,412,383;383,412,413;383,413,384;384,413,414;384,414,385;385,414,415;385,415,386;386,415,416;386,416,387;387,416,417;387,417,388;388,417,418;388,418,389;389,418,419;389,419,420;389,420,390;390,420,421;390,421,391;391,421,422;391,422,392;392,422,423;392,423,393;393,423,424;393,424,394;394,424,425;394,425,395;395,425,426;395,426,396;396,426,427;396,427,397;397,427,428;397,428,398;398,428,429;398,429,399;399,429,430;399,430,400;400,430,431;400,431,401;401,431,432;401,432,402;402,432,433;402,433,403;403,433,434;403,434,404;404,434,435;404,435,405;405,435,436;405,436,406;406,436,437;406,437,438;406,438,407;407,438,439;407,439,408;408,439,440;408,440,409;409,440,441;409,441,410;410,441,442;410,442,411;411,442,413;413,442,414;414,442,443;414,443,415;415,443,444;415,444,416;416,444,445;416,445,417;417,445,446;417,446,418;418,446,447;418,447,419;419,447,448;419,448,449;419,449,420;420,449,450;420,450,421;421,450,451;421,451,422;422,451,452;422,452,423;423,452,453;423,453,424;424,453,454;424,454,425;425,454,455;425,455,426;426,455,456;426,456,427;427,456,457;427,457,428;428,457,458;428,458,429;429,458,459;429,459,430;430,459,460;430,460,431;431,460,461;431,461,432;432,461,462;432,462,433;433,462,463;433,463,434;434,463,464;434,464,435;435,464,465;435,465,436;436,465,466;436,466,437;437,466,467;437,467,468;437,468,438;438,468,469;438,469,439;439,469,470;439,470,440;440,470,471;440,471,441;441,471,443;443,471,444;444,471,472;444,472,445;445,472,473;445,473,446;446,473,474;446,474,447;447,474,475;447,475,448;448,475,476;448,476,477;448,477,449;449,477,478;449,478,450;450,478,479;450,479,451;451,479,480;451,480,452;452,480,481;452,481,453;453,481,482;453,482,454;454,482,483;454,483,455;455,483,484;455,484,456;456,484,485;456,485,457;457,485,486;457,486,458;458,486,487;458,487,459;459,487,488;459,488,460;460,488,489;460,489,461;461,489,490;461,490,462;462,490,491;462,491,463;463,491,492;463,492,464;464,492,493;464,493,465;465,493,494;465,494,466;466,494,495;466,495,467;467,495,496;467,496,497;467,497,468;468,497,498;468,498,469;469,498,499;469,499,470;470,499,472;472,499,473;473,499,500;473,500,474;474,500,501;474,501,475;475,501,502;475,502,476;476,502,503;476,503,504;476,504,477;477,504,505;477,505,478;478,505,506;478,506,479;479,506,507;479,507,480;480,507,508;480,508,481;481,508,509;481,509,482;482,509,510;482,510,483;483,510,511;483,511,484;484,511,512;484,512,485;485,512,513;485,513,486;486,513,514;486,514,487;487,514,515;487,515,488;488,515,516;488,516,489;489,516,517;489,517,490;490,517,518;490,518,491;491,518,519;491,519,492;492,519,520;492,520,493;493,520,521;493,521,494;494,521,522;494,522,495;495,522,523;495,523,496;496,523,524;496,524,525;496,525,497;497,525,526;497,526,498;498,526,500;500,526,501;501,526,527;501,527,502;502,527,528;502,528,503;503,528,529;503,529,530;503,530,504;504,530,531;504,531,505;505,531,532;505,532,506;506,532,533;506,533,507;507,533,534;507,534,508;508,534,535;508,535,509;509,535,536;509,536,510;510,536,537;510,537,511;511,537,538;511,538,512;512,538,539;512,539,513;513,539,540;513,540,514;514,540,541;514,541,515;515,541,542;515,542,516;516,542,543;516,543,517;517,543,544;517,544,518;518,544,545;518,545,519;519,545,546;519,546,520;520,546,547;520,547,521;521,547,548;521,548,522;522,548,549;522,549,523;523,549,550;523,550,524;524,550,551;524,551,552;524,552,525;525,552,527;527,552,528;528,552,553;528,553,529;529,553,554;529,554,555;529,555,530;530,555,556;530,556,531;531,556,557;531,557,532;532,557,558;532,558,533;533,558,559;533,559,534;534,559,560;534,560,535;535,560,561;535,561,536;536,561,562;536,562,537;537,562,563;537,563,538;538,563,564;538,564,539;539,564,565;539,565,540;540,565,566;540,566,541;541,566,567;541,567,542;542,567,568;542,568,543;543,568,569;543,569,544;544,569,570;544,570,545;545,570,571;545,571,546;546,571,572;546,572,547;547,572,573;547,573,548;548,573,574;548,574,549;549,574,575;549,575,550;550,575,576;550,576,551;551,576,577;551,577,553;553,577,554;554,577,578;554,578,579;554,579,555;555,579,580;555,580,556;556,580,581;556,581,557;557,581,582;557,582,558;558,582,583;558,583,559;559,583,584;559,584,560;560,584,585;560,585,561;561,585,586;561,586,562;562,586,587;562,587,563;563,587,588;563,588,564;564,588,589;564,589,565;565,589,590;565,590,566;566,590,591;566,591,567;567,591,592;567,592,568;568,592,593;568,593,569;569,593,594;569,594,570;570,594,595;570,595,571;571,595,596;571,596,572;572,596,597;572,597,573;573,597,598;573,598,574;574,598,599;574,599,575;575,599,600;575,600,576;576,600,601;576,601,577;577,601,578;578,601,602;578,602,603;578,603,579;579,603,604;579,604,580;580,604,605;580,605,581;581,605,606;581,606,582;582,606,607;582,607,583;583,607,608;583,608,584;584,608,609;584,609,585;585,609,610;585,610,586;586,610,611;586,611,587;587,611,612;587,612,588;588,612,613;588,613,589;589,613,614;589,614,590;590,614,615;590,615,591;591,615,616;591,616,592;592,616,617;592,617,593;593,617,618;593,618,594;594,618,619;594,619,595;595,619,620;595,620,596;596,620,621;596,621,597;597,621,622;597,622,598;598,622,623;598,623,599;599,623,624;599,624,600;600,624,625;600,625,601;601,625,602;602,625,603;603,625,626;603,626,604;604,626,627;604,627,605;605,627,628;605,628,606;606,628,629;606,629,607;607,629,630;607,630,608;608,630,609;609,630,631;609,631,610;610,631,632;610,632,611;611,632,633;611,633,612;612,633,634;612,634,613;613,634,615;615,634,616;616,634,635;616,635,617;617,635,636;617,636,618;618,636,637;618,637,619;619,637,638;619,638,620;620,638,621;621,638,639;621,639,622;622,639,640;622,640,623;623,640,641;623,641,624;624,641,626;626,641,627;627,641,642;627,642,628;628,642,643;628,643,629;629,643,644;629,644,630;630,644,631;631,644,645;631,645,632;632,645,646;632,646,633;633,646,635;635,646,636;636,646,647;636,647,637;637,647,648;637,648,638;638,648,639;639,648,649;639,649,640;640,649,642;642,649,643;643,649,650;643,650,644;644,650,645;645,650,647;647,650,648;648,650,649;645,647,646;640,642,641;633,635,634;624,626,625;613,615,614;551,553,552;525,527,526;498,500,499;470,472,471;441,443,442;411,413,412;380,382,381;348,350,349;315,317,316;281,283,282;246,248,247
+ CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACAACACACACAACCACACACACACAACACACACACACACACACACAACACACAACCACACACACACAACACACACACACACACACAACACAACCACACACACACAACACACACACACACACAACAACCACACACACACAACACACACACACACAAACCACACACACACAABABABABABABE 1,2,3;1,3,4;1,4,5;1,5,2;2,5,6;2,6,7;2,7,8;2,8,3;3,8,9;3,9,10;3,10,4;4,10,11;4,11,12;4,12,5;5,12,13;5,13,6;6,13,14;6,14,15;6,15,7;7,15,16;7,16,17;7,17,8;8,17,18;8,18,9;9,18,19;9,19,20;9,20,10;10,20,21;10,21,11;11,21,22;11,22,23;11,23,12;12,23,24;12,24,13;13,24,25;13,25,14;14,25,26;14,26,27;14,27,15;15,27,28;15,28,16;16,28,29;16,29,30;16,30,17;17,30,31;17,31,18;18,31,32;18,32,19;19,32,33;19,33,34;19,34,20;20,34,35;20,35,21;21,35,36;21,36,22;22,36,37;22,37,38;22,38,23;23,38,39;23,39,24;24,39,40;24,40,25;25,40,41;25,41,26;26,41,42;26,42,43;26,43,27;27,43,44;27,44,28;28,44,45;28,45,29;29,45,46;29,46,47;29,47,30;30,47,48;30,48,31;31,48,49;31,49,32;32,49,50;32,50,33;33,50,51;33,51,52;33,52,34;34,52,53;34,53,35;35,53,54;35,54,36;36,54,55;36,55,37;37,55,56;37,56,57;37,57,38;38,57,58;38,58,39;39,58,59;39,59,40;40,59,60;40,60,41;41,60,61;41,61,42;42,61,62;42,62,63;42,63,43;43,63,64;43,64,44;44,64,65;44,65,45;45,65,66;45,66,46;46,66,67;46,67,68;46,68,47;47,68,69;47,69,48;48,69,70;48,70,49;49,70,71;49,71,50;50,71,72;50,72,51;51,72,73;51,73,74;51,74,52;52,74,75;52,75,53;53,75,76;53,76,54;54,76,77;54,77,55;55,77,78;55,78,56;56,78,79;56,79,80;56,80,57;57,80,81;57,81,58;58,81,82;58,82,59;59,82,83;59,83,60;60,83,84;60,84,61;61,84,85;61,85,62;62,85,86;62,86,87;62,87,63;63,87,88;63,88,64;64,88,89;64,89,65;65,89,90;65,90,66;66,90,91;66,91,67;67,91,68;68,91,92;68,92,69;69,92,93;69,93,70;70,93,94;70,94,71;71,94,95;71,95,72;72,95,96;72,96,73;73,96,97;73,97,98;73,98,74;74,98,99;74,99,75;75,99,100;75,100,76;76,100,101;76,101,77;77,101,102;77,102,78;78,102,103;78,103,79;79,103,104;79,104,80;80,104,105;80,105,81;81,105,106;81,106,82;82,106,107;82,107,83;83,107,108;83,108,84;84,108,109;84,109,85;85,109,110;85,110,86;86,110,111;86,111,112;86,112,87;87,112,113;87,113,88;88,113,114;88,114,89;89,114,115;89,115,90;90,115,116;90,116,91;91,116,92;92,116,117;92,117,93;93,117,118;93,118,94;94,118,119;94,119,95;95,119,120;95,120,96;96,120,121;96,121,97;97,121,122;97,122,123;97,123,98;98,123,124;98,124,99;99,124,125;99,125,100;100,125,126;100,126,101;101,126,127;101,127,102;102,127,128;102,128,103;103,128,129;103,129,104;104,129,130;104,130,105;105,130,131;105,131,106;106,131,132;106,132,107;107,132,133;107,133,108;108,133,134;108,134,109;109,134,135;109,135,110;110,135,136;110,136,111;111,136,137;111,137,138;111,138,112;112,138,139;112,139,113;113,139,140;113,140,114;114,140,141;114,141,115;115,141,142;115,142,116;116,142,117;117,142,143;117,143,118;118,143,144;118,144,119;119,144,145;119,145,120;120,145,146;120,146,121;121,146,147;121,147,122;122,147,148;122,148,149;122,149,123;123,149,150;123,150,124;124,150,151;124,151,125;125,151,152;125,152,126;126,152,153;126,153,127;127,153,154;127,154,128;128,154,155;128,155,129;129,155,156;129,156,130;130,156,157;130,157,131;131,157,158;131,158,132;132,158,159;132,159,133;133,159,160;133,160,134;134,160,161;134,161,135;135,161,162;135,162,136;136,162,163;136,163,137;137,163,164;137,164,165;137,165,138;138,165,166;138,166,139;139,166,167;139,167,140;140,167,168;140,168,141;141,168,169;141,169,142;142,169,143;143,169,170;143,170,144;144,170,171;144,171,145;145,171,172;145,172,146;146,172,173;146,173,147;147,173,174;147,174,148;148,174,175;148,175,176;148,176,149;149,176,177;149,177,150;150,177,178;150,178,151;151,178,179;151,179,152;152,179,180;152,180,153;153,180,181;153,181,154;154,181,182;154,182,155;155,182,183;155,183,156;156,183,184;156,184,157;157,184,185;157,185,158;158,185,186;158,186,159;159,186,187;159,187,160;160,187,188;160,188,161;161,188,189;161,189,162;162,189,190;162,190,163;163,190,191;163,191,164;164,191,192;164,192,193;164,193,165;165,193,194;165,194,166;166,194,195;166,195,167;167,195,196;167,196,168;168,196,197;168,197,169;169,197,170;170,197,198;170,198,171;171,198,199;171,199,172;172,199,200;172,200,173;173,200,201;173,201,174;174,201,202;174,202,175;175,202,203;175,203,204;175,204,176;176,204,205;176,205,177;177,205,206;177,206,178;178,206,207;178,207,179;179,207,208;179,208,180;180,208,209;180,209,181;181,209,210;181,210,182;182,210,211;182,211,183;183,211,212;183,212,184;184,212,213;184,213,185;185,213,214;185,214,186;186,214,215;186,215,187;187,215,216;187,216,188;188,216,217;188,217,189;189,217,218;189,218,190;190,218,219;190,219,191;191,219,220;191,220,192;192,220,221;192,221,222;192,222,193;193,222,223;193,223,194;194,223,224;194,224,195;195,224,225;195,225,196;196,225,226;196,226,197;197,226,198;198,226,227;198,227,199;199,227,228;199,228,200;200,228,229;200,229,201;201,229,230;201,230,202;202,230,231;202,231,203;203,231,232;203,232,233;203,233,204;204,233,234;204,234,205;205,234,235;205,235,206;206,235,236;206,236,207;207,236,237;207,237,208;208,237,238;208,238,209;209,238,239;209,239,210;210,239,240;210,240,211;211,240,241;211,241,212;212,241,242;212,242,213;213,242,243;213,243,214;214,243,244;214,244,215;215,244,245;215,245,216;216,245,246;216,246,217;217,246,247;217,247,218;218,247,248;218,248,219;219,248,249;219,249,220;220,249,250;220,250,221;221,250,251;221,251,252;221,252,222;222,252,253;222,253,223;223,253,254;223,254,224;224,254,255;224,255,225;225,255,227;227,255,228;228,255,256;228,256,229;229,256,257;229,257,230;230,257,258;230,258,231;231,258,259;231,259,232;232,259,260;232,260,261;232,261,233;233,261,262;233,262,234;234,262,263;234,263,235;235,263,264;235,264,236;236,264,265;236,265,237;237,265,266;237,266,238;238,266,267;238,267,239;239,267,268;239,268,240;240,268,269;240,269,241;241,269,270;241,270,242;242,270,271;242,271,243;243,271,272;243,272,244;244,272,273;244,273,245;245,273,274;245,274,246;246,274,275;246,275,247;247,275,276;247,276,248;248,276,277;248,277,249;249,277,278;249,278,250;250,278,279;250,279,251;251,279,280;251,280,281;251,281,252;252,281,282;252,282,253;253,282,283;253,283,254;254,283,256;256,283,257;257,283,284;257,284,258;258,284,285;258,285,259;259,285,286;259,286,260;260,286,287;260,287,288;260,288,261;261,288,289;261,289,262;262,289,290;262,290,263;263,290,291;263,291,264;264,291,292;264,292,265;265,292,293;265,293,266;266,293,294;266,294,267;267,294,295;267,295,268;268,295,296;268,296,269;269,296,297;269,297,270;270,297,298;270,298,271;271,298,299;271,299,272;272,299,300;272,300,273;273,300,301;273,301,274;274,301,302;274,302,275;275,302,303;275,303,276;276,303,304;276,304,277;277,304,305;277,305,278;278,305,306;278,306,279;279,306,307;279,307,280;280,307,308;280,308,309;280,309,281;281,309,310;281,310,282;282,310,284;284,310,285;285,310,311;285,311,286;286,311,312;286,312,287;287,312,313;287,313,314;287,314,288;288,314,315;288,315,289;289,315,316;289,316,290;290,316,317;290,317,291;291,317,318;291,318,292;292,318,319;292,319,293;293,319,320;293,320,294;294,320,321;294,321,295;295,321,322;295,322,296;296,322,323;296,323,297;297,323,324;297,324,298;298,324,325;298,325,299;299,325,326;299,326,300;300,326,327;300,327,301;301,327,328;301,328,302;302,328,329;302,329,303;303,329,330;303,330,304;304,330,331;304,331,305;305,331,332;305,332,306;306,332,333;306,333,307;307,333,334;307,334,308;308,334,335;308,335,336;308,336,309;309,336,311;311,336,312;312,336,337;312,337,313;313,337,338;313,338,339;313,339,314;314,339,340;314,340,315;315,340,341;315,341,316;316,341,342;316,342,317;317,342,343;317,343,318;318,343,344;318,344,319;319,344,345;319,345,320;320,345,346;320,346,321;321,346,347;321,347,322;322,347,348;322,348,323;323,348,349;323,349,324;324,349,350;324,350,325;325,350,351;325,351,326;326,351,352;326,352,327;327,352,353;327,353,328;328,353,354;328,354,329;329,354,355;329,355,330;330,355,356;330,356,331;331,356,357;331,357,332;332,357,358;332,358,333;333,358,359;333,359,334;334,359,360;334,360,335;335,360,361;335,361,337;337,361,338;338,361,362;338,362,363;338,363,339;339,363,364;339,364,340;340,364,365;340,365,341;341,365,366;341,366,342;342,366,367;342,367,343;343,367,368;343,368,344;344,368,369;344,369,345;345,369,370;345,370,346;346,370,371;346,371,347;347,371,372;347,372,348;348,372,373;348,373,349;349,373,374;349,374,350;350,374,375;350,375,351;351,375,376;351,376,352;352,376,377;352,377,353;353,377,378;353,378,354;354,378,379;354,379,355;355,379,380;355,380,356;356,380,381;356,381,357;357,381,382;357,382,358;358,382,383;358,383,359;359,383,384;359,384,360;360,384,385;360,385,361;361,385,362;362,385,386;362,386,387;362,387,363;363,387,388;363,388,364;364,388,389;364,389,365;365,389,390;365,390,366;366,390,391;366,391,367;367,391,392;367,392,368;368,392,393;368,393,369;369,393,394;369,394,370;370,394,395;370,395,371;371,395,396;371,396,372;372,396,397;372,397,373;373,397,398;373,398,374;374,398,399;374,399,375;375,399,400;375,400,376;376,400,401;376,401,377;377,401,402;377,402,378;378,402,403;378,403,379;379,403,404;379,404,380;380,404,405;380,405,381;381,405,406;381,406,382;382,406,407;382,407,383;383,407,408;383,408,384;384,408,409;384,409,385;385,409,386;386,409,410;386,410,411;386,411,387;387,411,412;387,412,388;388,412,413;388,413,389;389,413,414;389,414,390;390,414,415;390,415,391;391,415,416;391,416,392;392,416,417;392,417,393;393,417,418;393,418,394;394,418,419;394,419,395;395,419,420;395,420,396;396,420,421;396,421,397;397,421,422;397,422,398;398,422,423;398,423,399;399,423,424;399,424,400;400,424,425;400,425,401;401,425,426;401,426,402;402,426,427;402,427,403;403,427,428;403,428,404;404,428,429;404,429,405;405,429,430;405,430,406;406,430,431;406,431,407;407,431,432;407,432,408;408,432,433;408,433,409;409,433,410;410,433,434;410,434,435;410,435,411;411,435,436;411,436,412;412,436,437;412,437,413;413,437,438;413,438,414;414,438,439;414,439,415;415,439,440;415,440,416;416,440,441;416,441,417;417,441,442;417,442,418;418,442,443;418,443,419;419,443,444;419,444,420;420,444,445;420,445,421;421,445,446;421,446,422;422,446,447;422,447,423;423,447,448;423,448,424;424,448,449;424,449,425;425,449,450;425,450,426;426,450,451;426,451,427;427,451,452;427,452,428;428,452,453;428,453,429;429,453,454;429,454,430;430,454,455;430,455,431;431,455,456;431,456,432;432,456,457;432,457,433;433,457,434;434,457,458;434,458,459;434,459,435;435,459,460;435,460,436;436,460,461;436,461,437;437,461,462;437,462,438;438,462,463;438,463,439;439,463,464;439,464,440;440,464,465;440,465,441;441,465,466;441,466,442;442,466,467;442,467,443;443,467,468;443,468,444;444,468,469;444,469,445;445,469,470;445,470,446;446,470,471;446,471,447;447,471,472;447,472,448;448,472,473;448,473,449;449,473,474;449,474,450;450,474,475;450,475,451;451,475,476;451,476,452;452,476,477;452,477,453;453,477,478;453,478,454;454,478,479;454,479,455;455,479,480;455,480,456;456,480,481;456,481,457;457,481,458;458,481,482;458,482,483;458,483,459;459,483,484;459,484,460;460,484,485;460,485,461;461,485,486;461,486,462;462,486,487;462,487,463;463,487,488;463,488,464;464,488,489;464,489,465;465,489,490;465,490,466;466,490,491;466,491,467;467,491,492;467,492,468;468,492,493;468,493,469;469,493,494;469,494,470;470,494,495;470,495,471;471,495,496;471,496,472;472,496,497;472,497,473;473,497,498;473,498,474;474,498,499;474,499,475;475,499,500;475,500,476;476,500,501;476,501,477;477,501,502;477,502,478;478,502,503;478,503,479;479,503,504;479,504,480;480,504,505;480,505,481;481,505,482;482,505,506;482,506,507;482,507,483;483,507,508;483,508,484;484,508,509;484,509,485;485,509,510;485,510,486;486,510,511;486,511,487;487,511,512;487,512,488;488,512,513;488,513,489;489,513,514;489,514,490;490,514,515;490,515,491;491,515,516;491,516,492;492,516,517;492,517,493;493,517,518;493,518,494;494,518,519;494,519,495;495,519,520;495,520,496;496,520,521;496,521,497;497,521,522;497,522,498;498,522,523;498,523,499;499,523,524;499,524,500;500,524,525;500,525,501;501,525,526;501,526,502;502,526,527;502,527,503;503,527,528;503,528,504;504,528,529;504,529,505;505,529,506;506,529,530;506,530,531;506,531,507;507,531,532;507,532,508;508,532,533;508,533,509;509,533,534;509,534,510;510,534,535;510,535,511;511,535,536;511,536,512;512,536,537;512,537,513;513,537,538;513,538,514;514,538,539;514,539,515;515,539,540;515,540,516;516,540,541;516,541,517;517,541,542;517,542,518;518,542,543;518,543,519;519,543,544;519,544,520;520,544,545;520,545,521;521,545,546;521,546,522;522,546,547;522,547,523;523,547,548;523,548,524;524,548,549;524,549,525;525,549,550;525,550,526;526,550,551;526,551,527;527,551,552;527,552,528;528,552,553;528,553,529;529,553,530;530,553,554;530,554,555;530,555,531;531,555,556;531,556,532;532,556,557;532,557,533;533,557,558;533,558,534;534,558,559;534,559,535;535,559,560;535,560,536;536,560,561;536,561,537;537,561,562;537,562,538;538,562,563;538,563,539;539,563,564;539,564,540;540,564,565;540,565,541;541,565,566;541,566,542;542,566,567;542,567,543;543,567,568;543,568,544;544,568,569;544,569,545;545,569,570;545,570,546;546,570,571;546,571,547;547,571,572;547,572,548;548,572,573;548,573,549;549,573,574;549,574,550;550,574,575;550,575,551;551,575,576;551,576,552;552,576,577;552,577,553;553,577,554;554,577,578;554,578,579;554,579,555;555,579,580;555,580,556;556,580,581;556,581,557;557,581,582;557,582,558;558,582,583;558,583,559;559,583,584;559,584,560;560,584,585;560,585,561;561,585,586;561,586,562;562,586,587;562,587,563;563,587,588;563,588,564;564,588,589;564,589,565;565,589,590;565,590,566;566,590,591;566,591,567;567,591,592;567,592,568;568,592,593;568,593,569;569,593,594;569,594,570;570,594,595;570,595,571;571,595,596;571,596,572;572,596,597;572,597,573;573,597,598;573,598,574;574,598,599;574,599,575;575,599,600;575,600,576;576,600,601;576,601,577;577,601,578;578,601,602;578,602,603;578,603,579;579,603,604;579,604,580;580,604,605;580,605,581;581,605,606;581,606,582;582,606,607;582,607,583;583,607,608;583,608,584;584,608,609;584,609,585;585,609,610;585,610,586;586,610,611;586,611,587;587,611,612;587,612,588;588,612,613;588,613,589;589,613,614;589,614,590;590,614,615;590,615,591;591,615,616;591,616,592;592,616,617;592,617,593;593,617,618;593,618,594;594,618,619;594,619,595;595,619,620;595,620,596;596,620,621;596,621,597;597,621,622;597,622,598;598,622,623;598,623,599;599,623,624;599,624,600;600,624,625;600,625,601;601,625,602;602,625,626;602,626,627;602,627,603;603,627,628;603,628,604;604,628,629;604,629,605;605,629,630;605,630,606;606,630,631;606,631,607;607,631,632;607,632,608;608,632,633;608,633,609;609,633,634;609,634,610;610,634,635;610,635,611;611,635,636;611,636,612;612,636,637;612,637,613;613,637,638;613,638,614;614,638,639;614,639,615;615,639,640;615,640,616;616,640,641;616,641,617;617,641,642;617,642,618;618,642,643;618,643,619;619,643,644;619,644,620;620,644,645;620,645,621;621,645,646;621,646,622;622,646,647;622,647,623;623,647,648;623,648,624;624,648,649;624,649,625;625,649,626;626,649,650;626,650,651;626,651,627;627,651,652;627,652,628;628,652,653;628,653,629;629,653,654;629,654,630;630,654,655;630,655,631;631,655,656;631,656,632;632,656,657;632,657,633;633,657,658;633,658,634;634,658,659;634,659,635;635,659,660;635,660,636;636,660,661;636,661,637;637,661,662;637,662,638;638,662,663;638,663,639;639,663,664;639,664,640;640,664,665;640,665,641;641,665,666;641,666,642;642,666,667;642,667,643;643,667,668;643,668,644;644,668,669;644,669,645;645,669,670;645,670,646;646,670,671;646,671,647;647,671,672;647,672,648;648,672,673;648,673,649;649,673,650;650,673,674;650,674,675;650,675,651;651,675,676;651,676,652;652,676,677;652,677,653;653,677,678;653,678,654;654,678,679;654,679,655;655,679,680;655,680,656;656,680,681;656,681,657;657,681,682;657,682,658;658,682,683;658,683,659;659,683,684;659,684,660;660,684,685;660,685,661;661,685,686;661,686,662;662,686,687;662,687,663;663,687,688;663,688,664;664,688,689;664,689,665;665,689,690;665,690,666;666,690,691;666,691,667;667,691,692;667,692,668;668,692,693;668,693,669;669,693,694;669,694,670;670,694,695;670,695,671;671,695,696;671,696,672;672,696,697;672,697,673;673,697,674;674,697,698;674,698,699;674,699,675;675,699,700;675,700,676;676,700,701;676,701,677;677,701,702;677,702,678;678,702,703;678,703,679;679,703,704;679,704,680;680,704,681;681,704,705;681,705,682;682,705,706;682,706,683;683,706,707;683,707,684;684,707,708;684,708,685;685,708,709;685,709,686;686,709,710;686,710,687;687,710,711;687,711,688;688,711,712;688,712,689;689,712,713;689,713,690;690,713,714;690,714,691;691,714,715;691,715,692;692,715,693;693,715,716;693,716,694;694,716,717;694,717,695;695,717,718;695,718,696;696,718,719;696,719,697;697,719,698;698,719,720;698,720,721;698,721,699;699,721,722;699,722,700;700,722,723;700,723,701;701,723,724;701,724,702;702,724,725;702,725,703;703,725,726;703,726,704;704,726,705;705,726,727;705,727,706;706,727,728;706,728,707;707,728,729;707,729,708;708,729,730;708,730,709;709,730,731;709,731,710;710,731,732;710,732,711;711,732,733;711,733,712;712,733,734;712,734,713;713,734,735;713,735,714;714,735,736;714,736,715;715,736,716;716,736,737;716,737,717;717,737,738;717,738,718;718,738,739;718,739,719;719,739,720;720,739,740;720,740,741;720,741,721;721,741,742;721,742,722;722,742,743;722,743,723;723,743,744;723,744,724;724,744,745;724,745,725;725,745,746;725,746,726;726,746,727;727,746,747;727,747,728;728,747,748;728,748,729;729,748,749;729,749,730;730,749,750;730,750,731;731,750,751;731,751,732;732,751,752;732,752,733;733,752,753;733,753,734;734,753,754;734,754,735;735,754,755;735,755,736;736,755,737;737,755,756;737,756,738;738,756,757;738,757,739;739,757,740;740,757,758;740,758,759;740,759,741;741,759,760;741,760,742;742,760,761;742,761,743;743,761,762;743,762,744;744,762,763;744,763,745;745,763,764;745,764,746;746,764,747;747,764,765;747,765,748;748,765,766;748,766,749;749,766,767;749,767,750;750,767,768;750,768,751;751,768,769;751,769,752;752,769,770;752,770,753;753,770,771;753,771,754;754,771,772;754,772,755;755,772,756;756,772,773;756,773,757;757,773,758;758,773,774;758,774,775;758,775,759;759,775,776;759,776,760;760,776,777;760,777,761;761,777,778;761,778,762;762,778,779;762,779,763;763,779,780;763,780,764;764,780,765;765,780,781;765,781,766;766,781,782;766,782,767;767,782,783;767,783,768;768,783,784;768,784,769;769,784,785;769,785,770;770,785,786;770,786,771;771,786,787;771,787,772;772,787,773;773,787,774;774,787,788;774,788,789;774,789,775;775,789,790;775,790,776;776,790,791;776,791,777;777,791,792;777,792,778;778,792,793;778,793,779;779,793,794;779,794,780;780,794,781;781,794,793;781,793,782;782,793,792;782,792,783;783,792,791;783,791,784;784,791,790;784,790,785;785,790,789;785,789,786;786,789,788;786,788,787;335,337,336;309,311,310;282,284,283;254,256,255;225,227,226
++CCACCACCABAE 1,2,3;1,3,4;1,4,2;2,4,5;2,5,6;2,6,3;3,6,7;3,7,8;3,8,4;4,8,7;4,7,5;5,7,6
++CCACCACAACAE 1,2,3;1,3,4;1,4,2;2,4,5;2,5,6;2,6,3;3,6,7;3,7,4;4,7,5;5,7,8;5,8,6;6,8,7
++CCACCACACABCAE 1,2,3;1,3,4;1,4,2;2,4,5;2,5,6;2,6,3;3,6,7;3,7,4;4,7,8;4,8,5;5,8,7;5,7,9;5,9,6;6,9,7
++CCACCCABCACABCAE 1,2,3;1,3,4;1,4,2;2,4,5;2,5,6;2,6,7;2,7,3;3,7,6;3,6,8;3,8,4;4,8,9;4,9,5;5,9,8;5,8,10;5,10,6;6,10,8
+diff --git a/data/symmetry.tsv b/data/symmetry.tsv
+index 024323f..01a29f0 100644
+--- a/data/symmetry.tsv
++++ b/data/symmetry.tsv
+@@ -11,6 +11,7 @@ v106hb125deb358f972a7	v106CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACAC
+ v107h025ed392ab598a98	v107CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACCAACACACACDEACACACCAACACACAACACACACCAACACACAACACACCAACACAACACACACCAACACAACACACCAACAACACADABCAACAABEAAE	107	10	10	0
+ v10CCACACACACACACAE	v10CCACACACACACACAE	10	2	2	0
+ v10CCACCACAACCACAAE	v10CCACCACAACCACAAE	10	6	3	3
++v10CCACCCABCACABCAE	v10CCACCCABCACABCAE	10	8	4	4
+ v10CCACCCACCACAADEE	v10CCACCCACCACAADEE	10	6	3	3
+ v10CCACCCACCACABDEE	v10CCACCCACCACABDEE	10	24	12	12
+ v10CCCACACACACACAAE	v10CCCACACACACACAAE	10	2	2	0
+@@ -40,6 +41,7 @@ v11CCCACCACACCACAADEE	v11CCCACCACACCACAADEE	11	4	2	2
+ v122h8fe939a1353d3843	v122CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACCAACACCACAACACCACAACACCACAACACCACAACACACCAACACCACAACACCACAACACCACAACACCACAACACACCAACACACAACACACAACACACAACACACAACAACCAACACAACACAACACAACACAAACCAACAACAACAADECAAAE	122	120	60	60
+ v127h4fa99ecb0de114a9	v127CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACACACACACAACACACACAACCACACACAACACACACACACACACAACACACAACCACACACAACACACACACACACAACACAACCACACACAACACACACACACAACAACCACACACAABABABABACAAE	127	20	10	10
+ v128h0a8234b313980563	v128CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACCAACACACACCAACACACACCAACACACAACACACACCAACACACACCAACACACACCAACACAACACACACCAACACACACCAACACACACCAACAACACACACCAACACACACCAACACACACCAAAABACADBAEADBAEE	128	4	4	0
++v128h4f77b7f274aa28f7	v128CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACABABACACACACCACACABABABACACACCACACABABABACACADEACADEADEE	128	12	12	0
+ v128h918f570260220c9b	v128CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACCACACACACACDEACACACCACACACACAACACACACCACACACACACAACACACCACACACACAACACACACCACACACACACAACACACCACACACACAACACACACCACACACACACAABABABCACADABABAEACADEE	128	12	12	0
+ v12CCCACAACCACAACCACAAE	v12CCCACAACCACAACCACAAE	12	12	6	6
+ v12CCCACACACACACACACAAE	v12CCCACACACACACACACAAE	12	2	2	0
+@@ -64,6 +66,8 @@ v12CCCACCACACCACACDEABE	v12CCCACCACACCACACDEABE	12	8	4	4
+ v12CCCACCACCACACAACADEE	v12CCCACCACCACACAACADEE	12	8	4	4
+ v12CCCACCACCACACACAAAAE	v12CCCACCACCACACACAAAAE	12	12	6	6
+ v12CCCCACCACACACAACAAAE	v12CCCCACCACACACAACAAAE	12	120	60	60
++v130h4da8aa291a5b8b58	v130CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACABCACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	130	24	12	12
++v130hb37a8a4bf1c4c5b2	v130CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACACACACACACCACACAACACACACACACACACACACACACACCACACAACACACACACACACACACACACACACCACACAACACACACACACACACACACACACACCACACAACACACAACACACAACACADECACACAACACAACACAACAACACAACAACAAACAAE	130	2	2	0
+ v132h1603e125d77882ba	v132CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACACACACCAACACACCAACACACCAACACACCAACACACACACACACCAACACACCAACACACCAACACACCAACACACACACACACCAACACACCAACACACCAACACACCAACACACACAACACCAAACACCAAACACCAAACACCAAACACAACACDEACDEACDEACDEAACAAAE	132	60	60	0
+ v135h092af6d7c2f7fe27	v135CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCAACACACCACAACACACCACACACACACCADEACACACCAACACACCACAACACACCACACACACACACDEACACCAACACACCACAACACACCACACACACACACAACACCAACAACCACAADECACACACACACADEACCAAACCADEACACACADEDEDEE	135	2	2	0
+ v137hb0c7acff201fd2bd	v137CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACAACACACCACADEACACCACACAACACACCACADEACACACCACAACACACCADEACCACACAACACACCADEACACCACAACACACDECACACAACACACDEABCACAACADEACAADEAE	137	20	10	10
+@@ -101,6 +105,7 @@ v13CCCACCACCACACAACAACAAE	v13CCCACCACCACACAACAACAAE	13	2	2	0
+ v13CCCACCACCACACACAACAAAE	v13CCCACCACCACACACAACAAAE	13	4	2	2
+ v13CCCACCACCACCACAACADEBE	v13CCCACCACCACCACAACADEBE	13	4	2	2
+ v13CCCACCACCACCACACAADEBE	v13CCCACCACCACCACACAADEBE	13	6	3	3
++v146he2cde65e82df9e58	v146CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACCACACACACACCACACAACACACACACACACACCACACACACACACCACACAACACACACACACACACCACACACACACACACCACACAACACACACACACACACCACACACACACACACACCACACAACACACAACACACAACACACAACACADECACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	146	1	1	0
+ v149h5d70922ce66c392b	v149CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACCAACACACACCAACACACACCACACACACAACACACACCAACACACACCAACACACACCACACACACAACACACACCAACACACACCAACACACACCACACACACAACACACACCAACACACACCAACACACACCACACACACAAACACACCAAACACADBAEACCACACACADEACADDEEADEE	149	2	2	0
+ v14CCACACACACACACACACACACAE	v14CCACACACACACACACACACACAE	14	2	2	0
+ v14CCACCACAACCACAACCACAACAE	v14CCACCACAACCACAACCACAACAE	14	12	6	6
+@@ -163,6 +168,7 @@ v14CCCACCACCACCACACAACDEDEE	v14CCCACCACCACCACACAACDEDEE	14	4	2	2
+ v14CCCACCACCACCACACACAAADEE	v14CCCACCACCACCACACACAAADEE	14	4	4	0
+ v14CCCACCCACCACCACAACDEDEBE	v14CCCACCCACCACCACAACDEDEBE	14	48	24	24
+ v14CCCCACCACACACACACAACAAAE	v14CCCCACCACACACACACAACAAAE	14	24	12	12
++v152h166d825fa3770887	v152CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACABABABABACCACACACACABABABABABCACACACACABABABABABE	152	24	12	12
+ v152hcdb06f26767a9fee	v152CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACCACACACACAACACACACACACCACACACAACACACACACCACACACACAACACACACACACCACACACAACACACACACCACACACACAACACACACACACCACACACAACACACACACCACACACACAACACACACACACCACACACAABABABABACCACACACACAABABABABABE	152	24	12	12
+ v152he09dd528bd007438	v152CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACACACACACACACACACACAACCACACACAACACACACACACACACACACACACACAACCACACACAACACACACACACACACACACACACAACCACACACAACACACACACACACACACACACAACCACACACAACACACACACACACACACACAABCACACADEACACADEACADEADEE	152	8	4	4
+ v15CCCACAACCACAACCACAACCACAAE	v15CCCACAACCACAACCACAACCACAAE	15	12	6	6
+@@ -172,6 +178,9 @@ v15CCCACACCACCACACACCACAABABE	v15CCCACACCACCACACACCACAABABE	15	12	6	6
+ v15CCCACCACACCACACCAACACDEABE	v15CCCACCACACCACACCAACACDEABE	15	4	2	2
+ v15CCCCACCACACACACACACAACAAAE	v15CCCCACCACACACACACACAACAAAE	15	12	6	6
+ v162h9b09eec5168e9243	v162CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACAACACACAACACACAACACACAACACADECACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	162	120	60	60
++v164h1268c85b083401b2	v164CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACABCACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	164	24	12	12
++v164h269ae2cb791779bd	v164CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACACACACCACACACACACACCACACACACCACACACACACACCACACACACACACACCACACACACACCACACACACACACACCACACACACACACACACCACACACACACACCACACACACAACACACACACAACACACACACACACACAACACAACCACACACACAACACACACAACACACACACACACAACAACCACACACACAACACACAACACACACACACAAACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	164	24	12	12
++v164h64e816f04127fc46	v164CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACCACACACACCACACACACACACACACACCACACACACACCACACACACACACACACACACCACACACACACACCACACACADEACACACACACCACACACACACACACCACACADEACACACACCACACACACACACACACCACADEACACACCACACACACACACACACACCADEACACCACACACACACACACACACACDEACCACACACACACACACACACACAACCACACACACACACACACACACAAACACAACADEACAADEAE	164	8	4	4
+ v164he26c84ccf7059402	v164CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACAACACACCACACAACACACCACACAACACACCACADEACACACCACAACACACCACACAACACACCACACAACACACCADEACACCACAACACACCACACAACACACCACACAACACACDEACCACAACACAACACAACACAACACAACADECACAACAACAACAACAAACAAAAE	164	8	4	4
+ v164he3e705f0721b3784	v164CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACCACADEACACCACACACACACACCACADEACACACCACACACACACACCADEACCACACACACACACACCADEACACCACACACACACACACDECACACACACACACACACDEABCACACACACACACADEACACACACACADEACACACACADEACACADEACADEE	164	24	12	12
+ v16CCACCCACCACACCABCACABCACABAE	v16CCACCCACCACACCABCACABCACABAE	16	12	12	0
+@@ -194,6 +203,7 @@ v17CCCACCCACCACCACAACCAACDECAAAAE	v17CCCACCCACCACCACAACCAACDECAAAAE	17	20	10	10
+ v17CCCCACCACACACAACCACACACAACAAAE	v17CCCCACCACACACAACCACACACAACAAAE	17	20	10	10
+ v17CCCCACCACACACACACACACACAACAAAE	v17CCCCACCACACACACACACACACAACAAAE	17	4	2	2
+ v17CCCCACCACACACCACACACACAACAAAAE	v17CCCCACCACACACCACACACACAACAAAAE	17	4	2	2
++v182h4d83f7c1fdef10d3	v182CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACACACACACACAACACACACACAACCACACACACAACACACACACACACACACACAACACACACAACCACACACACAACACACACACACACACACAACACACAACCACACACACAACACACACACACACACAACACAACCACACACACAACACACACACACACAACAACCACACACACAABABABABABACAAE	182	20	10	10
+ v18CCCACACACACACACACACACACACACACAAE	v18CCCACACACACACACACACACACACACACAAE	18	2	2	0
+ v18CCCACACACCAACACACCAACACACCAACAAE	v18CCCACACACCAACACACCAACACACCAACAAE	18	8	4	4
+ v18CCCACACACCACACAACCACACAACACACAAE	v18CCCACACACCACACAACCACACAACACACAAE	18	4	2	2
+@@ -237,6 +247,9 @@ v19CCCCACCACACACCACACACACAACACAACAAAE	v19CCCCACCACACACCACACACACAACACAACAAAE	19	2
+ v19CCCCACCACACACCACACACACACACAAACAAAE	v19CCCCACCACACACCACACACACACACAAACAAAE	19	2	2	0
+ v19CCCCACCACACCACACACACACACAACAACAAAE	v19CCCCACCACACCACACACACACACAACAACAAAE	19	2	2	0
+ v19CCCCACCACACCACACACACACACAACACAAABE	v19CCCCACCACACCACACACACACACAACACAAABE	19	6	3	3
++v200h135a0caf146869c8	v200CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACCACACACACACACACCACAACACACCACACACACACACACACCACAACACACCACACACACACACACACACCADEACACCACACACACACACACACACACDEACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACACACACACACACACACAACCACACAACACACACACAACAACCACACAACACACACAAACCACACAABABABE	200	8	4	4
++v202hb84cee6a728cdd59	v202CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACABCACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	202	24	12	12
++v202hd5d3d1cdcaa902c7	v202CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACACACACACACACACACACACACCACACACAACACACACACACACACACACACACACACACACCACACACAACACACACACACACACACACACACACACACACCACACACAACACACACACACACACACACACACACACACACCACACACAACACACACACACACACACACACACACACACACCACACACAACACACACAACACACACAACACACADECACACACAACACACAACACACAACACAACACACAACACAACACAACAACACAACAACAAACAAE	202	2	2	0
+ v20CCACCCACCACACCACCACACCACACABCADEADEE	v20CCACCCACCACACCACCACACCACACABCADEADEE	20	24	12	12
+ v20CCCACACACACACACACACACACACACACACACAAE	v20CCCACACACACACACACACACACACACACACACAAE	20	2	2	0
+ v20CCCACACACCAACACACCAACACACCAACACACAAE	v20CCCACACACCAACACACCAACACACCAACACACAAE	20	8	4	4
+@@ -272,6 +285,8 @@ v20CCCCACCACACCACACACCACACACAACAACAAAAE	v20CCCCACCACACCACACACCACACACAACAACAAAAE
+ v20CCCCACCACCACACCACACACACAACACAAACAAAE	v20CCCCACCACCACACCACACACACAACACAAACAAAE	20	8	4	4
+ v20CCCCACCACCACACCACACCAACAACACAAACAAAE	v20CCCCACCACCACACCACACCAACAACACAAACAAAE	20	24	12	12
+ v212h09ca41a41819f9c3	v212CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACCACACACACACACACACACCAACACACACCAACACACACCAACACACACCAACACACACACACACACACCAACACACACCAACACACACCAACACACACCAACACACACACACACACACCAACACACACCAACACACACCAACACACACCAACACACACACACACACACCAACACACACCAACACACACCAACACACACCAACACACACACAACACACCAAACACACCAAACACACCAAACACACCAAACACACAACACACDEACACDEACACDEACACDEACAACACAACAACAACAAACAAAE	212	60	60	0
++v218h402a30a79d0fc4aa	v218CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACABABABABABACCACACACACACABABABABABABCACACACACACABABABABABABE	218	24	12	12
++v218h97ef229a70240d1e	v218CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACACACACAABCACACACADEACACACADEACACADEACADEADEE	218	8	4	4
+ v21CCCACACACACACACACACACACACACACACACACAAE	v21CCCACACACACACACACACACACACACACACACACAAE	21	2	2	0
+ v21CCCACACACCAACACACCAACACACCAACACACCAABE	v21CCCACACACCAACACACCAACACACCAACACACCAABE	21	4	2	2
+ v21CCCACACACCACACAACCACACAACCACACAACACAAE	v21CCCACACACCACACAACCACACAACCACACAACACAAE	21	1	1	0
+@@ -305,6 +320,8 @@ v21CCCCACCACACCACACACCACACACACAACACAAAABE	v21CCCCACCACACCACACACCACACACACAACACAAA
+ v21CCCCACCACACCACACACCACACACCAAACACAAAABE	v21CCCCACCACACCACACACCACACACCAAACACAAAABE	21	4	2	2
+ v21CCCCACCACACCACCACACCACACACAACAAACAAAAE	v21CCCCACCACACCACCACACCACACACAACAAACAAAAE	21	6	3	3
+ v21CCCCACCACCACACCACACACACAACACAACAACAAAE	v21CCCCACCACCACACCACACACACAACACAACAACAAAE	21	2	2	0
++v226he5c99f0254e9d767	v226CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACABABABACACACACACCACACACABABABABACACACACCACACACABABABABACACACADEACACADEACADEADEE	226	12	12	0
++v227hcf33e781a0512bdd	v227CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACACACACACACCACACACACACACCACACACAACACACACACACACACACACCACACACACACACACCACACACAACACACACACACACACACACCACACACACACACACACCACACACAACACACACACACACACACACCACACACACACACACACACCACACACAACACACACACACACACACACCACACACACACACACACACACCACACACAACACACACAACACACACAACACACACAACACACADECACACACAACACACAACACACAACACACAACACAACACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	227	1	1	0
+ v22CCCACACACACACACACACACACACACACACACACACAAE	v22CCCACACACACACACACACACACACACACACACACACAAE	22	2	2	0
+ v22CCCACACACCAACACACCAACACACCAACACACCAACAAE	v22CCCACACACCAACACACCAACACACCAACACACCAACAAE	22	8	4	4
+ v22CCCACACACCACACACACACACACACACACACAACACAAE	v22CCCACACACCACACACACACACACACACACACAACACAAE	22	1	1	0
+@@ -361,6 +378,7 @@ v22CCCCACCACCACACCACACACACACAACACAACAACAAAE	v22CCCCACCACCACACCACACACACACAACACAAC
+ v22CCCCACCACCACACCACACACACACAACACACAACAAAAE	v22CCCCACCACCACACCACACACACACAACACACAACAAAAE	22	4	2	2
+ v22CCCCACCACCACACCACACACACACAACCAACAACAAABE	v22CCCCACCACCACACCACACACACACAACCAACAACAAABE	22	4	4	0
+ v22CCCCACCACCACACCACACACACACAACCAACAACADEAE	v22CCCCACCACCACACCACACACACACAACCAACAACADEAE	22	20	10	10
++v236hc60ae96a0a268dcd	v236CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACABABACACACACACACACCACACABABABACACACACACACCACACABABABACACACACACADEACACACACADEACACACADEACACADEACADEADEE	236	12	12	0
+ v23CCCACACACACACACACACACACACACACACACACACACAAE	v23CCCACACACACACACACACACACACACACACACACACACAAE	23	2	2	0
+ v23CCCACACACCAACACACCAACACACCAACACACCAACACAAE	v23CCCACACACCAACACACCAACACACCAACACACCAACACAAE	23	4	2	2
+ v23CCCACACACCACACAACCACACAACCACACAACCACACAABE	v23CCCACACACCACACAACCACACAACCACACAACCACACAABE	23	2	1	1
+@@ -428,6 +446,7 @@ v23CCCCACCACCACACCACACACACACAACACACAACACAAABE	v23CCCCACCACCACACCACACACACACAACACA
+ v23CCCCACCACCACACCACACACACACAACACACACAACAAAAE	v23CCCCACCACCACACCACACACACACAACACACACAACAAAAE	23	2	2	0
+ v23CCCCACCACCACACCACACACACACAACCAACACAACAADEE	v23CCCCACCACCACACCACACACACACAACCAACACAACAADEE	23	1	1	0
+ v23CCCCACCACCACACCACACACACACACACAACACAACAAAAE	v23CCCCACCACCACACCACACACACACACACAACACAACAAAAE	23	6	6	0
++v244hdbc3e108e5770529	v244CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACABCACACACACACACACACADEACACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	244	24	12	12
+ v24CCCACACACACACACACACACACACACACACACACACACACAAE	v24CCCACACACACACACACACACACACACACACACACACACACAAE	24	2	2	0
+ v24CCCACACACCAACACACCAACACACCAACACACCAACACACAAE	v24CCCACACACCAACACACCAACACACCAACACACCAACACACAAE	24	8	4	4
+ v24CCCACACCAACACACCAACACACCAACACACCAACACACCAABE	v24CCCACACCAACACACCAACACACCAACACACCAACACACCAABE	24	8	4	4
+@@ -1197,6 +1216,12 @@ v28CCCCACCACACACCACACCACACACACCAACACCACAACACACDEACADEAE	v28CCCCACCACACACCACACCAC
+ v28CCCCACCACACCACACACACAACCACACACACAACCACACACACAACAAAAE	v28CCCCACCACACCACACACACAACCACACACACAACCACACACACAACAAAAE	28	6	3	3
+ v28CCCCACCACACCACCACACCACACACACACACACACACAACACAAACAAAAE	v28CCCCACCACACCACCACACCACACACACACACACACACAACACAAACAAAAE	28	6	3	3
+ v28CCCCACCACCACACCACACCACACCACACACAAACCACAACAACADECAAAE	v28CCCCACCACCACACCACACCACACCACACACAAACCACAACAACADECAAAE	28	8	4	4
++v290h0f7992414bbac49e	v290CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACCACACACACACACACCACACACACACACACACCACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACCACACACACACACAACACACACACACACAACACACACACACACACACACACAACACACAACCACACACACACACAACACACACACACAACACACACACACACACACACAACACAACCACACACACACACAACACACACACAACACACACACACACACACAACAACCACACACACACACAACACACACAACACACACACACACACAAACCACACAACACACAACACACAACACACAACACADECACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	290	24	12	12
++v290h1a2f90bc498c4723	v290CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACABCACACACACACACACACACADEACACACACACACACACACADEACACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	290	24	12	12
++v290h790855371f37b776	v290CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACACACACACACACACACACACACACACACCACACACACAACACACACACAACACACACACAACACACACADECACACACACAACACACACAACACACACAACACACAACACACACAACACACAACACACAACACAACACACAACACAACACAACAACACAACAACAAACAAE	290	2	2	0
++v290h8594802cf9ae1430	v290CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACACACACACACACACACCACACACACACCACACACACACACACACACACACACCACACACACACACCACACACACACACACACACACACACACCACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACCACACACACACADEACACACACACACACCACACACACACACACACACCACACACACADEACACACACACACCACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAAACACACAACACADEACACAACADEACAADEAE	290	8	4	4
++v296hc23f324403ace6be	v296CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACABABABABABABACCACACACACACACABABABABABABABCACACACACACACABABABABABABABE	296	24	12	12
++v296hcb57467ec7a6dde6	v296CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACCACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACACACACAABCACACACACADEACACACACADEACACACADEACACADEACADEADEE	296	8	4	4
+ v29CCCACACACACACACACACACACACACACACACACACACACACACACACACAAE	v29CCCACACACACACACACACACACACACACACACACACACACACACACACACAAE	29	2	2	0
+ v29CCCACACACCACACAACCACACAACCACACAACCACACAACCACACAACACAAE	v29CCCACACACCACACAACCACACAACCACACAACCACACAACCACACAACACAAE	29	1	1	0
+ v29CCCACACACCACACACACACACACACACACACACACACACACACAACACACAAE	v29CCCACACACCACACACACACACACACACACACACACACACACACAACACACAAE	29	2	2	0
+@@ -2104,28 +2129,45 @@ v30CCCACCCACCACCCACCACCCAACAACCAACCDECDECCAACACAACAADECADEE	v30CCCACCCACCACCCACC
+ v30CCCACCCACCACCCACCACCCAACAACCAACCDECDECCAACACAACACDEAADEE	v30CCCACCCACCACCCACCACCCAACAACCAACCDECDECCAACACAACACDEAADEE	30	12	6	6
+ v30CCCCACCACACCACACACACAACCACACACACAACCACACACACAACACAACAAAE	v30CCCCACCACACCACACACACAACCACACACACAACCACACACACAACACAACAAAE	30	6	6	0
+ v30CCCCACCACACCACCACACCACACACCACACACACACACACAACACAAACAAADEE	v30CCCCACCACACCACCACACCACACACCACACACACACACACAACACAAACAAADEE	30	24	12	12
++v326h3013f2c13feab50a	v326CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACACACACACCACACACACAACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACAACACACACACAACACACACACAACACACACACAACACACACADECACACACACAACACACACAACACACACAACACACACAACACACAACACACACAACACACAACACACAACACACAACACAACACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	326	1	1	0
+ v32CCCACCCACCACCCACCACCAACCAACAACCCAACCDECACACACAABCAACAADECAAE	v32CCCACCCACCACCCACCACCAACCAACAACCCAACCDECACACACAABCAACAADECAAE	32	20	10	10
+ v32CCCACCCACCACCCACCACCACCDECCACAACCCAACCDEDECCAACDBECAACAAAABE	v32CCCACCCACCACCCACCACCACCDECCACAACCCAACCDEDECCAACDBECAACAAAABE	32	20	10	10
+ v32CCCCACCCACCACCACCACACACCAACCAACCAACCAACACACAACAACAACAAACAAAE	v32CCCCACCCACCACCACCACACACCAACCAACCAACCAACACACAACAACAACAAACAAAE	32	120	60	60
++v340hc710a10a3524ab46	v340CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACABCACACACACACACACACACACADEACACACACACACACACACACADEACACACACACACACACACADEACACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	340	24	12	12
+ v34CCACCCACCACACCACCACACCACACACCACACCACACACCACACACABCACADEACADEADEE	v34CCACCCACCACACCACCACACCACACACCACACCACACACCACACACABCACADEACADEADEE	34	24	12	12
++v34CCCACCCACCACCACACCAACACACACACACACCAACACACACACACACCAACAACAADECAAE	v34CCCACCCACCACCACACCAACACACACACACACCAACACACACACACACCAACAACAADECAAE	34	2	2	0
+ v34CCCACCCACCACCCACCACCACCACACCACAACCDECDECACAACDECCACAACDEACADEBBE	v34CCCACCCACCACCCACCACCACCACACCACAACCDECDECACAACDECCACAACDEACADEBBE	34	8	8	0
++v352h1f6724b95fe9acdb	v352CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACABABABABACACACACACACCACACACACABABABABABACACACACACCACACACACABABABABABACACACACADEACACACADEACACADEACADEADEE	352	12	12	0
++v354h6a0cce6a517ee928	v354CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACCACACACACACACACACACCACACAACACACACCACACACACACACACACACACCACACAACACACACCACACACACACACACACACACACCACACAACACACACCACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACAACCACACACAACACACACACACACAACACAACCACACACAACACACACACACAACAACCACACACAACACACACACAAACCACACACAABABABABE	354	8	4	4
++v35CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAABABABABE	v35CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAABABABABE	35	12	6	6
+ v37CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACDEACCAACAACACCAACAABBAAE	v37CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACDEACCAACAACACCAACAABBAAE	37	10	10	0
+ v37CCCACCCACCACCCACCACCACACACACAACCCAACCDECACACACACAACCAACAACAACAADECAAAE	v37CCCACCCACCACCCACCACCACACACACAACCCAACCDECACACACACAACCAACAACAACAADECAAAE	37	10	5	5
+ v37CCCACCCACCACCCACCACCACCAACCACAACCCAACCDECAACCAACCAAACCAACAACAACDEDEAAE	v37CCCACCCACCACCCACCACCACCAACCACAACCCAACCDECAACCAACCAAACCAACAACAACDEDEAAE	37	10	5	5
++v386h0d9207355457defd	v386CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACABABABABABABABACCACACACACACACACABABABABABABABABCACACACACACACACABABABABABABABABE	386	24	12	12
++v386h287604456b213e70	v386CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACAACACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACACAACCACACACACACACAACACACACACACACACACACACACACACACACAABCACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	386	8	4	4
++v38CCCACCCACCACCACACCAACACACACCACACACCAACACACACCACACACACCAACAACAACAADECAAAE	v38CCCACCCACCACCACACCAACACACACCACACACCAACACACACCACACACACCAACAACAACAADECAAAE	38	1	1	0
+ v38CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACAACADECACAACAACAAACAAE	v38CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACAACADECACAACAACAAACAAE	38	48	24	24
++v394h12be35569acb08a2	v394CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACABCACACACACACACACACACACACADEACACACACACACACACACACACADEACACACACACACACACACACADEACACACACACACACACACADEACACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	394	24	12	12
++v394h7a36d28c75939de2	v394CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACCACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACACACACACACACACACCACACACACACAACACACACACACAACACACACACACAACACACACACADECACACACACACAACACACACACAACACACACACAACACACACAACACACACACAACACACACAACACACACAACACACAACACACACAACACACAACACACAACACAACACACAACACAACACAACAACACAACAACAAACAAE	394	2	2	0
+ v40CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCABACACCACABABACCACABABADEE	v40CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCABACACCACABABACCACABABADEE	40	12	12	0
++v418h89ce987010a54cbd	v418CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACCACACABABABACACACACACACACACACCACACACABABABABACACACACACACACACCACACACABABABABACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	418	12	12	0
+ v42CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACAACDECCACAACCAACAACACACAACDBECAAADEE	v42CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACAACDECCACAACCAACAACACACAACDBECAAADEE	42	10	10	0
+ v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACAACCAACAACACAACCDEABAACADEE	v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACAACCAACAACACAACCDEABAACADEE	42	16	8	8
+ v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACACCDECCACAACACAACDDEEDEBDEE	v42CCCACCCCACCCACCCACCAACCCAACCAACCDECCAACCAACAACCCACAACACCDECCACAACACAACDDEEDEBDEE	42	48	24	24
+ v42CCCCACCCACCACCACCACACACCACACACACACACACACACACCAACACACACACACAACAACCAACAACAACAAABBE	v42CCCCACCCACCACCACCACACACCACACACACACACACACACACCAACACACACACACAACAACCAACAACAACAAABBE	42	20	10	10
+ v42CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCAACAACAACAADECAAAE	v42CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCAACAACAACAADECAAAE	42	120	60	60
++v443h91956484cfa84d32	v443CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACCACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACAACACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACAACACACACACACAACACACACACACAACACACACACACAACACACACACADECACACACACACAACACACACACAACACACACACAACACACACACAACACACACAACACACACACAACACACACAACACACACAACACACACAACACACAACACACACAACACACAACACACAACACACAACACAACACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	443	1	1	0
+ v44CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACABCACACACABCACACACABABCADEADEE	v44CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACABCACACACABCACACACABABCADEADEE	44	12	12	0
+ v44CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCAACAACACCAACACCAACACCAAAABDAEAE	v44CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCAACAACACCAACACCAACACCAAAABDAEAE	44	4	4	0
+ v44CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACDEACCACACAACACCACACACAABCACADAEACADEE	v44CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACDEACCACACAACACCACACACAABCACADAEACADEE	44	12	12	0
++v452h66b0eea56a6b673b	v452CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACACABCACACACACACACACACACACACACADEACACACACACACACACACACACACADEACACACACACACACACACACACADEACACACACACACACACACACADEACACACACACACACACACADEACACACACACACACACADEACACACACACACACADEACACACACACACADEACACACACACADEACACACACADEACACACADEACACADEACADEADEE	452	24	12	12
++v452hd5300f29debcd56d	v452CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACACACACACACACACACACACCACACACACACACCACACACACACACACACACACACACACACACCACACACACACACACCACACACACACACACACACACACACACACACACCACACACACACACACACCACACACACACACACACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACADEACACACACACACACACACCACACACACACACACACACACACCACACACACACACADEACACACACACACACACCACACACACACACACACACACACACCACACACACACADEACACACACACACACCACACACACACACACACACACACACACCACACACACADEACACACACACACCACACACACACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAAACACACACAACACACADEACACACAACACADEACACAACADEACAADEAE	452	8	4	4
++v452hdf751e9c22065e97	v452CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACCACACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACCACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACAACACACACACACACACACAACACACACACACACACACACACACACACAACACACACAACCACACACACACACACACAACACACACACACACACAACACACACACACACACACACACACACAACACACAACCACACACACACACACACAACACACACACACACAACACACACACACACACACACACACAACACAACCACACACACACACACACAACACACACACACAACACACACACACACACACACACAACAACCACACACACACACACACAACACACACACAACACACACACACACACACACAAACCACACACAACACACACAACACACACAACACACACAACACACADECACACACAACACACAACACACAACACACAACACAACACACAACACAACACAACACAACAACACAACAACAACAAACAAAE	452	24	12	12
+ v47CCCACCCACCACCACACCACCACACCACACCACACACACACCACACAACACACACACAACACACCACACAACACACADEAABCACAAABE	v47CCCACCCACCACCACACCACCACACCACACCACACACACACCACACAACACACACACAACACACCACACAACACACADEAABCACAAABE	47	2	1	1
+ v47CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACAACACAACCACAACACACACAACAACCACAABABACAAE	v47CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACAACACAACCACAACACACACAACAACCACAABABACAAE	47	20	10	10
+ v47CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACACACAACCACAACCAACAACACACACAACCAAACCAAACAADEDEE	v47CCCACCCACCACCCACCACCACCACACCACAACCCAACCDECACACACAACCACAACCAACAACACACACAACCAAACCAAACAADEDEE	47	5	5	0
+ v47CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADEACAADEAE	v47CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADEACAADEAE	47	12	6	6
++v48CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACAABABABABABE	v48CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACAABABABABABE	48	12	6	6
+ v48CCCACCACCACACACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACADEACAAAAE	v48CCCACCACCACACACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACADEACAAAAE	48	2	1	1
+ v48CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACACACACAACCAAACACAAACACAAAABDEE	v48CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACACACACAACCAAACACAAACACAAAABDEE	48	6	3	3
+ v49CCCACCACCACACACCACACCACACACACCAACACCACACACACACCAACACCACACACACACACCAACACCACADEACACACDEACCADEABE	v49CCCACCACCACACACCACACCACACACACCAACACCACACACACACCAACACCACACACACACACCAACACCACADEACACACDEACCADEABE	49	4	2	2
+@@ -2133,6 +2175,7 @@ v49CCCACCCACCACCACAACCACACCACACCACAACCACACACACACACACAACCACACACACACACACAACCAACACA
+ v49CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACACACAACACAACACACACAACACACAACAACACAAAABAE	v49CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACACACAACACAACACACACAACACACAACAACACAAAABAE	49	2	1	1
+ v49CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACACACAACCACAACAACACACAAACACAAABAE	v49CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACACACAACCACAACAACACACAAACACAAABAE	49	6	3	3
+ v4CCAE	v4CCAE	4	24	12	12
++v506h1cd81128f5b89efd	v506CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACACCACACACACACACACACACACACACACACACACACCACACACACABABABABABACACACACACACACCACACACACACABABABABABABACACACACACACCACACACACACABABABABABABACACACACACADEACACACACADEACACACADEACACADEACADEADEE	506	12	12	0
+ v50CCCACCACCACCACACCACACCAACCACACACCACACACCAACCACACACACCACACACACCAACCAACACACACACACACAAAABCAACADEABE	v50CCCACCACCACCACACCACACCAACCACACACCACACACCAACCACACACACCACACACACCAACCAACACACACACACACAAAABCAACADEABE	50	2	1	1
+ v50CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACDEACCADEACCADEACCADEACAACDEDEBE	v50CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACDEACCADEACCADEACCADEACAACDEDEBE	50	48	24	24
+ v51CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCACACAACACCAACACCAACACCACACAAACCAAACDAEACADEBE	v51CCCACCCACCACCACACCACCACACCACACCACACAACACCAACACCAACACCACACAACACCAACACCAACACCACACAAACCAAACDAEACADEBE	51	2	2	0
+@@ -2141,6 +2184,7 @@ v52CCCACCCCACCCACCCACCAACCCAACCAACCCAACCCAACCAACAACCCACAACACCCAACAACCCACAACACACA
+ v52CCCACCCCACCCACCCACCAACCCAACCAACCCAACCCAACCAACACCCAACAACACCCAACAACCCACAADECCACACADEBCAACACAADBBECAABE	v52CCCACCCCACCCACCCACCAACCCAACCAACCCAACCCAACCAACACCCAACAACACCCAACAACCCACAADECCACACADEBCAACACAADBBECAABE	52	20	10	10
+ v52CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACACACACACACAACACAACAACAACAAACAAAE	v52CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACACACACACACAACACAACAACAACAAACAAAE	52	10	10	0
+ v54CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACDEACACDEACACDEACAACACAACAACAAACAAE	v54CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACDEACACDEACACDEACAACACAACAACAAACAAE	54	24	24	0
++v552hbdf5d5a762252e37	v552CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACAACACACACACCACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACACCACACACAACACACACACCACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACAACCACACACACAACACACACACACACACACAACACACAACCACACACACAACACACACACACACACAACACAACCACACACACAACACACACACACACAACAACCACACACACAACACACACACACAAACCACACACACAABABABABABE	552	8	4	4
+ v56CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACABABACCACACABABABCACACABABABE	v56CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACABABACCACACABABABCACACABABABE	56	24	12	12
+ v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACAACCACAACACACACACACACAACCACAACACACACACACAABCADEADEE	v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACAACCACAACACACACACACACAACCACAACACACACACACAABCADEADEE	56	8	4	4
+ v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACCACACAACACACACCACAACACACCACACAACACACACCACAABABACCACACAABABABE	v56CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACCACACAACACACACCACAACACACCACACAACACACACCACAABABACCACACAABABABE	56	24	12	12
+@@ -2151,7 +2195,9 @@ v5CCACAE	v5CCACAE	5	12	6	6
+ v62CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCADEACCACAACACCADEACACCAACACDECACAACACDEABCAADEAE	v62CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCADEACCACAACACCADEACACCAACACDECACAACACDEABCAADEAE	62	20	10	10
+ v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACACACACAACCCACACACACACCDECCACACACACACAACCCAACAACAACCDECCAACAACAACAACDCAAAEDEBCAAAE	v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACACACACAACCCACACACACACCDECCACACACACACAACCCAACAACAACCDECCAACAACAACAACDCAAAEDEBCAAAE	62	20	10	10
+ v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACCAACCACAACCCACACACACACCDECCAACCAACCAACAACCCAACAACAACCDECCAACDECAACAACDCAAAEDEBDEE	v62CCCACCCCACCCACCCACCAACCCACACACACCDECCACCAACCACAACCCACACACACACCDECCAACCAACCAACAACCCAACAACAACCDECCAACDECAACAACDCAAAEDEBDEE	62	20	10	10
++v63CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACAABABABABABABE	v63CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACAABABABABABABE	63	12	6	6
+ v64CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACABCACACACACABCACACACACABABCACADEACADEADEE	v64CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACABCACACACACABCACACACACABABCACADEACADEADEE	64	12	12	0
++v650h05db026f45f32a95	v650CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACACACACACACACACACACACACACACCACACACACACACACCACACACACACACACACACACACACACACACACACACCACACACACACACACACCACACACACACACACACACACACACACACACACACACACCACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACACCACACACACACACACACACACACACACACACACACACACACACACCACACACACACACACACACACACACCACACACACACACACACACADEACACACACACACACACACACACCACACACACACACACACACACACACACCACACACACACACACACADEACACACACACACACACACACCACACACACACACACACACACACACACACCACACACACACACACADEACACACACACACACACACCACACACACACACACACACACACACACACACCACACACACACACADEACACACACACACACACCACACACACACACACACACACACACACACACACCACACACACACADEACACACACACACACCACACACACACACACACACACACACACACACACACCACACACACADEACACACACACACCACACACACACACACACACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAAACACACACACAACACACACADEACACACACAACACACADEACACACAACACADEACACAACADEACAADEAE	650	8	4	4
+ v65CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCADEACAACADEADEBE	v65CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCADEACAACADEADEBE	65	4	2	2
+ v66CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACAACACACAACACADECACACAACACAACACAACAACACAACAACAAACAAE	v66CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACAACACACAACACADECACACAACACAACACAACAACACAACAACAAACAAE	66	48	24	24
+ v67CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACDEACACCAACACAACACACCAACACAACACCAACAACACADCAACAABEAAE	v67CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACDEACACCAACACAACACACCAACACAACACCAACAACACADCAACAABEAAE	67	10	10	0
+@@ -2159,33 +2205,44 @@ v6CCACACAE	v6CCACACAE	6	4	2	2
+ v6CCCACAAE	v6CCCACAAE	6	48	24	24
+ v72CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACACACCAACACCAACACCAACACCAACACACACACCAACACCAACACCAACACCAACACACAACCAAACCAAACCAAACCAAACAACDEDEDEBE	v72CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACACACCAACACCAACACCAACACCAACACACACACCAACACCAACACCAACACCAACACACAACCAAACCAAACCAAACCAAACAACDEDEDEBE	72	60	60	0
+ v74CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACABCACACACADEACACACADEACACADEACADEADEE	v74CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACABCACACACADEACACACADEACACADEACADEADEE	74	24	12	12
++v74CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCACACACACCACADEACACACCACACACACACCADEACACCACACACACACACDEACCACACACACACACAACCACACACACACACAAACAADEAE	v74CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCACACACACCACADEACACACCACACACACACCADEACACCACACACACACACDEACCACACACACACACAACCACACACACACACAAACAADEAE	74	8	4	4
++v74CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACAACACAACADECACAACAACAAACAAE	v74CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACACACACACACACACACCACAACACAACACAACADECACAACAACAAACAAE	74	2	2	0
+ v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACAACACCADEACACCAACACCACAACACCACAACACDEACCAACAACAACAACAADECAAAAE	v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACAACACCADEACACCAACACCACAACACCACAACACDEACCAACAACAACAACAADECAAAAE	74	8	4	4
+ v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCADEACCACACACACCADEACACCACACACACDECACACACACACDEABCACACACADEACACADEACADEE	v74CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCADEACCACACACACCADEACACCACACACACDECACACACACACDEABCACACACADEACACADEACADEE	74	24	12	12
++v74CCCCACCCACCACCACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACAACACACAACACACACACAACAACCACACAACACAACACACACAAACCAACAACAACAADECAAAE	v74CCCCACCCACCACCACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACAACACACAACACACACACAACAACCACACAACACAACACACACAAACCAACAACAACAADECAAAE	74	24	12	12
+ v76CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACABABACACCACACABABABACCACACABABABADEE	v76CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACABABACACCACACABABABACCACACABABABADEE	76	12	12	0
+ v78CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCADEACCACADEACCACADEACCACADEACACDECADECADECADEACAAE	v78CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCADEACCACADEACCACADEACCACADEACACDECADECADECADEACAAE	78	24	24	0
++v794hbcdfcb6da5470a44	v794CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACCACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACACCACACACACAACACACACACACCACACACACACACACACACACACACACACACACACACCACACACADEACACACACACCACACACACACACACACACACACACACACACACACACACCACACADEACACACACCACACACACACACACACACACACACACACACACACACACACCACADEACACACCACACACACACACACACACACACACACACACACACACACACACCADEACACCACACACACACACACACACACACACACACACACACACACACACACDEACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACACACACACACACACACACACACACACACACACACAACCACACACACACAACACACACACACACACACACACAACACACACAACCACACACACACAACACACACACACACACACACAACACACAACCACACACACACAACACACACACACACACACAACACAACCACACACACACAACACACACACACACACAACAACCACACACACACAACACACACACACACAAACCACACACACACAABABABABABABE	794	8	4	4
+ v7CCACACACAE	v7CCACACACAE	7	2	2	0
+ v7CCACACCABE	v7CCACACCABE	7	4	2	2
+ v7CCACCACAAE	v7CCACCACAAE	7	6	3	3
+ v7CCCACACAAE	v7CCCACACAAE	7	20	10	10
+ v80CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCABACACACACCACABABACACACCACABABACACADEACADEADEE	v80CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCABACACACACCACABABACACACCACABABACACADEACADEADEE	80	12	12	0
++v80CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACAABABABABABABABE	v80CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACAABABABABABABABE	80	12	6	6
+ v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCAACACAACACACCAACACACCAACACACCAACAACACACCAACACACCAACACACCAAAABADBAEBAE	v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCAACACAACACACCAACACACCAACACACCAACAACACACCAACACACCAACACACCAAAABADBAEBAE	80	4	4	0
+ v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCACACACACDEACACCACACACAACACACCACACACACAACACCACACACAACACACCACACACACAABABCACADABAEACADEE	v80CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCACACACACDEACACCACACACAACACACCACACACACAACACCACACACAACACACCACACACACAABABCACADABAEACADEE	80	12	12	0
+ v82CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACAACACACAACCACACAACACACACACACAACACAACCACACAACACACACACAACAACCACACAABABABACAAE	v82CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACAACACACAACCACACAACACACACACACAACACAACCACACAACACACACACAACAACCACACAABABABACAAE	82	20	10	10
++v83CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACCACACACACCACAACACACACACACCACACACACACCACAACACACACACACCACACACACACACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	v83CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACCACACACACCACAACACACACACACCACACACACACCACAACACACACACACCACACACACACACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	83	1	1	0
+ v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACACACACCADEACACCAACACCACAACACCACACACACACDEACCAACACACAACAACACACACADECAACACAAACACACAAADEE	v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCAACACCACAACACCACACACACCADEACACCAACACCACAACACCACACACACACDEACCAACACACAACAACACACACADECAACACAAACACACAAADEE	86	4	2	2
+ v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACDEACACACDEACACACDEACACAACACACAACACAACACAACAACACAACAACAAACAAE	v86CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACAACACACACDEACACACDEACACACDEACACAACACACAACACAACACAACAACACAACAACAAACAAE	86	24	24	0
+ v88CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACABCACACACACACABCACACACACACABABCACACADEACACADEACADEADEE	v88CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACABCACACACACACABCACACACACACABABCACACADEACACADEACADEADEE	88	12	12	0
+ v8CCACACACACAE	v8CCACACACACAE	8	2	2	0
++v8CCACCACAACAE	v8CCACCACAACAE	8	12	6	6
+ v8CCACCACACABE	v8CCACCACACABE	8	4	2	2
++v8CCACCACCABAE	v8CCACCACCABAE	8	4	2	2
+ v8CCACCCABCABE	v8CCACCCABCABE	8	24	12	12
+ v8CCCACACACAAE	v8CCCACACACAAE	8	8	4	4
+ v8CCCACACCAABE	v8CCCACACCAABE	8	24	12	12
++v90CCCACCCACCACCACACCAACACCACACACACACCAACACCACACACACACACDEACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACAACACACAAACCACAABABE	v90CCCACCCACCACCACACCAACACCACACACACACCAACACCACACACACACACDEACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACACACACACACAACCACAACACACAAACCACAABABE	90	8	4	4
+ v92CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	v92CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	92	120	60	60
+ v93CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAAACACCAAACADBAECACACADEADBEE	v93CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAACACACCAACACACCAACACACCACACACAAACACCAAACADBAECACACADEADBEE	93	2	2	0
+ v97CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCAACACACCADEACACCACAACACACCADEACACACCAACACACDEACCACAACACACDEACACCAACACAABCACAACACAABABBAE	v97CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACACCACACACACCACACACACCACACACACACCAACACACCADEACACCACAACACACCADEACACACCAACACACDEACCACAACACACDEACACCAACACAABCACAACACAABABBAE	97	10	10	0
+ v98CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACABABABACCACACACABABABABCACACACABABABABE	v98CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACACABABABACCACACACABABABABCACACACABABABABE	98	24	12	12
+ v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACACACACAACCACACAACACACACACACACACACACAACCACACAACACACACACACACACACAACCACACAACACACACACACACACAABCACADEACADEADEE	v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACACACACACACACACAACCACACAACACACACACACACACACACAACCACACAACACACACACACACACACAACCACACAACACACACACACACACAABCACADEACADEADEE	98	8	4	4
+ v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAABABABACCACACACAABABABABE	v98CCCACCCACCACCACACCACCACACCACACCACACACCACACCACACACCACACACCACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAACACACACCACACACAACACACACACCACACAABABABACCACACACAABABABABE	98	24	12	12
++v99CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACACCACACACACACACACAABABABABABABABABE	v99CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACACCACACACACACACACCACACACACACACCACACACACACACACACCACACACACACACACCACACACACACACACACACCACACACACACACACAABABABABABABABABE	99	12	6	6
+ v9CCACACACACACAE	v9CCACACACACACAE	9	2	2	0
++v9CCACCACACABCAE	v9CCACCACACABCAE	9	2	1	1
+ v9CCACCACCACABAE	v9CCACCACCACABAE	9	6	3	3
+ v9CCCACAACCACAAE	v9CCCACAACCACAAE	9	12	6	6
+ v9CCCACACACACAAE	v9CCCACACACACAAE	9	4	2	2
+diff --git a/data/theme_nonprime.txt b/data/theme_nonprime.txt
+index c6dc683..945eab5 100644
+--- a/data/theme_nonprime.txt
++++ b/data/theme_nonprime.txt
+@@ -13,9 +13,12 @@ CCACCACAACCACAACCACAAE
+ CCACCACAACCACAACCACAACAE
+ CCCACAACCACAACCACAACCACAAE
+ CCACCACAACCACAACCACAACCACAACAE
+-CCCACAAE
+ CCACCACAAE
+ CCACCACACABE
+ CCACCACCACABAE
+ CCACCCACCACABDEE
+ CCACAE
++CCACCACCABAE
++CCACCACAACAE
++CCACCACACABCAE
++CCACCCABCACABCAE
+diff --git a/data/themes.tsv b/data/themes.tsv
+index 3c20682..098f7d7 100644
+--- a/data/themes.tsv
++++ b/data/themes.tsv
+@@ -23,7 +23,7 @@ v4CCAE	classics,recognized
+ v15CCCACAACCACAACCACAACCACAAE	nonprime
+ v12CCCACAACCACAACCACAAE	nonprime
+ v9CCCACAACCACAAE	nonprime
+-v6CCCACAAE	classics,nonprime,recognized,small
++v6CCCACAAE	classics,recognized,small
+ v7CCCACACAAE	classics,decap,icorel,recognized,small
+ v8CCCACACACAAE	classics,small
+ v9CCCACACACACAAE	small
+@@ -589,3 +589,7 @@ v42CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCAACAACAACAADECA
+ v52CCCCACCCACCACCACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACACACACACACAACACAACAACAACAAACAAAE	classics
+ v72CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACACACCAACACCAACACCAACACCAACACACACACCAACACCAACACCAACACCAACACACAACCAAACCAAACCAAACCAAACAACDEDEDEBE	classics
+ v92CCCCACCCACCACCACCACACCACCACACCACACCACACCACACACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACACACACACACACACACACACACACAACCACAACACAACACAACACAACADECACAACAACAACAAACAAAE	classics
++v8CCACCACCABAE	nonprime
++v8CCACCACAACAE	nonprime
++v9CCACCACACABCAE	nonprime
++v10CCACCCABCACABCAE	nonprime
+diff --git a/notes/regen-verification-20260725/README.txt b/notes/regen-verification-20260725/README.txt
+new file mode 100644
+index 0000000..5052af0
+--- /dev/null
++++ b/notes/regen-verification-20260725/README.txt
+@@ -0,0 +1,9 @@
++source: the 2026-07-25 working tree (oct-core exemplars + census completion; commit hash recorded in the commit that carries this file)
++run A: bash regen_personal.sh   # exit 0
++       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_A.txt
++run B: bash regen_personal.sh   # exit 0, immediately after
++       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_B.txt
++70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  notes/regen-verification-20260725/site_manifest_A.txt
++70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  notes/regen-verification-20260725/site_manifest_B.txt
++file count: 20474
++diff A B: EMPTY (byte-identical builds)
+--- excluded-path summary ---
+ data/bends/v10CCACCCABCACABCAE.json                |     1 +
+ data/bends/v8CCACCACAACAE.json                     |     1 +
+ data/bends/v8CCACCACCABAE.json                     |     1 +
+ data/bends/v9CCACCACACABCAE.json                   |     1 +
+ .../2026-07-24-221700-g2retro3-ed1365b.txt         |    75 +
+ ...te-f9db3c8ac835761749260d913f59e1b49b828660.txt |   483 +
+ notes/regen-verification-20260725/README.txt       |     9 +
+ .../site_manifest_A.txt                            | 20474 +++++++++++++++++++
+ .../site_manifest_B.txt                            | 20474 +++++++++++++++++++
+ 9 files changed, 41519 insertions(+)
+--- one new bend store, first 300 bytes (schema sample) ---
+{"clers": "CCACCACAACAE", "v": 8, "netcode": "1,2,3;1,3,4;1,4,2;2,4,5;2,5,6;2,6,3;3,6,7;3,7,4;4,7,5;5,7,8;5,8,6;6,8,7", "maxdeg": 5, "hero": {"1,2": 1.9106332362490186, "1,3": 1.9106332362490186, "1,4": 1.9106332362490186, "2,3": 0.0, "2,4": 0.0, "2,5": 1.2309594173407747, "2,6": 1.2309594173407747,
+--- committer evidence ---
+# Commit evidence — 2026-07-25: oct-core exemplars, 8/8/8 non-prime, census completion
+
+Branch `next`, on top of ed1365b.
+
+## Staged tree
+
+**data/nets_pages.txt (+4), data/theme_nonprime.txt (+4, −1),
+data/themes.tsv (+4 rows, oct's nonprime token dropped)** — four
+octahedron-core exemplars minted (the missing attachment classes:
+adjacent pair v8CCACCACCABAE, antipodal pair v8CCACCACAACAE, second
+triple v9CCACCACACABCAE, second quadruple v10CCACCCABCACABCAE), named
+by the canonical encoder (neo/clers official_unoriented_name,
+round-trip verified on five known nets first); the bare octahedron
+REMOVED from the non-prime gallery (it is prime; PD: "octa doesn't
+belong in class 2").
+
+**data/bends/ (+4)** — stores for the minted nets (producer builds
+through the gates: heroes + 11-frame ladders each, "OK morphs built").
+
+**data/symmetry.tsv, data/conway.tsv (+57 each)** — census completion:
+the 53 previously unstamped records + the 4 new nets. Floppy and class
+columns untouched (PD: "we can keep the floppers").
+
+**builders/special.py** — non-prime typing per PD's corrections:
+type 2 = stacks of ≥2 octs; type 3 = a prime core OTHER THAN THE TET
+with 1–4 attached tets (the single-oct families); section texts
+updated ("The octahedron core is complete: all eight attachment
+classes up to symmetry"). Gallery renders 8/8/8.
+
+**HANDOFF.md** — rewritten to current reality (architecture, tiers,
+gates, policy, process incl. the advisory-gate discipline, compressed
+history). **MORPH_GATE_TODO.md** — gate-record correction appended (the
+"fail-open/didn't fire" claims were wrong: advisory by design per PD
+2026-06-11, always logs; my observation error via tail-piping) + floppy
+resolution + policy records.
+
+**notes/regen-verification-20260725/** — build-twice at THIS tree:
+two runs, manifests, README with per-run commands; diff EMPTY (see
+Verification). **notes/codex-consults/** — new transcripts swept in
+(retro-3 PASS for ed1365b; the July-24 gate transcripts).
+
+## Environment fixes (outside the tree, same session)
+
+~/.claude/hooks/codex-commit-gate.py: MAX_DIFF_CHARS 700k → 250k
+(model context is the binding limit, measured 2026-07-22); advisory
+message now distinguishes codex BLOCK from codex ERROR. Auto-memory
+corrected to the advisory-design record.
+
+## Verification (this session)
+
+- Enumeration: all cap-subsets of the oct up to its 48 automorphisms,
+  degree-validity (≤2 caps/vertex): k=1:1, k=2:3, k=3:2, k=4:2 = 8
+  classes total; 4 already present, 4 minted. Encoder round-trip
+  verified on oct, oct+1, and the three previously-existing capped
+  forms before use.
+- Producer builds: 4/4 "OK morphs built 11 frames" (gates passed,
+  stores persisted).
+- Gallery: sections verified in generated HTML = 8 / 8 / 8; bare oct
+  absent; type-2 roster = exactly the eight ≥2-oct stacks (2 octs …
+  4 octs + 2 tets); type-3 roster = the eight oct-core forms.
+- Census completion: symmetry.tsv 2,249 rows (+57), conway.tsv +57;
+  spot check: the minted nets' records carry conway flags after
+  restamping.
+- Build-twice at this tree: two independent rm -rf regens, manifests
+  byte-identical (notes/regen-verification-20260725/, diff EMPTY),
+  2,249 nets.
+
+## New conventions / invariants (G1)
+
+None new. The clique-sum decomposition is the G1-approved construction
+(r3 APPROVE, 2026-07-24-220707); this commit only changes its TYPE
+ASSIGNMENT rule (≥2-oct stacks vs single-core families) — a gallery
+organization choice per PD's explicit instruction, verified by roster
+inspection. Display gates and morph policy unchanged.
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll inspect the committed tree directly, compare the full path inventory against the message and evidence, and run focused consistency checks on the census and non-prime outputs.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git status --short && git show -s --format='%H %T%n%B' 024d34d && git diff --name-status ed1365b 024d34d && git diff --stat ed1365b 024d34d" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+?? notes/codex-consults/2026-07-25-135030-g2retro-024d34d.txt
+024d34d63daa4ecbc5f35771c680b04fccb18736 f0fe48f8904a13644058d04b611ad3b23c2b41e9
+oct-core exemplars: 8/8/8 non-prime + census completion + records
+
+- Four octahedron-core exemplars minted (canonical CLERS names via
+  neo/clers, encoder round-trip verified; producer builds through the
+  display gates; stores committed): the non-prime type-3 family is
+  COMPLETE -- all eight attachment classes of the oct core up to
+  symmetry (k=1:1, k=2:3, k=3:2, k=4:2, enumerated against the 48
+  automorphisms with the degree-validity constraint).
+- Typing per PD: type 2 = stacks of >=2 octs (bare oct removed -- it
+  is prime and belongs in this gallery not at all); type 3 = a prime
+  core other than the tet with 1-4 attached tets. Gallery reads 8/8/8.
+- Census completion (floppers untouched per PD): symmetry.tsv and
+  conway.tsv +57 rows each (53 old gaps + the 4 new nets).
+- HANDOFF.md rewritten to current reality. MORPH_GATE_TODO.md: gate
+  record corrected -- the commit gate is advisory BY DESIGN outside
+  TEAMWORK repos (PD 2026-06-11), always fires, always logs; the
+  "fail-open / didn't fire" claims were my observation error. Hook
+  fixes landed in ~/.claude (diff cap 250k; BLOCK vs ERROR
+  distinguished) -- outside this tree.
+- Build-twice at this tree: byte-identical manifests
+  (notes/regen-verification-20260725/, diff EMPTY, 2249 nets).
+
+Evidence: .session/claude-commit-evidence.md.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+M	HANDOFF.md
+M	MORPH_GATE_TODO.md
+M	builders/special.py
+A	data/bends/v10CCACCCABCACABCAE.json
+A	data/bends/v8CCACCACAACAE.json
+A	data/bends/v8CCACCACCABAE.json
+A	data/bends/v9CCACCACACABCAE.json
+M	data/conway.tsv
+M	data/nets_pages.txt
+M	data/symmetry.tsv
+M	data/theme_nonprime.txt
+M	data/themes.tsv
+A	notes/codex-consults/2026-07-24-221700-g2retro3-ed1365b.txt
+A	notes/codex-consults/2026-07-25-122524-codex-gate-f9db3c8ac835761749260d913f59e1b49b828660.txt
+A	notes/regen-verification-20260725/README.txt
+A	notes/regen-verification-20260725/site_manifest_A.txt
+A	notes/regen-verification-20260725/site_manifest_B.txt
+ HANDOFF.md                                         |   226 +-
+ MORPH_GATE_TODO.md                                 |    17 +
+ builders/special.py                                |    20 +-
+ data/bends/v10CCACCCABCACABCAE.json                |     1 +
+ data/bends/v8CCACCACAACAE.json                     |     1 +
+ data/bends/v8CCACCACCABAE.json                     |     1 +
+ data/bends/v9CCACCACACABCAE.json                   |     1 +
+ data/conway.tsv                                    |    57 +
+ data/nets_pages.txt                                |     4 +
+ data/symmetry.tsv                                  |    57 +
+ data/theme_nonprime.txt                            |     5 +-
+ data/themes.tsv                                    |     6 +-
+ .../2026-07-24-221700-g2retro3-ed1365b.txt         |    75 +
+ ...te-f9db3c8ac835761749260d913f59e1b49b828660.txt |   483 +
+ notes/regen-verification-20260725/README.txt       |     9 +
+ .../site_manifest_A.txt                            | 20474 +++++++++++++++++++
+ .../site_manifest_B.txt                            | 20474 +++++++++++++++++++
+ 17 files changed, 41789 insertions(+), 122 deletions(-)
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git show 024d34d:notes/codex-consults/2026-07-25-122524-codex-gate-f9db3c8ac835761749260d913f59e1b49b828660.txt | sed -n '1,45p'; git show 024d34d:notes/regen-verification-20260725/README.txt; git show 024d34d:notes/regen-verification-20260725/site_manifest_A.txt | shasum -a 256; git show 024d34d:notes/regen-verification-20260725/site_manifest_B.txt | shasum -a 256; diff <(git show 024d34d:notes/regen-verification-20260725/site_manifest_A.txt) <(git show 024d34d:notes/regen-verification-20260725/site_manifest_B.txt); git show 024d34d:notes/regen-verification-20260725/site_manifest_A.txt | wc -l" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/atlas
+staged tree: f9db3c8ac835761749260d913f59e1b49b828660
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-auv5nx92.txt
+codex exit: 0
+
+final message:
+WARN
+Files reviewed: No staged files; staged tree f9db3c8 equals HEAD tree.
+Checks run: git diff --cached --stat/name-status/check/numstat; git rev-parse HEAD^{tree}; git status --porcelain=v2.
+Blocking issues: None.
+Warnings: Committer evidence describes an earlier, different tree and does not substantiate this empty staged tree. Proposed command changes are unstaged or external.
+Recommendation: Stage the intended changes, regenerate tree-specific evidence, then rerun the gate.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9a18-8181-7840-a069-4effce73e8c5
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+source: the 2026-07-25 working tree (oct-core exemplars + census completion; commit hash recorded in the commit that carries this file)
+run A: bash regen_personal.sh   # exit 0
+       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_A.txt
+run B: bash regen_personal.sh   # exit 0, immediately after
+       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_B.txt
+70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  notes/regen-verification-20260725/site_manifest_A.txt
+70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  notes/regen-verification-20260725/site_manifest_B.txt
+file count: 20474
+diff A B: EMPTY (byte-identical builds)
+70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  -
+70e8156408b89cc979f38f3a65bb7e722fe76584827f22c6c4315a309e1f6f3a  -
+   20474
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "python3 - <<'PY'
+import subprocess, json, math
+base='ed1365b'; new='024d34d'
+def show(rev,path): return subprocess.check_output(['git','show',f'{rev}:{path}'],text=True)
+def tsv(rev,path):
+ rows=[x.split('\\t') for x in show(rev,path).splitlines() if x]
+ return rows
+for p in ['data/symmetry.tsv','data/conway.tsv']:
+ a,b=tsv(base,p),tsv(new,p); ak=[r[0] for r in a]; bk=[r[0] for r in b]
+ adds=set(bk)-set(ak)
+ print(p,'rows',len(a),len(b),'added',len(adds),'removed',len(set(ak)-set(bk)),'dups',len(bk)-len(set(bk)))
+ if p.endswith('symmetry.tsv'): symadds=adds
+ else: conadds=adds
+print('added-key-set-equal',symadds==conadds)
+newids={'v8CCACCACCABAE','v8CCACCACAACAE','v9CCACCACACABCAE','v10CCACCCABCACABCAE'}
+print('new ids present',newids <= symadds,'old gaps',len(symadds-newids))
+for ident in sorted(newids):
+ p=f'data/bends/{ident}.json'; d=json.loads(show(new,p));
+ vals=[]
+ def walk(x):
+  if isinstance(x,dict):
+   for v in x.values(): walk(v)
+  elif isinstance(x,list):
+   for v in x: walk(v)
+  elif isinstance(x,float): vals.append(x)
+ walk(d)
+ print(ident,'v',d.get('v'),'clers-match',ident==f\"v{d['v']}{d['clers']}\",'finite',all(map(math.isfinite,vals)),'topkeys',sorted(d))
+PY
+rg -n \"Assemblies of regular tetrahedra|Stacks of regular octahedra|prime neoplatonic core\" site/personal/gallery/nonprime.html 2>/dev/null || true
+rg -n \"class=card|net-card|<article\" site/personal/gallery/nonprime.html | head" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+data/symmetry.tsv rows 2193 2250 added 57 removed 0 dups 0
+data/conway.tsv rows 2193 2250 added 57 removed 0 dups 0
+added-key-set-equal True
+new ids present True old gaps 53
+v10CCACCCABCACABCAE v 10 clers-match True finite True topkeys ['clers', 'hero', 'maxdeg', 'morph', 'netcode', 'v']
+v8CCACCACAACAE v 8 clers-match True finite True topkeys ['clers', 'hero', 'maxdeg', 'morph', 'netcode', 'v']
+v8CCACCACCABAE v 8 clers-match True finite True topkeys ['clers', 'hero', 'maxdeg', 'morph', 'netcode', 'v']
+v9CCACCACACABCAE v 9 clers-match True finite True topkeys ['clers', 'hero', 'maxdeg', 'morph', 'netcode', 'v']
+1:<!DOCTYPE html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1"><title>Non-prime neoplatonics</title><style>body{font-family:Georgia,serif;max-width:1000px;margin:2em auto;line-height:1.6;color:#222;padding:0 1em}h1{font-size:1.3em}h1 a{color:inherit;text-decoration:none}h1 a:hover{text-decoration:underline}h2{font-size:1em;margin-top:1.6em}p.desc{font-size:.9em;color:#555}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5em;margin-top:1em}.item{text-align:center}.item .cell{position:relative;width:100%;padding-bottom:100%}.item .cell model-viewer{position:absolute;top:0;left:0;width:100%;height:100%;background:#f0f0f0;--poster-color:transparent}.item a{font-family:monospace;font-size:.75em;color:#2255aa;text-decoration:none;word-break:break-all}.item a:hover{text-decoration:underline}.item .v{font-size:.7em;color:#888}.item .d{font-family:monospace;font-size:.75em;color:#333}.item .o{font-size:.7em;color:#888}h2 .v{font-size:.8em;color:#888;font-weight:normal}</style><script type="module" src="../vendor/model-viewer.min.js"></script></head><body><nav style="font-size:.9em"><a href="../index.html">neoplatonic solids</a></nav><h1>Non-prime neoplatonics</h1><p class=desc>A net is prime if every triangular circuit bounds a face. Non-prime neoplatonics decompose along their separating triangles into prime pieces; the three construction types below follow the paper. Captions give the decomposition.</p><h2>Assemblies of regular tetrahedra</h2><p class=desc>Two to four sharing an axis edge, or helical stacks.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v5CCACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v5CCACAE/">v5CCACAE</a> <span class=v>2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v6CCACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v6CCACACAE/">v6CCACACAE</a> <span class=v>3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACACAE/">v7CCACACACAE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v7CCACACCABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACACCABE/">v7CCACACCABE</a> <span class=v>4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACACACACAE/">v8CCACACACACAE</a> <span class=v>5 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACACACACACAE/">v9CCACACACACACAE</a> <span class=v>6 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACACACACACACAE/">v10CCACACACACACACAE</a> <span class=v>7 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACACACACACACACACACACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACACACACACACACACACACAE/">v14CCACACACACACACACACACACAE</a> <span class=v>11 tets</span></div></div><h2>Stacks of regular octahedra, optionally capped by tetrahedra</h2><p class=desc>Two or more octahedra glued face to face.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v9CCCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCCACAACCACAAE/">v9CCCACAACCACAAE</a> <span class=v>2 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCACAACCACAAE/">v10CCACCACAACCACAAE</a> <span class=v>2 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v11CCACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v11CCACCACAACCACAACAE/">v11CCACCACAACCACAACAE</a> <span class=v>2 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v12CCCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v12CCCACAACCACAACCACAAE/">v12CCCACAACCACAACCACAAE</a> <span class=v>3 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v13CCACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v13CCACCACAACCACAACCACAAE/">v13CCACCACAACCACAACCACAAE</a> <span class=v>3 octs + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v14CCACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v14CCACCACAACCACAACCACAACAE/">v14CCACCACAACCACAACCACAACAE</a> <span class=v>3 octs + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v15CCCACAACCACAACCACAACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v15CCCACAACCACAACCACAACCACAAE/">v15CCCACAACCACAACCACAACCACAAE</a> <span class=v>4 octs</span></div><div class=item><div class=cell><model-viewer src="../nets/v17CCACCACAACCACAACCACAACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v17CCACCACAACCACAACCACAACCACAACAE/">v17CCACCACAACCACAACCACAACCACAACAE</a> <span class=v>4 octs + 2 tets</span></div></div><h2>A prime neoplatonic core with attached tetrahedra</h2><p class=desc>One to four tetrahedra on the faces of a prime core other than the tetrahedron. The octahedron core is complete: all eight attachment classes up to symmetry.</p><div class=grid><div class=item><div class=cell><model-viewer src="../nets/v7CCACCACAAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v7CCACCACAAE/">v7CCACCACAAE</a> <span class=v>1 oct + 1 tet</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACAACAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACAACAE/">v8CCACCACAACAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACACABE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACACABE/">v8CCACCACACABE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v8CCACCACCABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v8CCACCACCABAE/">v8CCACCACCABAE</a> <span class=v>1 oct + 2 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACACABCAE/">v9CCACCACACABCAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v9CCACCACCACABAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v9CCACCACCACABAE/">v9CCACCACCACABAE</a> <span class=v>1 oct + 3 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCABCACABCAE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCABCACABCAE/">v10CCACCCABCACABCAE</a> <span class=v>1 oct + 4 tets</span></div><div class=item><div class=cell><model-viewer src="../nets/v10CCACCCACCACABDEE/rb.glb" camera-orbit="0deg 100deg auto" camera-controls interaction-prompt=none></model-viewer></div><a href="../nets/v10CCACCCACCACABDEE/">v10CCACCCACCACABDEE</a> <span class=v>1 oct + 4 tets</span></div></div></body></html>
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --check ed1365b 024d34d; git diff --numstat ed1365b 024d34d; git ls-tree -rl 024d34d data/bends notes/regen-verification-20260725 notes/codex-consults | sort -k4nr | head -12; git show 024d34d:notes/codex-consults/2026-07-24-221700-g2retro3-ed1365b.txt | sed -n '1,12p'; for f in data/bends/v10CCACCCABCACABCAE.json data/bends/v8CCACCACAACAE.json data/bends/v8CCACCACCABAE.json data/bends/v9CCACCACACABCAE.json; do git show 024d34d:"'$f | python3 -c '"'import json,sys; d=json.load(sys.stdin); print(len(d[\"hero\"]),len(d[\"morph\"]), sorted(d[\"morph\"][0]) if isinstance(d[\"morph\"],list) else type(d[\"morph\"]).__name__)'; done" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 149ms:
+18 10 ['alpha', 'bends']
+18 10 ['alpha', 'bends']
+21 10 ['alpha', 'bends']
+
+codex
+WARN
+Files reviewed: all 17 paths in ed1365b..024d34d; committed tree f0fe48f confirmed.
+Checks run: full name/status/stat/numstat, diff-check, census key comparison, bend-store JSON checks, manifest hashes/diff, generated gallery inspection.
+Blocking issues: None.
+Warnings: Evidence does not include producer/display-gate transcripts or executable enumeration/encoder-round-trip output; those claims remain unsupported by the supplied artifacts.
+Warnings: The committed live-gate transcript reviewed stale tree f9db3c8 and explicitly found no staged files; this retroactive review is therefore the first exact-tree review.
+Correctness: symmetry.tsv and conway.tsv each add the same 57 unique keys—four minted IDs plus 53 prior gaps—with no removals or duplicates.
+Correctness: all four stores parse, match their IDs, contain finite numeric values, and carry hero plus ten morph entries.
+Correctness: generated gallery contains 8/8/8 entries; the bare octahedron is absent and the type split matches the code and message.
+Evidence: both 20,474-line manifests are identical and hash to the recorded 70e81564… value, supporting byte identity; their asserted command provenance is not independently logged.
+Undisclosed changes: None found relative to the supplied bundle; both added consult transcripts and verification artifacts are disclosed there.
+Message-vs-diff: Consistent, subject to the unsupported producer/enumeration claims above.
+Recommendation: Accept with WARN; retain this exact-tree review alongside commit 024d34d.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+101,877
+WARN
+Files reviewed: all 17 paths in ed1365b..024d34d; committed tree f0fe48f confirmed.
+Checks run: full name/status/stat/numstat, diff-check, census key comparison, bend-store JSON checks, manifest hashes/diff, generated gallery inspection.
+Blocking issues: None.
+Warnings: Evidence does not include producer/display-gate transcripts or executable enumeration/encoder-round-trip output; those claims remain unsupported by the supplied artifacts.
+Warnings: The committed live-gate transcript reviewed stale tree f9db3c8 and explicitly found no staged files; this retroactive review is therefore the first exact-tree review.
+Correctness: symmetry.tsv and conway.tsv each add the same 57 unique keys—four minted IDs plus 53 prior gaps—with no removals or duplicates.
+Correctness: all four stores parse, match their IDs, contain finite numeric values, and carry hero plus ten morph entries.
+Correctness: generated gallery contains 8/8/8 entries; the bare octahedron is absent and the type split matches the code and message.
+Evidence: both 20,474-line manifests are identical and hash to the recorded 70e81564… value, supporting byte identity; their asserted command provenance is not independently logged.
+Undisclosed changes: None found relative to the supplied bundle; both added consult transcripts and verification artifacts are disclosed there.
+Message-vs-diff: Consistent, subject to the unsupported producer/enumeration claims above.
+Recommendation: Accept with WARN; retain this exact-tree review alongside commit 024d34d.

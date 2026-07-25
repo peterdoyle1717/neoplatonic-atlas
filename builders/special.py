@@ -635,16 +635,32 @@ def main():
                 for v in f:
                     deg[v] += 1
             if len(V) == 4 and len(fac) == 4:
-                pieces.append('tet')
+                pieces.append(('tet', frozenset(V)))
             elif len(V) == 6 and len(fac) == 8 and all(d == 4 for d in deg.values()):
-                pieces.append('oct')
+                pieces.append(('oct', frozenset(V)))
             else:
-                pieces.append('core')
+                pieces.append(('core', frozenset(V)))
         return pieces
+
+    def assembly_shape(pieces):
+        """dual-tree shape of an all-tet assembly: 'around an edge'
+        (a common edge in every factor), 'path' (the 3NA helix family),
+        or 'branched' (a factor glued to three or more others)."""
+        fv = [v for _, v in pieces]
+        if len(fv) < 3:
+            return None
+        dual_deg = [sum(1 for j, w in enumerate(fv) if j != i and len(v & w) == 3)
+                    for i, v in enumerate(fv)]
+        if max(dual_deg) > 2:
+            return 'branched'
+        if len(frozenset.intersection(*fv)) == 2:
+            return 'around an edge'
+        return 'path'
 
     np_rows = {1: [], 2: [], 3: []}
     for r in theme_list("nonprime"):
-        pieces = nonprime_pieces(r["netcode"])
+        pairs = nonprime_pieces(r["netcode"])
+        pieces = [l for l, _ in pairs]
         kinds = set(pieces)
         no, nt = pieces.count('oct'), pieces.count('tet')
         # type 2 = STACKS of two or more octs +- caps; type 3 = a prime
@@ -658,13 +674,19 @@ def main():
         else:
             typ = 3
         nt, no = pieces.count('tet'), pieces.count('oct')
-        cap = (f"{nt} tets" if typ == 1 else
-               (f"{no} oct{'s' if no > 1 else ''}"
-                + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else "")))
+        if typ == 1:
+            sh = assembly_shape(pairs)
+            cap = f"{nt} tets" + (f", {sh}" if sh else "")
+        else:
+            cap = (f"{no} oct{'s' if no > 1 else ''}"
+                   + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else ""))
         np_rows[typ].append((r["v"], r, cap))
     NP_SECT = (
         (1, 'Assemblies of regular tetrahedra',
-         'Two to four sharing an axis edge, or helical stacks.'),
+         'All face-to-face gluings of tetrahedra through eleven tets '
+         '(v &le; 14), enumerated under the degree bound: one class at '
+         'two and at three tets, three at four and at five; from six '
+         'through eleven, only the helical path.'),
         (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
          'Two or more octahedra glued face to face.'),
         (3, 'A prime neoplatonic core with attached tetrahedra',
