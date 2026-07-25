@@ -1,0 +1,75 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f970f-c57f-78c2-b016-f0a73b2c672e
+--------
+user
+RETROACTIVE commit-gate review, round 3 (atlas, commit ed1365b, tree f9db3c8; amend over your round-2 review added only notes/verification artifacts -- builders/data identity verified empty-diff). Round-2 residuals were: manifests not tied to the tree, brace-expansion command ambiguity, stale debris text, transcripts unnamed. Bundle shows each fixed. Audit ONLY these residuals. First line exactly one of: PASS / WARN / BLOCK. Max 8 lines.
+
+<stdin>
+=== RETROACTIVE G2 round 3: commit ed1365b, tree f9db3c8 (amend added only notes + verification artifacts) ===
+Round-2 residuals resolved:
+2. Build-twice RE-EXECUTED at the reworked tree: README records source commit 540ac2a / tree 7cf8fe9 and the two runs as SEPARATE commands; manifests both sha256 05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30, 20438 lines, diff EMPTY. The amend to ed1365b added only notes/evidence: git diff 7cf8fe9 f9db3c8 -- builders data regen_personal.sh is EMPTY (verified just now), so the generating inputs of tree f9db3c8 are exactly those the runs used.
+4. Evidence opening now describes the recursive clique-sum construction (debris text gone).
+6. The four transcripts named explicitly in the evidence (g2retro-602a825; g1/g1r2/g1r3-nonprime-decomposition).
+
+--- verification README as committed ---
+source: commit 540ac2a (pre-amend working tree identical to committed builders/ + data/), tree 7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a
+run A: bash regen_personal.sh                                # 2026-07-24, exit 0
+       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_A.txt
+run B: bash regen_personal.sh                                # immediately after, exit 0
+       find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_B.txt
+manifest sha256s:
+05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30  notes/regen-verification-20260724/site_manifest_A.txt
+05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30  notes/regen-verification-20260724/site_manifest_B.txt
+file count: 20438
+diff A B: EMPTY (byte-identical builds)
+--- evidence special.py paragraph + artifacts section ---
+**builders/special.py** — non-prime gallery organized by the paper's three
+types via recursive clique-sum decomposition (split along the
+lexicographically-least separating triangle, both sides receive it as a
+face, recurse; every factor certified a closed triangulated 2-manifold
+sphere -- edge double-incidence, connected dual, single-cycle vertex
+links, Euler 2; tet/oct identified structurally). Census: 8
+tet-assemblies, 13 oct-stacks±caps incl. the prime oct base case and the
+(2,0)-subdivided tet as oct+4caps; type 3 empty, stated as such on the
+page. Convex gallery
+opens with the eight no-coplanar-faces solids (Rausenberger, later
+Freudenthal & van der Waerden; "arbitrary conditioning, wrong road"
+language per PD; non-prime triangular bipyramid included). "Classics" →
+"Platonic & Archimedean" (title + chip), chip moved up after Non-prime.
+## Tree-tied verification artifacts (added at the gate's direction)
+
+notes/regen-verification-20260724/: build-twice RE-EXECUTED at this
+exact tree (commit 540ac2a, tree 7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a)
+after the classifier rework: site_manifest_A.txt and site_manifest_B.txt
+both sha256
+05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30
+(20438 lines), diff EMPTY; README.txt records the two runs as separate
+commands with the source commit/tree. (The earlier pre-rework manifests
+hashed e2034694... -- superseded, the rework changed site bytes.)
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+PASS
+Residuals 2, 4, and 6 are resolved by the supplied bundle.
+The empty generating-input diff ties the re-executed manifests to tree f9db3c8.
+Commands are separate and unambiguous; stale text is removed; transcripts are named.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+21,444
+PASS
+Residuals 2, 4, and 6 are resolved by the supplied bundle.
+The empty generating-input diff ties the re-executed manifests to tree f9db3c8.
+Commands are separate and unambiguous; stale text is removed; transcripts are named.

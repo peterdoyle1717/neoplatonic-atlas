@@ -646,8 +646,17 @@ def main():
     for r in theme_list("nonprime"):
         pieces = nonprime_pieces(r["netcode"])
         kinds = set(pieces)
-        typ = (1 if kinds <= {'tet'} else
-               2 if kinds <= {'oct', 'tet'} else 3)
+        no, nt = pieces.count('oct'), pieces.count('tet')
+        # type 2 = STACKS of two or more octs +- caps; type 3 = a prime
+        # core OTHER THAN THE TET with attached tets (single oct + tets
+        # is the first core family). The bare oct is prime and belongs
+        # in this gallery not at all (PD 2026-07-24).
+        if kinds <= {'tet'}:
+            typ = 1
+        elif kinds <= {'oct', 'tet'} and no >= 2:
+            typ = 2
+        else:
+            typ = 3
         nt, no = pieces.count('tet'), pieces.count('oct')
         cap = (f"{nt} tets" if typ == 1 else
                (f"{no} oct{'s' if no > 1 else ''}"
@@ -657,10 +666,11 @@ def main():
         (1, 'Assemblies of regular tetrahedra',
          'Two to four sharing an axis edge, or helical stacks.'),
         (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
-         'The octahedron itself (prime) is the one-stack base case.'),
+         'Two or more octahedra glued face to face.'),
         (3, 'A prime neoplatonic core with attached tetrahedra',
-         'Up to four tetrahedra on the faces of a prime core. No '
-         'exemplars built yet.'))
+         'One to four tetrahedra on the faces of a prime core other '
+         'than the tetrahedron. The octahedron core is complete: all '
+         'eight attachment classes up to symmetry.'))
     parts = []
     for typ, title, sub in NP_SECT:
         parts.append(f'<h2>{title}</h2><p class=desc>{sub}</p>')

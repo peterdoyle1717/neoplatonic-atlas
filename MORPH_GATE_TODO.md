@@ -329,3 +329,20 @@ classify output is now sorted (imap_unordered completion order was the
 measured ~3.1k-row reorder). The committed census stands unchanged --
 no science moved, a file did. (PD: floppy mattered before frozen-0-bend
 handling; the gallery stays for now, census pinned.)
+
+## Gate record CORRECTED (2026-07-25)
+
+My "fail-open bug / hook didn't fire" claims were wrong. The commit gate
+fires on every git commit and always logs
+(notes/codex-consults/<ts>-codex-gate-<tree>.txt); outside TEAMWORK
+repos a BLOCK or codex error is mandatory-but-ADVISORY per PD's
+2026-06-11 ruling. The July-24 commits both received codex BLOCK
+verdicts (transcripts ...220734-...ee9d3c1b and ...221602-...7cf8fe9),
+advisory-allowed by design, and those BLOCKs AGREE with the retroactive
+reviews run on the same trees -- two channels, same findings, final
+tree approved (retro-3 PASS on ed1365b). My "didn't fire" observation
+error: piping commit output through tail ate the hook stderr. Real
+defects fixed today in ~/.claude/hooks/codex-commit-gate.py:
+MAX_DIFF_CHARS 700k -> 250k (model context is the binding limit,
+measured 2026-07-22) and the advisory message now distinguishes codex
+BLOCK from codex ERROR.

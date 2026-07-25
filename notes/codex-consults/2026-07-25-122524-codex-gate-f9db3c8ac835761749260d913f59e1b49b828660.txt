@@ -1,0 +1,483 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/atlas
+staged tree: f9db3c8ac835761749260d913f59e1b49b828660
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-auv5nx92.txt
+codex exit: 0
+
+final message:
+WARN
+Files reviewed: No staged files; staged tree f9db3c8 equals HEAD tree.
+Checks run: git diff --cached --stat/name-status/check/numstat; git rev-parse HEAD^{tree}; git status --porcelain=v2.
+Blocking issues: None.
+Warnings: Committer evidence describes an earlier, different tree and does not substantiate this empty staged tree. Proposed command changes are unstaged or external.
+Recommendation: Stage the intended changes, regenerate tree-specific evidence, then rerun the gate.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9a18-8181-7840-a069-4effce73e8c5
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/projects/atlas
+
+Staged tree:
+f9db3c8ac835761749260d913f59e1b49b828660
+
+Proposed command:
+cd /Users/doyle/Dropbox/projects/atlas
+python3.13 - <<'PY'
+p = '/Users/doyle/.claude/projects/-Users-doyle-Dropbox-projects-atlas/memory/MEMORY.md'
+s = open(p).read()
+s = s.replace("- [Commit gate fails open](commit-gate-failopen.md) — G2 hook lets commits through on codex error; check transcript, retro-review big diffs",
+              "- [Commit gate is advisory by design](commit-gate-failopen.md) — always fires, always logs; read the codex-gate transcript after every commit (silence ≠ approval)")
+open(p, 'w').write(s)
+print("memory index corrected")
+PY
+cat >> MORPH_GATE_TODO.md <<'EOF'
+
+## Gate record CORRECTED (2026-07-25)
+
+My "fail-open bug / hook didn't fire" claims were wrong. The commit gate
+fires on every git commit and always logs
+(notes/codex-consults/<ts>-codex-gate-<tree>.txt); outside TEAMWORK
+repos a BLOCK or codex error is mandatory-but-ADVISORY per PD's
+2026-06-11 ruling. The July-24 commits both received codex BLOCK
+verdicts (transcripts ...220734-...ee9d3c1b and ...221602-...7cf8fe9),
+advisory-allowed by design, and those BLOCKs AGREE with the retroactive
+reviews run on the same trees -- two channels, same findings, final
+tree approved (retro-3 PASS on ed1365b). My "didn't fire" observation
+error: piping commit output through tail ate the hook stderr. Real
+defects fixed today in ~/.claude/hooks/codex-commit-gate.py:
+MAX_DIFF_CHARS 700k -> 250k (model context is the binding limit,
+measured 2026-07-22) and the advisory message now distinguishes codex
+BLOCK from codex ERROR.
+EOF
+echo "baton corrected"
+echo
+echo "=== census completion: symmetry + conway over all records (floppy/class untouched) ==="
+python3.13 builders/symmetry.py 2>&1 | tail -2
+python3.13 builders/conway.py 2>&1 | tail -2
+git diff --stat -- data/symmetry.tsv data/conway.tsv
+
+Status:
+ M builders/special.py
+ M data/nets_pages.txt
+ M data/theme_nonprime.txt
+ M data/themes.tsv
+?? data/bends/v10CCACCCABCACABCAE.json
+?? data/bends/v8CCACCACAACAE.json
+?? data/bends/v8CCACCACCABAE.json
+?? data/bends/v9CCACCACACABCAE.json
+?? notes/codex-consults/2026-07-24-221700-g2retro3-ed1365b.txt
+
+
+Staged diff stat:
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+2026-07-14-101901-codex-gate-1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4.txt
+2026-07-14-103502-codex-gate-f2fbd863bdd15acccd0bfda262f544637f04d3b8.txt
+2026-07-14-125406-codex-gate-060357cfb98d78330737aca087486f00a7735032.txt
+2026-07-14-132309-codex-gate-50b403ea027bb716b1eaa98db5085a0ed6904b5f.txt
+2026-07-14-133540-codex-gate-fc8d1f6da60dd5b343355c8f61c721c3793a9950.txt
+2026-07-14-134813-codex-gate-93b9d2ec3683d2ba10c2cf0acbfa246f08402c1f.txt
+2026-07-14-152756-codex-gate-122f9d9c38e05751ba3a6842bb2fc8f86e2253eb.txt
+2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt
+2026-07-14-161259-codex-gate-66d65fd3278505edb5d721e97fc7aea6b3ffaee6.txt
+2026-07-14-170958-codex-gate-b605d697b3dbffada21fb08eb97f7eb2cbe22bb9.txt
+2026-07-14-171239-codex-gate-fe3d2dbb95df6b62212d9894f98fe6c875afc1c7.txt
+2026-07-14-172154-codex-gate-1093cbe3bd01aeae93a536fc3b6e923fde88b2bf.txt
+2026-07-14-173029-codex-gate-7c69e7c0e04dbe81732e9649f27e5a35501a4f2b.txt
+2026-07-14-180614-codex-gate-90636b018737efd42f87e55774625919cdd74952.txt
+2026-07-14-183507-codex-gate-00cd11020f300d3cd29523693b057178c1027a2a.txt
+2026-07-14-185544-codex-gate-566d79c294fb5b392c5546570a7ad58e4fb3db6e.txt
+2026-07-14-192549-codex-gate-78924caa5c65110828884bb69282f57972927f6c.txt
+2026-07-14-223200-codex-gate-9efb20903c8b49d889bb8d7e084696009b104d91.txt
+2026-07-14-223658-codex-gate-b15c90098b5e9ff31c01c81b923fa5a325d1cbb5.txt
+2026-07-14-224857-codex-gate-2b36da1c069db914d9aeaa39754a399e380ce884.txt
+2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+2026-07-15-094806-codex-gate-87781ee5d118ed974e5254446f47c3d22f96b8e1.txt
+2026-07-15-102447-codex-gate-82b4ab34a46f52702438751bec3ad7645fd95e84.txt
+2026-07-15-102900-codex-gate-5c23c33f3f533179762462db5136dc5171516d1b.txt
+2026-07-17-114359-codex-gate-ec8b4bf2c2e400c5d21a9f3766fb74b2553d2a51.txt
+2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt
+2026-07-17-193316-codex-gate-79d5db5a2969f60e2cf9d0d36a81e6c31216c307.txt
+2026-07-17-194727-codex-gate-f18f4ccd183e294cba892d646661d4090cb66b78.txt
+2026-07-17-194825-codex-gate-e37f396044b2ca3e9ce1bed180b1a7a7af53346f.txt
+2026-07-17-215425-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-215816-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-233951-codex-gate-8fea647624d147134934551e82af2d2e24c27696.txt
+2026-07-18-180702-codex-gate-03f43a9077c3a3f4c2e7370438a684313cf49c30.txt
+2026-07-19-012944-codex-gate-5c13d51d4fc3a2e1fac1ceb876c51c60670dd91b.txt
+2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+2026-07-21-230211-codex-gate-16c2e834a4268607f71818a16ee05d2b752e58da.txt
+2026-07-22-161343-g1-display-gates.txt
+2026-07-22-162535-g1r2-display-gates.txt
+2026-07-22-162856-g1r3-display-gates.txt
+2026-07-22-163649-g1r4-display-gates.txt
+2026-07-22-164416-g1r5-display-gates.txt
+2026-07-22-164845-g1r6-display-gates.txt
+2026-07-22-175729-g1r7-display-gates.txt
+2026-07-22-180129-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-180254-g2retro-1c4fcf6.txt
+2026-07-22-181010-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181253-g2retro2-e1a814b.txt
+2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181610-g2retro3-c0a599a.txt
+2026-07-24-215046-g2retro-602a825.txt
+2026-07-24-215321-g1-nonprime-decomposition.txt
+2026-07-24-220537-g1r2-nonprime-decomposition.txt
+2026-07-24-220707-g1r3-nonprime-decomposition.txt
+2026-07-24-220734-codex-gate-ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad.txt
+2026-07-24-220827-g2retro2-540ac2a.txt
+2026-07-24-220849-g2retro2-540ac2a.txt
+2026-07-24-221602-codex-gate-7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a.txt
+2026-07-24-221700-g2retro3-ed1365b.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — 2026-07-24: gallery round 2, morph policy, regen split, census pin
+
+Branch `next`, on top of c0a599a. Code + notes + one 322-line data file
+(no bulk data; the bend store is already committed).
+
+## Staged tree
+
+**builders/special.py** — non-prime gallery organized by the paper's three
+types via recursive clique-sum decomposition (split along the
+lexicographically-least separating triangle, both sides receive it as a
+face, recurse; every factor certified a closed triangulated 2-manifold
+sphere -- edge double-incidence, connected dual, single-cycle vertex
+links, Euler 2; tet/oct identified structurally). Census: 8
+tet-assemblies, 13 oct-stacks±caps incl. the prime oct base case and the
+(2,0)-subdivided tet as oct+4caps; type 3 empty, stated as such on the
+page. Convex gallery
+opens with the eight no-coplanar-faces solids (Rausenberger, later
+Freudenthal & van der Waerden; "arbitrary conditioning, wrong road"
+language per PD; non-prime triangular bipyramid included). "Classics" →
+"Platonic & Archimedean" (title + chip), chip moved up after Non-prime.
+NEW Hyperbolic gallery: the 25 degree-7 nets (Klein heroes, names, α=360/7
+explanation); chip after Convex. Front page title/h1 → "Atlas of
+neoplatonic solids" (PD: search-fallback phrase for the paper).
+
+**builders/personal.py** — MORPH_VMAX = 30 (PD 2026-07-24: no morph movies
+beyond v=30; build policy, not a gate — the realizer generates any finite
+realization on demand and the atlas owns assembly); v>30 nets get
+morph_note "not built: v>30 morph policy", labels/caveats cleared.
+
+**builders/views.py** — "strictly convex" caption → "convex, no coplanar
+faces"; morph labels emitted whenever the record carries them (deg-7
+scaled and partial ladders).
+
+**builders/classify.py** — flopper census input pinned to
+data/floppers.txt; HARD FAIL when missing (the old silent-empty default
+zeroed all 67 floppy flags after neo's 2026-07-15 trash-sweep removed
+euclid_hp/explore/ — root cause verified: trashed list matches the
+committed 67 floppies 67/67 on bare CLERS); output rows sorted
+(imap_unordered completion order measured to reorder ~3.1k rows/run).
+
+**regen_personal.sh** — now the pure CONSUMER regen: numpy-only preflight,
+no solver/neo/network/scipy; personal.py + special.py only.
+**producer_census.sh** (new) — the producer tier (classify/members/
+symmetry), attended-editorial, header documents the 2026-07-24 test run
+and measured drift semantics.
+
+**data/floppers.txt** (new, 322 entries) — the flopper census, pinned
+in-repo from neo/_trash-20260715/euclid_hp/explore/floppers.txt.
+
+**notes/FOR_NEO_morph_frames.md / notes/FOR_ATLAS_frames_ready.md** — the
+frames-mode correspondence: atlas request, neo's delivery note
+(bendprover 672a603, --frames, Klein-normalized emission), atlas
+verification and the closing PD ruling (no --frames-tol; v≤30 policy).
+
+**MORPH_GATE_TODO.md** — appended records: morph policy final + frames
+capability; alpha hypersensitivity of closure certification (measured:
+1.4e-15 alpha perturbation flips v28's closure verdict 5.4e-3→1.9e-2;
+RULE: certify only at the solved alpha, read it from the store); floppy
+disparity resolution.
+
+**notes/codex-consults/** — the 2026-07-22 G2 fail-open transcripts and
+the three retroactive reviews for c0a599a, plus this batch's four:
+2026-07-24-215046-g2retro-602a825.txt,
+2026-07-24-215321-g1-nonprime-decomposition.txt (REVISE),
+2026-07-24-220537-g1r2-nonprime-decomposition.txt (REVISE),
+2026-07-24-220707-g1r3-nonprime-decomposition.txt (APPROVE).
+
+## Verification (all run this session)
+
+- py_compile clean (special, personal, views, classify).
+- --frames contract verified against neo's note: tet devresid 1.6e-56;
+  v506 PASS at 34.89 (devresid 2.4e-36, 506 pos lines); v506 REFUSED at
+  2.1 with the documented reason. End-to-end assembly test (9 frames,
+  atlas gates re-verified each at 3e-12..4e-7) built and then REVERTED
+  under the v≤30 policy.
+- Policy strip: 155 v>30 nets → policy note, no morph artifacts;
+  2,089 carriers remain, all v≤30 (census: 2,245 − 155 − v30-net).
+- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+  independent rm -rf → full consumer rebuilds, 2.5 min each,
+  20,438 files, manifests BYTE-IDENTICAL (empty diff).
+- Producer census executed under python3.13 + scipy 1.18.0 (installed
+  2026-07-24, PD-authorized): runs clean; drift vs committed census
+  fully decomposed (67 floppy flips = the vanished flopper file; 9
+  page-worthy drops = consequence; ~3.1k row reorder = unsorted output;
+  +53 symmetry rows = completion). Committed census RESTORED (pinned);
+  refresh is editorial.
+- v28/v30/v48 verdicts re-verified at TRUE alphas: v28 legitimately
+  carries morphs (5.37e-3, 29 caveated events); v30 (5.53e-2) and v48
+  (5.13e-2) genuinely fail. Run-A anomaly was a test bug (hardcoded
+  alpha), not a build bug.
+- Hyperbolic gallery: 25 model-viewers, named captions, verified in the
+  generated HTML; deg-7 v≤30 nets keep hyperbolic ladders, deg-7 v>30
+  keep heroes only.
+- Site regenerated and serving at localhost:8765 (root redirects to
+  personal/; front title "Atlas of neoplatonic solids" verified live).
+
+## New conventions / invariants (G1)
+
+ONE new convention: the non-prime separating-triangle decomposition
+(builders/special.py::nonprime_pieces — combinatorial, gallery-only).
+G1 audit run retroactively at the gate's direction with the five-point
+spec (cut rule, debris-merge rule, vertex-count identification,
+conservation invariant, failure modes): three rounds, 2026-07-24-215321-g1-nonprime-decomposition.txt / 2026-07-24-220537-g1r2-nonprime-decomposition.txt / 2026-07-24-220707-g1r3-nonprime-decomposition.txt — r1 REVISE (debris-merge unjustified, vertex-count ID insufficient) led to REPLACING the construction with recursive clique-sum splitting; r2 REVISE (frozenset non-total-order canonicality, Euler-only sphere check) fixed with min-by-sorted-tuple and full closed-2-manifold certification; r3 APPROVE.
+The morph v≤30 bound is a PD build-policy ruling (no invariant); the
+display gates are unchanged from the seven-round G1-approved set
+(c0a599a evidence + MORPH_GATE_TODO.md).
+
+## Tree-tied verification artifacts (added at the gate's direction)
+
+notes/regen-verification-20260724/: build-twice RE-EXECUTED at this
+exact tree (commit 540ac2a, tree 7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a)
+after the classifier rework: site_manifest_A.txt and site_manifest_B.txt
+both sha256
+05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30
+(20438 lines), diff EMPTY; README.txt records the two runs as separate
+commands with the source commit/tree. (The earlier pre-rework manifests
+hashed e2034694... -- superseded, the rework changed site bytes.)
+
+
+Staged diff:
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’m checking the index at the supplied tree hash, plus the on-disk evidence file, without modifying the worktree.
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --cached --stat; git diff --cached --name-status; git diff --cached --check; git diff --cached --numstat; git rev-parse --verify ':/' 2>/dev/null || true; test -f .session/claude-commit-evidence.md && sed -n '1,260p' .session/claude-commit-evidence.md" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+# Commit evidence — 2026-07-24: gallery round 2, morph policy, regen split, census pin
+
+Branch `next`, on top of c0a599a. Code + notes + one 322-line data file
+(no bulk data; the bend store is already committed).
+
+## Staged tree
+
+**builders/special.py** — non-prime gallery organized by the paper's three
+types via recursive clique-sum decomposition (split along the
+lexicographically-least separating triangle, both sides receive it as a
+face, recurse; every factor certified a closed triangulated 2-manifold
+sphere -- edge double-incidence, connected dual, single-cycle vertex
+links, Euler 2; tet/oct identified structurally). Census: 8
+tet-assemblies, 13 oct-stacks±caps incl. the prime oct base case and the
+(2,0)-subdivided tet as oct+4caps; type 3 empty, stated as such on the
+page. Convex gallery
+opens with the eight no-coplanar-faces solids (Rausenberger, later
+Freudenthal & van der Waerden; "arbitrary conditioning, wrong road"
+language per PD; non-prime triangular bipyramid included). "Classics" →
+"Platonic & Archimedean" (title + chip), chip moved up after Non-prime.
+NEW Hyperbolic gallery: the 25 degree-7 nets (Klein heroes, names, α=360/7
+explanation); chip after Convex. Front page title/h1 → "Atlas of
+neoplatonic solids" (PD: search-fallback phrase for the paper).
+
+**builders/personal.py** — MORPH_VMAX = 30 (PD 2026-07-24: no morph movies
+beyond v=30; build policy, not a gate — the realizer generates any finite
+realization on demand and the atlas owns assembly); v>30 nets get
+morph_note "not built: v>30 morph policy", labels/caveats cleared.
+
+**builders/views.py** — "strictly convex" caption → "convex, no coplanar
+faces"; morph labels emitted whenever the record carries them (deg-7
+scaled and partial ladders).
+
+**builders/classify.py** — flopper census input pinned to
+data/floppers.txt; HARD FAIL when missing (the old silent-empty default
+zeroed all 67 floppy flags after neo's 2026-07-15 trash-sweep removed
+euclid_hp/explore/ — root cause verified: trashed list matches the
+committed 67 floppies 67/67 on bare CLERS); output rows sorted
+(imap_unordered completion order measured to reorder ~3.1k rows/run).
+
+**regen_personal.sh** — now the pure CONSUMER regen: numpy-only preflight,
+no solver/neo/network/scipy; personal.py + special.py only.
+**producer_census.sh** (new) — the producer tier (classify/members/
+symmetry), attended-editorial, header documents the 2026-07-24 test run
+and measured drift semantics.
+
+**data/floppers.txt** (new, 322 entries) — the flopper census, pinned
+in-repo from neo/_trash-20260715/euclid_hp/explore/floppers.txt.
+
+**notes/FOR_NEO_morph_frames.md / notes/FOR_ATLAS_frames_ready.md** — the
+frames-mode correspondence: atlas request, neo's delivery note
+(bendprover 672a603, --frames, Klein-normalized emission), atlas
+verification and the closing PD ruling (no --frames-tol; v≤30 policy).
+
+**MORPH_GATE_TODO.md** — appended records: morph policy final + frames
+capability; alpha hypersensitivity of closure certification (measured:
+1.4e-15 alpha perturbation flips v28's closure verdict 5.4e-3→1.9e-2;
+RULE: certify only at the solved alpha, read it from the store); floppy
+disparity resolution.
+
+**notes/codex-consults/** — the 2026-07-22 G2 fail-open transcripts and
+the three retroactive reviews for c0a599a, plus this batch's four:
+2026-07-24-215046-g2retro-602a825.txt,
+2026-07-24-215321-g1-nonprime-decomposition.txt (REVISE),
+2026-07-24-220537-g1r2-nonprime-decomposition.txt (REVISE),
+2026-07-24-220707-g1r3-nonprime-decomposition.txt (APPROVE).
+
+## Verification (all run this session)
+
+- py_compile clean (special, personal, views, classify).
+- --frames contract verified against neo's note: tet devresid 1.6e-56;
+  v506 PASS at 34.89 (devresid 2.4e-36, 506 pos lines); v506 REFUSED at
+  2.1 with the documented reason. End-to-end assembly test (9 frames,
+  atlas gates re-verified each at 3e-12..4e-7) built and then REVERTED
+  under the v≤30 policy.
+- Policy strip: 155 v>30 nets → policy note, no morph artifacts;
+  2,089 carriers remain, all v≤30 (census: 2,245 − 155 − v30-net).
+- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+  independent rm -rf → full consumer rebuilds, 2.5 min each,
+  20,438 files, manifests BYTE-IDENTICAL (empty diff).
+- Producer census executed under python3.13 + scipy 1.18.0 (installed
+  2026-07-24, PD-authorized): runs clean; drift vs committed census
+  fully decomposed (67 floppy flips = the vanished flopper file; 9
+  page-worthy drops = consequence; ~3.1k row reorder = unsorted output;
+  +53 symmetry rows = completion). Committed census RESTORED (pinned);
+  refresh is editorial.
+- v28/v30/v48 verdicts re-verified at TRUE alphas: v28 legitimately
+  carries morphs (5.37e-3, 29 caveated events); v30 (5.53e-2) and v48
+  (5.13e-2) genuinely fail. Run-A anomaly was a test bug (hardcoded
+  alpha), not a build bug.
+- Hyperbolic gallery: 25 model-viewers, named captions, verified in the
+  generated HTML; deg-7 v≤30 nets keep hyperbolic ladders, deg-7 v>30
+  keep heroes only.
+- Site regenerated and serving at localhost:8765 (root redirects to
+  personal/; front title "Atlas of neoplatonic solids" verified live).
+
+## New conventions / invariants (G1)
+
+ONE new convention: the non-prime separating-triangle decomposition
+(builders/special.py::nonprime_pieces — combinatorial, gallery-only).
+G1 audit run retroactively at the gate's direction with the five-point
+spec (cut rule, debris-merge rule, vertex-count identification,
+conservation invariant, failure modes): three rounds, 2026-07-24-215321-g1-nonprime-decomposition.txt / 2026-07-24-220537-g1r2-nonprime-decomposition.txt / 2026-07-24-220707-g1r3-nonprime-decomposition.txt — r1 REVISE (debris-merge unjustified, vertex-count ID insufficient) led to REPLACING the construction with recursive clique-sum splitting; r2 REVISE (frozenset non-total-order canonicality, Euler-only sphere check) fixed with min-by-sorted-tuple and full closed-2-manifold certification; r3 APPROVE.
+The morph v≤30 bound is a PD build-policy ruling (no invariant); the
+display gates are unchanged from the seven-round G1-approved set
+(c0a599a evidence + MORPH_GATE_TODO.md).
+
+## Tree-tied verification artifacts (added at the gate's direction)
+
+notes/regen-verification-20260724/: build-twice RE-EXECUTED at this
+exact tree (commit 540ac2a, tree 7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a)
+after the classifier rework: site_manifest_A.txt and site_manifest_B.txt
+both sha256
+05c183daad697ae54a962dea47269b834b43851ee584c9d99647b76e44ae6b30
+(20438 lines), diff EMPTY; README.txt records the two runs as separate
+commands with the source commit/tree. (The earlier pre-rework manifests
+hashed e2034694... -- superseded, the rework changed site bytes.)
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'git cat-file -t f9db3c8ac835761749260d913f59e1b49b828660; git rev-parse HEAD; git diff --stat HEAD f9db3c8ac835761749260d913f59e1b49b828660; git diff --name-status HEAD f9db3c8ac835761749260d913f59e1b49b828660; git diff --check HEAD f9db3c8ac835761749260d913f59e1b49b828660; git diff --numstat HEAD f9db3c8ac835761749260d913f59e1b49b828660' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+tree
+ed1365b922ba25990cb769a44b89259519648582
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'git rev-parse HEAD''^{tree}; git diff-tree --no-commit-id --name-status -r f9db3c8ac835761749260d913f59e1b49b828660; git diff --cached --quiet; printf '"'cached_diff_exit=%s\\n' \""'$?"; git status --porcelain=v2' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+f9db3c8ac835761749260d913f59e1b49b828660
+error: object f9db3c8ac835761749260d913f59e1b49b828660 is a tree, not a commit
+cached_diff_exit=0
+1 .M N... 100644 100644 100644 c3c982d610a405dc24f1e3cee8ca64df8e42167b c3c982d610a405dc24f1e3cee8ca64df8e42167b builders/special.py
+1 .M N... 100644 100644 100644 ac3a34b02a37fc733f5436e6ca17d6990d663e75 ac3a34b02a37fc733f5436e6ca17d6990d663e75 data/nets_pages.txt
+1 .M N... 100644 100644 100644 c6dc683cd10007db4b3021cccd5be87a18a78079 c6dc683cd10007db4b3021cccd5be87a18a78079 data/theme_nonprime.txt
+1 .M N... 100644 100644 100644 3c20682690e0e4c2bdecbeebaf9a553ca9587c7b 3c20682690e0e4c2bdecbeebaf9a553ca9587c7b data/themes.tsv
+? data/bends/v10CCACCCABCACABCAE.json
+? data/bends/v8CCACCACAACAE.json
+? data/bends/v8CCACCACCABAE.json
+? data/bends/v9CCACCACACABCAE.json
+? notes/codex-consults/2026-07-24-221700-g2retro3-ed1365b.txt
+
+codex
+WARN
+Files reviewed: No staged files; staged tree f9db3c8 equals HEAD tree.
+Checks run: git diff --cached --stat/name-status/check/numstat; git rev-parse HEAD^{tree}; git status --porcelain=v2.
+Blocking issues: None.
+Warnings: Committer evidence describes an earlier, different tree and does not substantiate this empty staged tree. Proposed command changes are unstaged or external.
+Recommendation: Stage the intended changes, regenerate tree-specific evidence, then rerun the gate.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+33,637
+WARN
+Files reviewed: No staged files; staged tree f9db3c8 equals HEAD tree.
+Checks run: git diff --cached --stat/name-status/check/numstat; git rev-parse HEAD^{tree}; git status --porcelain=v2.
+Blocking issues: None.
+Warnings: Committer evidence describes an earlier, different tree and does not substantiate this empty staged tree. Proposed command changes are unstaged or external.
+Recommendation: Stage the intended changes, regenerate tree-specific evidence, then rerun the gate.

@@ -1,119 +1,115 @@
 # Atlas HANDOFF (chat bootstrap)
 
-## Charter (what this chat is about)
+## Charter
 
 This is the ATLAS chat: it owns the site — records, views, galleries,
-eisenmaps, per-net artifacts, regeneration, and eventually hosting.
-Success = every net Peter wants visible has a correct, beautiful,
-regenerable page. NOT this chat: proving things (prover chat:
-~/Dropbox/neo/bendq_sandbox/boundary_cert/HANDOFF.md) or Lean (lob:
-~/Dropbox/lob/TEAMWORK.md). It CONSUMES their outputs as committed
-data files (classifications, certificates, specimen lists) and turns
-them into pages and galleries.
+eisenmaps, per-net artifacts, regeneration, deployment. Success = every
+net Peter wants visible has a correct, beautiful, regenerable page. NOT
+this chat: proving things or Lean. The atlas CONSUMES committed solver
+output (producer→consumer rule); it never re-runs the solver at build.
 
-Pick-up for a fresh atlas chat: read this + `git log --oneline -15`.
+Pick-up for a fresh atlas chat: read this + `git log --oneline -15` +
+the auto-memory index. Live design record: `MORPH_GATE_TODO.md`.
 
-## What this is
+## Architecture
 
-The personal atlas of neoplatonic solids, record/view architecture:
-one directory per net under `site/personal/nets/<id>/` — `net.json`
-is the database record (identity, netcode, flags, themes, eisenstein,
-artifact inventory) beside its artifacts (rb/clers GLBs, morph_p/k,
-ideal_net.svg, clers_layout.svg, eismap.svg, dent_v<k>.glb). id =
-`v{V}{CLERS}` when ≤ 200 chars, else `v{V}h`+sha1-16 (`views.net_id`).
-Display names always from the record, `v13CC…` style.
+Record/view: one directory per net under `site/personal/nets/<id>/` —
+`net.json` is the record (identity, netcode, flags, themes, eisenstein,
+artifact inventory, morph_note/caveat) beside its artifacts (rb/clers
+GLBs, morph_p/k, ideal_net.svg, clers_layout.svg, eismap.svg). id =
+`v{V}{CLERS}` when ≤200 chars else `v{V}h`+sha1-16 (`views.net_id`).
+`views.py` is the only renderer.
 
-## Pipeline (from scratch: `./regen_personal.sh`)
+Committed data is the source of truth:
+- `data/bends/` (2,249 json) — the bend store: hero + morph-ladder
+  bends per net, persisted by producer runs, consumed at build.
+  Store-only rule: with a store present the solver is NEVER invoked.
+- `data/*.tsv` — census pins (class_v30, symmetry, conway, classics,
+  eisenstein, themes, floppers, …). Editorial: refresh deliberately,
+  never as a build side effect.
+- `data/walks/` — the dent-walk scan; the dentings gallery regenerates
+  from it.
 
-classify.py (79,349 primes v≤30 from neo/data/objs → class_v30.tsv)
-→ members.py (page-worthy list + themes.tsv + eisenstein.tsv)
-→ personal.py (records + artifacts + pages; solver = bendprover
-euclid_lm_mp, MAXV 512) → fetch_dents.py → symmetry.py →
-special.py (stamps records; galleries; by-v; front; about; eisenmaps
-via eisenmap.py; re-renders all pages via views.py).
+Two tiers:
+- `./regen_personal.sh` — CONSUMER regen, the whole atlas from scratch:
+  numpy-only, no solver/neo/network/scipy; personal.py + special.py;
+  ~2.5 min; byte-deterministic (build-twice-diff proven; manifests in
+  `notes/regen-verification-*/`).
+- `./producer_census.sh` — PRODUCER census sweep (classify/members/
+  symmetry; needs the neo tree + scipy): attended, editorial; its
+  header records the measured drift semantics.
 
-views.py is the only place that knows what a net page looks like;
-re-render everything in seconds (`python3 builders/views.py`).
+Display gates (G1-audited, seven rounds; specs + calibration in
+MORPH_GATE_TODO.md and notes/gate-calibration-20260722/): every
+displayed edge within 1% of exact (normalized Lorentz metric, per-event
+closure, certify-where-resolvable at float64 limits); dent_index
+link-turning on displayed coordinates (NEVER volume sign).
+Certification is only meaningful AT the solved alpha — read alphas from
+the store, never retype them.
 
-Serve: `python3 -m http.server 8765` in ~/Dropbox/neo →
-http://localhost:8765/atlas2/personal/
+Morph policy: movies only for v ≤ 30 (MORPH_VMAX; PD 2026-07-24).
+bendprover `--frames` (672a603) emits any finite realization on demand
+(Klein-normalized, mp development); the atlas owns assembly.
+Correspondence: notes/FOR_NEO_morph_frames.md / FOR_ATLAS_frames_ready.md.
 
-## State (2026-07-14)
+## Site content (2026-07-25)
 
-2,133 nets built (all primes v≤14; pancake/convex/floppy classes and
-8-deepest+depth≥0.1 buried to v≤30; Eisenstein families to v≤164, tet
-filled to T≤60 via subdiv.py+Antiprism; old-atlas theme harvests).
-16+ galleries incl. symmetry (19 classes). Old-atlas galleries all
-carried over with their descriptions (data/theme_desc.tsv).
+2,249 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
+v≤12 / v=13 / v=14 · Non-prime · Platonic & Archimedean · Convex ·
+Hyperbolic · Dented · Hull-buried · Pancakes · Floppy · Symmetry ·
+Eisenstein subdivisions · … Non-prime is organized by the paper's three
+types via G1-audited clique-sum decomposition, 8/8/8: tet assemblies /
+stacks of ≥2 octs / prime-core+tets — the octahedron core complete (all
+eight attachment classes up to symmetry; four minted 2026-07-25 via the
+canonical CLERS encoder in neo/clers). Convex opens with the eight
+no-coplanar-faces solids (Rausenberger, later Freudenthal & van der
+Waerden). Hyperbolic = the 25 degree-7 nets (Klein heroes). Dentings =
+per-net dent SETS, ∅ first, from data/walks.
 
-## Pending
+## Process
 
-- Recognition sweep (recognize_sweep.py → data/recognized_v30.tsv,
-  all-recognized + ≥1 icosahedral-atom criterion v1): if the TSV is
-  complete, add members to members.py's page-worthy set, build pages,
-  rerun special.py (gallery/recognized.html is pre-wired). PD expects
-  criterion tinkering.
-- Unbuilt Eisenstein giants (v>164: ico T16..27 to v=272 etc.) —
-  buildable since bendprover MAXV=512; raise SUBDIV_VCAP + build.
-- Dented: currently the 26 old-atlas GLBs; a regeneration pipeline
-  (punch + --dents solve) would replace/extend them.
-- Hosting decision (GitHub Pages + Zenodo DOI was the recommendation;
-  Dartmouth redirects; next arXiv version).
-- Buried wholesale (13k more classified nets could get pages).
+- Commit gate: PreToolUse hook (~/.claude/hooks/codex-commit-gate.py →
+  codex-review) fires on every `git commit` and always logs to
+  notes/codex-consults/<ts>-codex-gate-<tree>.txt. In this repo (no
+  TEAMWORK.md) verdicts are mandatory-but-ADVISORY (PD 2026-06-11):
+  READ THE TRANSCRIPT after every commit; approval = PASS/WARN for the
+  exact tree (or a matching .git/claude-codex-approval stamp). Write
+  .session/claude-commit-evidence.md before committing.
+- G1 design audits for new conventions via `codex exec`, logged under
+  notes/codex-consults/.
+- Serve locally: persistent `python3 -m http.server 8765 --directory
+  site` (root redirects to personal/). Deploy: rsync site/personal/ →
+  gauss.dartmouth.edu:public_html/docs/atlas/ (preserve
+  atlas_records.jsonl); old atlas parked at docs/atlas_old.
+- Builders run under python3.13 (numpy 2.4.4, scipy 1.18.0).
 
-## Distribution (2026-07-15, commit e95d48f)
+## State (2026-07-25)
 
-Zenodo DRAFT deposition 21367250, DOI 10.5281/zenodo.21367250
-reserved (live once Peter publishes). Two verified artifacts (site
-tarball three-way md5 local = doob = Zenodo; db tarball two-way,
-local = Zenodo — it was uploaded from home, small enough):
-- neoplatonic-atlas.tar.gz 2,614,014,412 B, d57df591ef9dd03654da1a4db521b609
-- neoplatonic-atlas-database.tar.gz 3,664,510 B, e526e00459623f6d2b7f0a45011f6b2d
-Pipeline: builders/zenodo_dist.sh (token: ~/.config/zenodo/token —
-also copied to doob; multi-GB PUTs from home failed repeatedly
-(502s/resets), from doob succeeded first try in ~1 min — upload big
-files from doob). Paper cites the DOI (neo.tex:209, compile-checked).
-Remaining: Peter reviews + publishes; arXiv comments line.
-2026-07-15 later: gauss SWAPPED (docs/atlas = new atlas, old at
-docs/atlas_old; web/<v>/<NAME>.html 301-redirects via .htaccess;
-all 5 paper URLs verified 200). primes_v4-60.tar.gz (208,670,491 B,
-md5 a1a2b6a9...) added to the record — 3 files total, all
-checksum-verified. Paper: bipyramid href canonicalized; zzz now
-packages figures (compiled clean standalone on doob).
+Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
+landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo
+refresh deliberately deferred (PD: "never mind zenodo for now") — the
+draft is BEHIND the live site. Promotion formalities not yet done:
+`next` unpushed, unmerged, untagged.
 
-## Freeze + deploy (2026-07-15)
+## History (compressed; details in git log and MORPH_GATE_TODO.md)
 
-Public repos: github.com/peterdoyle1717/neoplatonic-atlas (this repo:
-builders + data, MIT, README points at the DOI) and
-github.com/peterdoyle1717/idealprover (boundary-cert scripts +
-reports, copied from bendq_sandbox — originals untouched);
-bendprover pushed current (ae6f915). Deployed to gauss docs/atlas2,
-then SWAPPED to docs/atlas (see Distribution above); OLD atlas (131G)
-parked at gauss docs/atlas_old pending final retirement — its
-downloads/ tarballs are superseded by the record's primes_v4-60
-(objs tarballs still unique there). Local cleanup: retirees in
-neo/_trash-20260715/ (5.9G; fleet pushed and/or tarballed first),
-full-tree tarballs in neo/retired/ (310M, 14 tarballs).
-
-## Tinkering round (2026-07-17, commits 9e9f4b4..af142c8)
-
-Site now 2,215 nets. Tet rays: (1,0) to T=225, (2,1) to T=252
-(V=506), (1,1) to T=192, (3,1) to T=208 -- built via the alpha-walk
-fallback in solve_prove_60 (canonical -> walk 59.9/59/57/54 seeded ->
-relabel retries). tri2 family = cut double-covered triangles (exact
-pancakes; uncut is unrepresentable: doubled corner edges, measured
-build_topology failure). smooth.glb on every net (welded, no borders,
-no normals). Galleries: primes-labeled links; fullerene/icosym/
-geodesic/deg7 pages gone; classics+deg7 merged; eisenstein after
-symmetry; hyperbolics only in classics/oddsends/by-v(marked).
-Ray-limit measurements (flat ray exactly tet at T64/T121; (2,1)-ray
-corner-collar/flat-core profile): bendq_sandbox/ray_limit/REPORT.md.
-Zenodo draft REFRESHED (site a1e44da7..., db b41a39f0..., 3-way md5
-verified) -- same deposition 21367250. gauss redeployed (old at
-docs/atlas_pretinker, legacy at docs/atlas_old); 6 URL checks 200/301.
-
-## Conventions
-
-Evidence discipline per user CLAUDE.md; link nets by their personal
-page (memory: link-atlas-when-discussing-nets); codex Stop-hook review
-applies (cwd under ~/Dropbox/neo).
+- 2026-07-15 freeze+deploy: public repos
+  github.com/peterdoyle1717/neoplatonic-atlas (MIT) + idealprover;
+  gauss docs/atlas swapped in, old 131G atlas at docs/atlas_old.
+  Zenodo DRAFT 21367250 (DOI 10.5281/zenodo.21367250 reserved):
+  site + db + primes_v4-60 tarballs, md5-verified; upload big files
+  from doob (home PUTs 502). Pipeline builders/zenodo_dist.sh, token
+  ~/.config/zenodo/token. Draft refreshed 2026-07-17; STALE since the
+  2026-07-22+ rounds.
+- 2026-07-17 tinkering: 2,215 nets, tet rays to T=252 (v506),
+  smooth.glb everywhere, gallery consolidation.
+- 2026-07-22 (c0a599a): display gates + committed bend store +
+  always-regenerate + gallery round; seven G1 rounds; two production
+  catches by the audited gates.
+- 2026-07-24 (ed1365b): galleries by paper types, morph v≤30 policy,
+  consumer/producer regen split with build-twice proof, census pin
+  (floppers), title.
+- 2026-07-25: octahedron-core exemplars (4 minted), 8/8/8 non-prime,
+  symmetry/conway census completion (+57), gate-record correction,
+  hook fixes (diff cap 250k, BLOCK vs ERROR distinguished).
