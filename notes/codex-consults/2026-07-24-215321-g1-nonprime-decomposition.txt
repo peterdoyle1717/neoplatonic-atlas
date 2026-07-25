@@ -1,0 +1,134 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f96fa-1c32-7ba1-9371-68da941e9ec4
+--------
+user
+G1 design audit (atlas): nonprime_pieces, the separating-triangle decomposition organizing the non-prime gallery into the paper's three types (tet assemblies / oct stacks with caps / prime core + tets). Combinatorial only, gallery-only output. Audit the five-point spec and code: is the cut correct, is the debris-merge rule sound (can it ever absorb a genuine core?), is the piece identification by vertex count safe for this input class, any failure mode missed. First line exactly one of: APPROVE / REVISE / BLOCK. Max 15 lines.
+
+<stdin>
+=== G1 DESIGN AUDIT: nonprime_pieces — separating-triangle decomposition (retroactive; implemented at PD instruction, now audited per discipline) ===
+
+FIVE-POINT SPEC:
+1. EXACT ALGORITHM: faces = triangles of the net (netcode). Separating triangles = 3-cliques of the adjacency graph that are NOT faces. Cut: build the face-adjacency graph EXCLUDING gluing across any edge whose endpoints lie in a separating triangle; connected components are candidate pieces. DEBRIS RULE: a single-face component (a face whose three edges all lie in separating triangles, e.g. the uncapped oct faces of a subdivided tet) is merged into a multi-face component whose vertex set contains it; if none contains it, it stands alone. IDENTIFICATION: piece with 4 distinct vertices = tet; 6 vertices = oct; anything else = core.
+2. CONVENTIONS: vertices 1..V from the netcode; edges as frozensets; faces compared as frozensets (orientation-free -- the decomposition is combinatorial, no geometry, no signs).
+3. STRONGEST VALIDATION INVARIANT: piece census must reproduce the paper's three types over the 21-net gallery list, with vertex-count conservation: for a type-1/2 net, V = sum over pieces of (4 or 6) minus shared separating-triangle vertices (3 per gluing).
+4. FAILURE MODES CAUGHT: (a) an oct fragmented by the naive cut (its capped-alternate faces isolated) -- caught+repaired by the debris rule, verified on the (2,0)-subdivided tet (v10 = oct + 4 tet caps, V = 6+4x3-4x3+4 = 10 conserved); (b) a mis-merge would misclassify a core as debris -- bounded because debris merges ONLY into a component already containing all 3 of its vertices; (c) prime input (no separating triangles) yields a single piece = the net itself (the oct base case).
+5. FILES/TESTS: builders/special.py::nonprime_pieces (build-time, gallery-only -- no record or solver data touched). Verified classification of all 21 gallery nets: 8 type-1 (2..7 and 11 tets, incl. both v7 forms and helical stacks), 13 type-2 (1..4 octs with 0..4 caps, incl. prime oct as one-stack base and the subdivided tet), 0 type-3 (stated on the page). Anomalies resolved during development: two nets initially showed single-face 'cores' -- the debris artifact -- and reclassified correctly under the rule.
+
+--- THE CODE ---
+    def nonprime_pieces(nc):
+        from itertools import combinations
+        faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+        V = max(max(f) for f in faces)
+        fset = {frozenset(f) for f in faces}
+        adj = {v: set() for v in range(1, V + 1)}
+        for a, b, c in faces:
+            adj[a] |= {b, c}; adj[b] |= {a, c}; adj[c] |= {a, b}
+        seps = [t for t in ({frozenset(t) for v in adj
+                             for t in combinations(sorted(adj[v] | {v}), 3)
+                             if all(y in adj[x] for x, y in combinations(t, 2))})
+                if t not in fset]
+        sep_edges = {frozenset(e) for t in seps for e in combinations(t, 2)}
+        edge2f = {}
+        for i, f in enumerate(faces):
+            for e in (frozenset((f[0], f[1])), frozenset((f[1], f[2])),
+                      frozenset((f[2], f[0]))):
+                edge2f.setdefault(e, []).append(i)
+        fadj = {i: set() for i in range(len(faces))}
+        for e, fs in edge2f.items():
+            if e in sep_edges:
+                continue
+            for i in fs:
+                fadj[i].update(j for j in fs if j != i)
+        comps, seen = [], set()
+        for i in range(len(faces)):
+            if i in seen:
+                continue
+            comp, stack = set(), [i]
+            while stack:
+                k = stack.pop()
+                if k not in comp:
+                    comp.add(k); stack.extend(fadj[k] - comp)
+            seen |= comp; comps.append(comp)
+        big = [(c, {v for i in c for v in faces[i]}) for c in comps if len(c) > 1]
+        for c in [c for c in comps if len(c) == 1]:      # merge cut debris
+            vs = {v for i in c for v in faces[i]}
+            host = next((bc for bc in big if vs <= bc[1]), None)
+            if host:
+                host[0].update(c)
+            else:
+                big.append((set(c), vs))
+        pieces = []
+        for comp, vs in big:
+            if len(vs) == 4:
+                pieces.append('tet')
+            elif len(vs) == 6:
+                pieces.append('oct')
+            else:
+                pieces.append('core')
+        return pieces
+
+--- THE CLASSIFICATION IT PRODUCES (gallery captions, from the generated page) ---
+<span class=v>2 tets</span>
+<span class=v>3 tets</span>
+<span class=v>4 tets</span>
+<span class=v>4 tets</span>
+<span class=v>5 tets</span>
+<span class=v>6 tets</span>
+<span class=v>7 tets</span>
+<span class=v>11 tets</span>
+<span class=v>1 oct</span>
+<span class=v>1 oct + 1 tet</span>
+<span class=v>1 oct + 2 tets</span>
+<span class=v>1 oct + 3 tets</span>
+<span class=v>2 octs</span>
+<span class=v>2 octs + 1 tet</span>
+<span class=v>2 octs + 2 tets</span>
+<span class=v>3 octs</span>
+<span class=v>3 octs + 1 tet</span>
+<span class=v>3 octs + 2 tets</span>
+<span class=v>4 octs</span>
+<span class=v>4 octs + 2 tets</span>
+<span class=v>0 oct + 4 tets</span>
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+REVISE
+The 3-clique/nonface definition of separating triangles is correct for a simplicial triangulated sphere.
+Cutting every dual adjacency across each separating-triangle edge is also correct for simultaneously cutting along all such triangles.
+The debris merge is not justified: both sides of a separating triangle generally contain all three boundary vertices, so `next(...)` can choose an arbitrary host.
+It cannot absorb a multi-face core, but a genuine one-face region is indistinguishable from “debris” under the stated rule.
+The current merge does not change the host vertex set, so it may leave this gallery’s captions unchanged while producing an invalid face partition.
+Vertex count alone is insufficient: a six-vertex component need not be an octahedron, and cut patches are not closed triangulated spheres.
+Require piece signatures: expected face count, boundary triangles, Euler/topological-disk checks, and reconstructed adjacency—not only 4/6 vertices.
+Also verify every original face belongs to exactly one final piece and every merge has a unique, structurally determined host.
+The stated conservation invariant is too weak and the subdivided-tet arithmetic is presented inconsistently.
+Gallery-caption agreement is regression evidence, not proof that the decomposition or identification is sound.
+Implement boundary-aware reconstruction or retain cut-side incidence so isolated faces can be assigned without vertex-containment guessing.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+9,543
+REVISE
+The 3-clique/nonface definition of separating triangles is correct for a simplicial triangulated sphere.
+Cutting every dual adjacency across each separating-triangle edge is also correct for simultaneously cutting along all such triangles.
+The debris merge is not justified: both sides of a separating triangle generally contain all three boundary vertices, so `next(...)` can choose an arbitrary host.
+It cannot absorb a multi-face core, but a genuine one-face region is indistinguishable from “debris” under the stated rule.
+The current merge does not change the host vertex set, so it may leave this gallery’s captions unchanged while producing an invalid face partition.
+Vertex count alone is insufficient: a six-vertex component need not be an octahedron, and cut patches are not closed triangulated spheres.
+Require piece signatures: expected face count, boundary triangles, Euler/topological-disk checks, and reconstructed adjacency—not only 4/6 vertices.
+Also verify every original face belongs to exactly one final piece and every merge has a unique, structurally determined host.
+The stated conservation invariant is too weak and the subdivided-tet arithmetic is presented inconsistently.
+Gallery-caption agreement is regression evidence, not proof that the decomposition or identification is sound.
+Implement boundary-aware reconstruction or retain cut-side incidence so isolated faces can be assigned without vertex-containment guessing.

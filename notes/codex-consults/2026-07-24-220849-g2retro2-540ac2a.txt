@@ -1,0 +1,403 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9708-43ec-7380-b753-ea5bf5fe9901
+--------
+user
+RETROACTIVE commit-gate review, round 2 (atlas, commit 540ac2a, tree 7cf8fe9, amended from 602a825 after your five-finding BLOCK). Bundle: findings->fixes map, final message, full CODE delta, added audit files by name/stat, current evidence. Audit ONLY the delta and whether your findings are resolved. First line exactly one of: PASS / WARN / BLOCK. Max 15 lines.
+
+<stdin>
+=== RETROACTIVE G2 round 2: commit 540ac2a, tree 7cf8fe9 (amended from 602a825 after your five-finding BLOCK) ===
+Findings -> fixes:
+1. nonprime_pieces G1 RUN: r1 REVISE -> construction REPLACED (recursive clique-sum); r2 REVISE -> canonical min-by-sorted-tuple + closed-2-manifold certification; r3 APPROVE. Transcripts committed under notes/codex-consults/2026-07-24-*nonprime*.
+2. Tree-tied evidence: notes/regen-verification-20260724/ (manifests sha256 e203469487ab203fe7dcb27f5070f2734fcdeac8cfc970ac5a481a7f5f735981 x2, 20438 lines, diff EMPTY, commands, log tails).
+3. producer_census.sh header: HISTORICAL vs current expectations separated.
+4. Banned intensifier removed (message + evidence).
+5. Precise labeling: below is the full CODE delta; the also-amended files are the four consult transcripts (large, append-only audit) and the manifests, disclosed here by name.
+
+--- final commit message ---
+galleries by paper types + morph v<=30 policy + proven regen + census pin
+
+- special.py: non-prime gallery organized by the paper's three types
+  (separating-triangle decomposition computed at build: 8 tet
+  assemblies, 13 oct stacks +- caps, type 3 empty, stated as such on the page); convex
+  gallery opens with the eight no-coplanar-faces solids (Rausenberger,
+  later Freudenthal & van der Waerden; the conditioning called what it
+  is); Classics renamed Platonic & Archimedean and moved up; NEW
+  Hyperbolic gallery (25 degree-7 nets, Klein heroes); front title
+  "Atlas of neoplatonic solids" (the paper's search-fallback phrase).
+- personal.py: MORPH_VMAX=30 -- morph movies only for v<=30 (PD:
+  build policy, not a gate; bendprover 672a603 --frames generates any
+  finite realization on demand, atlas owns assembly -- capability
+  verified end-to-end on v506 and reverted under the policy). 155 v>30
+  nets stripped to a uniform policy note; 2089 carriers, all v<=30.
+- regen split: regen_personal.sh = pure consumer (numpy-only; no
+  solver/neo/network) -- BUILD-TWICE PROVEN: two rm -rf rebuilds,
+  2.5 min each, 20438 files byte-identical. producer_census.sh = the
+  attended editorial tier (tested under new scipy 1.18.0; drift vs
+  committed census decomposed and the census left pinned).
+- classify.py: flopper census pinned in-repo (data/floppers.txt, 322
+  entries -- the neo original vanished in the 2026-07-15 trash-sweep
+  and the silent-empty default zeroed 67 flags; verified 67/67);
+  missing census now hard-fails; output sorted (was imap_unordered
+  completion order, ~3.1k-row reorder per run).
+- views.py: "convex, no coplanar faces"; labels for partial ladders.
+- MORPH_GATE_TODO.md: policy ruling, frames correspondence closed
+  (notes/FOR_NEO + FOR_ATLAS), alpha-hypersensitivity rule (certify
+  only at the solved alpha), floppy resolution.
+
+Evidence: .session/claude-commit-evidence.md.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+--- CODE DELTA (602a825 -> 540ac2a: builders, scripts, verification README) ---
+diff --git a/builders/special.py b/builders/special.py
+index 1e6751a..c3c982d 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -528,52 +528,115 @@ def main():
+     #    subdivided tet -- and are merged into the piece that contains
+     #    their vertices.)
+     def nonprime_pieces(nc):
++        """Prime factors of a triangulated sphere by recursive splitting
++        along separating triangles (clique-sum decomposition): split
++        along a non-facial 3-clique, give BOTH sides the triangle as a
++        face, recurse until no separating triangle remains. Every factor
++        is a closed triangulated sphere (asserted via V-E+F=2); factors
++        are identified rigorously: tet = (V=4,F=4); oct = (V=6,F=8, all
++        vertex degrees 4); else core. Split choice is lexicographic, so
++        the recursion is canonical; each original face lands in exactly
++        one factor by construction (G1 2026-07-24: replaces the
++        debris-merge heuristic, which could guess hosts)."""
+         from itertools import combinations
+-        faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+-        V = max(max(f) for f in faces)
+-        fset = {frozenset(f) for f in faces}
+-        adj = {v: set() for v in range(1, V + 1)}
+-        for a, b, c in faces:
+-            adj[a] |= {b, c}; adj[b] |= {a, c}; adj[c] |= {a, b}
+-        seps = [t for t in ({frozenset(t) for v in adj
+-                             for t in combinations(sorted(adj[v] | {v}), 3)
+-                             if all(y in adj[x] for x, y in combinations(t, 2))})
+-                if t not in fset]
+-        sep_edges = {frozenset(e) for t in seps for e in combinations(t, 2)}
+-        edge2f = {}
+-        for i, f in enumerate(faces):
+-            for e in (frozenset((f[0], f[1])), frozenset((f[1], f[2])),
+-                      frozenset((f[2], f[0]))):
+-                edge2f.setdefault(e, []).append(i)
+-        fadj = {i: set() for i in range(len(faces))}
+-        for e, fs in edge2f.items():
+-            if e in sep_edges:
+-                continue
+-            for i in fs:
+-                fadj[i].update(j for j in fs if j != i)
+-        comps, seen = [], set()
+-        for i in range(len(faces)):
+-            if i in seen:
+-                continue
+-            comp, stack = set(), [i]
++
++        def sphere_check(fs):
++            """closed-2-manifold + Euler 2 => sphere (G1 r2): every edge
++            exactly two incident faces, connected face dual, every vertex
++            link a single cycle, V - E + F = 2."""
++            V = {v for f in fs for v in f}
++            e2f = {}
++            for i, f in enumerate(fs):
++                for e in zip(f, f[1:] + f[:1]):
++                    e2f.setdefault(frozenset(e), []).append(i)
++            assert all(len(ff) == 2 for ff in e2f.values()), \
++                "factor edge without exactly two faces"
++            dual = {i: set() for i in range(len(fs))}
++            for ff in e2f.values():
++                dual[ff[0]].add(ff[1]); dual[ff[1]].add(ff[0])
++            comp, stack = set(), [0]
+             while stack:
+                 k = stack.pop()
+                 if k not in comp:
+-                    comp.add(k); stack.extend(fadj[k] - comp)
+-            seen |= comp; comps.append(comp)
+-        big = [(c, {v for i in c for v in faces[i]}) for c in comps if len(c) > 1]
+-        for c in [c for c in comps if len(c) == 1]:      # merge cut debris
+-            vs = {v for i in c for v in faces[i]}
+-            host = next((bc for bc in big if vs <= bc[1]), None)
+-            if host:
+-                host[0].update(c)
+-            else:
+-                big.append((set(c), vs))
++                    comp.add(k); stack.extend(dual[k] - comp)
++            assert len(comp) == len(fs), "factor dual not connected"
++            for v in V:
++                nbr = {}
++                for f in fs:
++                    if v in f:
++                        i = f.index(v)
++                        a, b = f[(i + 1) % 3], f[(i + 2) % 3]
++                        nbr.setdefault(a, set()).add(b)
++                        nbr.setdefault(b, set()).add(a)
++                assert all(len(x) == 2 for x in nbr.values()), \
++                    "vertex link not a cycle (branching)"
++                start = next(iter(nbr))
++                seen, cur, prev = {start}, next(iter(nbr[start])), start
++                while cur != start:
++                    seen.add(cur)
++                    nxt = next(x for x in nbr[cur] if x != prev)
++                    prev, cur = cur, nxt
++                assert len(seen) == len(nbr), "vertex link not a single cycle"
++            assert len(V) - len(e2f) + len(fs) == 2, "Euler characteristic != 2"
++            return V, e2f.keys()
++
++        def factors(fs):
++            fset = {frozenset(f) for f in fs}
++            adj = {}
++            for a, b, c in fs:
++                adj.setdefault(a, set()).update((b, c))
++                adj.setdefault(b, set()).update((a, c))
++                adj.setdefault(c, set()).update((a, b))
++            seps = sorted(t for t in {frozenset(t) for v in adj
++                          for t in combinations(sorted(adj[v] | {v}), 3)
++                          if all(y in adj[x] for x, y in combinations(t, 2))}
++                          if t not in fset)
++            if not seps:
++                return [fs]
++            # frozensets have no total order (subset comparison only) --
++            # canonical choice needs an explicit sorted-tuple key (G1 r2)
++            T = sorted(min(seps, key=lambda t: tuple(sorted(t))))
++            cut = {frozenset(e) for e in combinations(T, 2)}
++            edge2f = {}
++            for i, f in enumerate(fs):
++                for e in zip(f, f[1:] + f[:1]):
++                    edge2f.setdefault(frozenset(e), []).append(i)
++            fadj = {i: set() for i in range(len(fs))}
++            for e, ff in edge2f.items():
++                if e in cut:
++                    continue
++                for i in ff:
++                    fadj[i].update(j for j in ff if j != i)
++            comps, seen = [], set()
++            for i in range(len(fs)):
++                if i in seen:
++                    continue
++                comp, stack = set(), [i]
++                while stack:
++                    k = stack.pop()
++                    if k not in comp:
++                        comp.add(k)
++                        stack.extend(fadj[k] - comp)
++                seen |= comp
++                comps.append(comp)
++            assert len(comps) == 2, "separating triangle must split in two"
++            out = []
++            for comp in comps:
++                side = [fs[i] for i in sorted(comp)] + [tuple(T)]
++                out.extend(factors(side))
++            return out
++
++        fs0 = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+         pieces = []
+-        for comp, vs in big:
+-            if len(vs) == 4:
++        for fac in factors(fs0):
++            V, E = sphere_check(fac)
++            deg = {v: 0 for v in V}
++            for f in fac:
++                for v in f:
++                    deg[v] += 1
++            if len(V) == 4 and len(fac) == 4:
+                 pieces.append('tet')
+-            elif len(vs) == 6:
++            elif len(V) == 6 and len(fac) == 8 and all(d == 4 for d in deg.values()):
+                 pieces.append('oct')
+             else:
+                 pieces.append('core')
+diff --git a/notes/regen-verification-20260724/README.txt b/notes/regen-verification-20260724/README.txt
+new file mode 100644
+index 0000000..207686f
+--- /dev/null
++++ b/notes/regen-verification-20260724/README.txt
+@@ -0,0 +1,9 @@
++commands:
++  bash regen_personal.sh   (run A 15:20:09-15:22:36 exit 0; run B 15:30:00-15:32:32 exit 0)
++  find site/personal -type f -exec shasum -a 256 {} + | sort -k2 > site_manifest_{A,B}.txt
++  diff site_manifest_A.txt site_manifest_B.txt -> EMPTY
++manifest sha256s:
++e203469487ab203fe7dcb27f5070f2734fcdeac8cfc970ac5a481a7f5f735981  notes/regen-verification-20260724/site_manifest_A.txt
++e203469487ab203fe7dcb27f5070f2734fcdeac8cfc970ac5a481a7f5f735981  notes/regen-verification-20260724/site_manifest_B.txt
++file count: 20438
++diff: EMPTY (byte-identical builds)
+diff --git a/producer_census.sh b/producer_census.sh
+index 7da55ab..4669714 100755
+--- a/producer_census.sh
++++ b/producer_census.sh
+@@ -7,12 +7,14 @@
+ # interpreter with numpy AND scipy (scipy 1.18.0 installed for
+ # python3.13 on 2026-07-24).
+ # TESTED 2026-07-24 (python3.13 + scipy 1.18.0): runs clean end-to-end.
+-# Outputs DRIFT from the committed census by design -- they snapshot
+-# neo's CURRENT state. Measured that day: 67 floppy flags flipped 1->0
+-# (neo's floppers.txt moved since the Jul-14 snapshot), dropping 9
+-# nets (v25-30) from the page-worthy list; ~3.1k class rows reordered
+-# (classify output order is not stable -- sort before comparing);
+-# symmetry gained 53 rows (completion over the now-built records).
++# HISTORICAL (pre-fix) measurement from that test: 67 floppy flags
++# flipped 1->0 because neo's trash-sweep had removed the flopper list
++# and classify silently defaulted it empty; 9 page-worthy nets dropped
++# as a consequence; ~3.1k rows reordered by unsorted output. Those
++# faults are FIXED: the flopper census is pinned (data/floppers.txt,
++# hard-fail if missing) and output is sorted. Remaining EXPECTED drift
++# on a rerun: value columns if neo/data/objs changes, symmetry rows
++# completing over newly built records, and page-worthy consequences.
+ # A census refresh is an EDITORIAL act: run attended, diff against the
+ # committed tsvs, and commit deliberately -- never as a silent step.
+ set -euo pipefail
+--- files added in the amend beyond the code delta ---
+ ...26-07-24-220707-g1r3-nonprime-decomposition.txt |    85 +
+ ...te-ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad.txt |   470 +
+ notes/regen-verification-20260724/README.txt       |     9 +
+ notes/regen-verification-20260724/regenA_tail.log  |     5 +
+ notes/regen-verification-20260724/regenB_tail.log  |     5 +
+ .../site_manifest_A.txt                            | 20438 +++++++++++++++++++
+ .../site_manifest_B.txt                            | 20438 +++++++++++++++++++
+ 10 files changed, 42735 insertions(+)
+--- committer evidence (current) ---
+# Commit evidence — 2026-07-24: gallery round 2, morph policy, regen split, census pin
+
+Branch `next`, on top of c0a599a. Code + notes + one 322-line data file
+(no bulk data; the bend store is already committed).
+
+## Staged tree
+
+**builders/special.py** — non-prime gallery organized by the paper's three
+types via the separating-triangle decomposition computed inline (cut along
+non-facial 3-cycles; single-face fragments merged as cut debris; verified:
+8 tet-assemblies, 13 oct-stacks±caps incl. the prime oct base case and the
+(2,0)-subdivided tet as oct+4caps; type 3 empty, stated as such on the page). Convex gallery
+opens with the eight no-coplanar-faces solids (Rausenberger, later
+Freudenthal & van der Waerden; "arbitrary conditioning, wrong road"
+language per PD; non-prime triangular bipyramid included). "Classics" →
+"Platonic & Archimedean" (title + chip), chip moved up after Non-prime.
+NEW Hyperbolic gallery: the 25 degree-7 nets (Klein heroes, names, α=360/7
+explanation); chip after Convex. Front page title/h1 → "Atlas of
+neoplatonic solids" (PD: search-fallback phrase for the paper).
+
+**builders/personal.py** — MORPH_VMAX = 30 (PD 2026-07-24: no morph movies
+beyond v=30; build policy, not a gate — the realizer generates any finite
+realization on demand and the atlas owns assembly); v>30 nets get
+morph_note "not built: v>30 morph policy", labels/caveats cleared.
+
+**builders/views.py** — "strictly convex" caption → "convex, no coplanar
+faces"; morph labels emitted whenever the record carries them (deg-7
+scaled and partial ladders).
+
+**builders/classify.py** — flopper census input pinned to
+data/floppers.txt; HARD FAIL when missing (the old silent-empty default
+zeroed all 67 floppy flags after neo's 2026-07-15 trash-sweep removed
+euclid_hp/explore/ — root cause verified: trashed list matches the
+committed 67 floppies 67/67 on bare CLERS); output rows sorted
+(imap_unordered completion order measured to reorder ~3.1k rows/run).
+
+**regen_personal.sh** — now the pure CONSUMER regen: numpy-only preflight,
+no solver/neo/network/scipy; personal.py + special.py only.
+**producer_census.sh** (new) — the producer tier (classify/members/
+symmetry), attended-editorial, header documents the 2026-07-24 test run
+and measured drift semantics.
+
+**data/floppers.txt** (new, 322 entries) — the flopper census, pinned
+in-repo from neo/_trash-20260715/euclid_hp/explore/floppers.txt.
+
+**notes/FOR_NEO_morph_frames.md / notes/FOR_ATLAS_frames_ready.md** — the
+frames-mode correspondence: atlas request, neo's delivery note
+(bendprover 672a603, --frames, Klein-normalized emission), atlas
+verification and the closing PD ruling (no --frames-tol; v≤30 policy).
+
+**MORPH_GATE_TODO.md** — appended records: morph policy final + frames
+capability; alpha hypersensitivity of closure certification (measured:
+1.4e-15 alpha perturbation flips v28's closure verdict 5.4e-3→1.9e-2;
+RULE: certify only at the solved alpha, read it from the store); floppy
+disparity resolution.
+
+**notes/codex-consults/** — the 2026-07-22 G2 fail-open transcripts and
+the three retroactive reviews (append-only audit for commit c0a599a).
+
+## Verification (all run this session)
+
+- py_compile clean (special, personal, views, classify).
+- --frames contract verified against neo's note: tet devresid 1.6e-56;
+  v506 PASS at 34.89 (devresid 2.4e-36, 506 pos lines); v506 REFUSED at
+  2.1 with the documented reason. End-to-end assembly test (9 frames,
+  atlas gates re-verified each at 3e-12..4e-7) built and then REVERTED
+  under the v≤30 policy.
+- Policy strip: 155 v>30 nets → policy note, no morph artifacts;
+  2,089 carriers remain, all v≤30 (census: 2,245 − 155 − v30-net).
+- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+  independent rm -rf → full consumer rebuilds, 2.5 min each,
+  20,438 files, manifests BYTE-IDENTICAL (empty diff).
+- Producer census executed under python3.13 + scipy 1.18.0 (installed
+  2026-07-24, PD-authorized): runs clean; drift vs committed census
+  fully decomposed (67 floppy flips = the vanished flopper file; 9
+  page-worthy drops = consequence; ~3.1k row reorder = unsorted output;
+  +53 symmetry rows = completion). Committed census RESTORED (pinned);
+  refresh is editorial.
+- v28/v30/v48 verdicts re-verified at TRUE alphas: v28 legitimately
+  carries morphs (5.37e-3, 29 caveated events); v30 (5.53e-2) and v48
+  (5.13e-2) genuinely fail. Run-A anomaly was a test bug (hardcoded
+  alpha), not a build bug.
+- Hyperbolic gallery: 25 model-viewers, named captions, verified in the
+  generated HTML; deg-7 v≤30 nets keep hyperbolic ladders, deg-7 v>30
+  keep heroes only.
+- Site regenerated and serving at localhost:8765 (root redirects to
+  personal/; front title "Atlas of neoplatonic solids" verified live).
+
+## New conventions / invariants (G1)
+
+ONE new convention: the non-prime separating-triangle decomposition
+(builders/special.py::nonprime_pieces — combinatorial, gallery-only).
+G1 audit run retroactively at the gate's direction with the five-point
+spec (cut rule, debris-merge rule, vertex-count identification,
+conservation invariant, failure modes): three rounds, 2026-07-24-215321-g1-nonprime-decomposition.txt / 2026-07-24-220537-g1r2-nonprime-decomposition.txt / 2026-07-24-220707-g1r3-nonprime-decomposition.txt — r1 REVISE (debris-merge unjustified, vertex-count ID insufficient) led to REPLACING the construction with recursive clique-sum splitting; r2 REVISE (frozenset non-total-order canonicality, Euler-only sphere check) fixed with min-by-sorted-tuple and full closed-2-manifold certification; r3 APPROVE.
+The morph v≤30 bound is a PD build-policy ruling (no invariant); the
+display gates are unchanged from the seven-round G1-approved set
+(c0a599a evidence + MORPH_GATE_TODO.md).
+
+## Tree-tied verification artifacts (added at the gate's direction)
+
+notes/regen-verification-20260724/: site_manifest_A.txt and
+site_manifest_B.txt (both sha256
+e203469487ab203fe7dcb27f5070f2734fcdeac8cfc970ac5a481a7f5f735981,
+20438 lines), regen run logs' tails, and README.txt with the exact
+commands. diff A B = empty. The manifests certify the build-twice
+byte-identity for the site content this tree regenerates.
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+BLOCK
+1. Finding 1 is resolved in code: recursive splitting, tuple-key cut selection, manifold/link/Euler checks, and structural tet/oct identification match the approved r3 design.
+2. Finding 2 is not resolved: the verification bundle records no commit/tree hash, so the manifests do not establish that tree 7cf8fe9 produced them.
+3. Its claimed exact manifest command uses `> site_manifest_{A,B}.txt`; that does not document the two distinct commands needed to create A and B.
+4. The evidence remains stale: its opening `special.py` description still says “single-face fragments merged as cut debris,” the construction removed by this amend.
+5. Findings 3 and 4 are resolved by the shown header and revised message/evidence.
+6. Finding 5 is only partly resolved: the prose says four consult transcripts, while the supplied stat excerpt does not name all four unambiguously.
+7. Required fix: update the evidence and verification README with the actual separate commands, source commit/tree hash captured for each run, and the recursive clique-sum description.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+26,553
+BLOCK
+1. Finding 1 is resolved in code: recursive splitting, tuple-key cut selection, manifold/link/Euler checks, and structural tet/oct identification match the approved r3 design.
+2. Finding 2 is not resolved: the verification bundle records no commit/tree hash, so the manifests do not establish that tree 7cf8fe9 produced them.
+3. Its claimed exact manifest command uses `> site_manifest_{A,B}.txt`; that does not document the two distinct commands needed to create A and B.
+4. The evidence remains stale: its opening `special.py` description still says “single-face fragments merged as cut debris,” the construction removed by this amend.
+5. Findings 3 and 4 are resolved by the shown header and revised message/evidence.
+6. Finding 5 is only partly resolved: the prose says four consult transcripts, while the supplied stat excerpt does not name all four unambiguously.
+7. Required fix: update the evidence and verification README with the actual separate commands, source commit/tree hash captured for each run, and the recursive clique-sum description.

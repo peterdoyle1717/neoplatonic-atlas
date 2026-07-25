@@ -328,6 +328,13 @@ def align_frames(frames):
 # endpoints arrive via different development paths inherit the drift.
 EDGE_LEN_TOL = 1e-2
 
+# Morph movies are built only for v <= MORPH_VMAX (PD 2026-07-24: "no
+# need to include any morph movies beyond v=30 -- waste of time and
+# space"). A build-policy choice, not a correctness gate: the realizer
+# (bendprover --frames) can generate any finite realization on demand,
+# and the atlas owns frame assembly; what gets built is up to us.
+MORPH_VMAX = 30
+
 
 def _edges_of(faces):
     return {tuple(sorted((a, b))) for f in faces
@@ -671,8 +678,13 @@ def _build_net(job, morphs=True):
         glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
                  bends=bd)
     morph_note, morph_bends, n_unv = None, None, 0
+    vpolicy = morphs and V > MORPH_VMAX
+    if vpolicy:
+        morphs = False
+        morph_note = f"not built: v>{MORPH_VMAX} morph policy (PD 2026-07-24)"
     if not morphs:
-        built = "skipped (morphs=False)"          # generation-time opt-out
+        built = (f"skipped (v>{MORPH_VMAX} policy)" if vpolicy
+                 else "skipped (morphs=False)")   # generation-time opt-out
     else:
         nframes, morph_note, morph_bends, n_unv = glb_movies(
             name, faces, V, nc, netdir,
@@ -701,7 +713,10 @@ def _build_net(job, morphs=True):
                 "maxdeg": maxdeg})
     if maxdeg > 6:
         rec["alpha_max"] = amax
+    if maxdeg > 6 and not morph_note:
         rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
+    else:
+        rec.pop("morph_labels", None)
     if morph_note:
         rec["morph_note"] = morph_note      # why the morphs are absent (audit)
     else:

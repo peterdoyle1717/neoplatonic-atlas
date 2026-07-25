@@ -242,15 +242,37 @@ def main():
     convex = sorted((r for r in recs.values() if r["flags"].get("convex")
                      and not r["flags"].get("pancake")),
                     key=lambda r: (r["v"], r["name"]))
+    byn_cx = {r["name"]: r for r in recs.values()}
+    EIGHT = [("v4CCAE", "tetrahedron"),
+             ("v5CCACAE", "triangular bipyramid"),
+             ("v6CCCACAAE", "octahedron"),
+             ("v7CCCACACAAE", "pentagonal bipyramid"),
+             ("v8CCCACACACAAE", "snub disphenoid"),
+             ("v9CCCACCACACAAAE", "triaugmented triangular prism"),
+             ("v10CCCACCACACAACAAE", "gyroelongated square bipyramid"),
+             ("v12CCCCACCACACACAACAAAE", "icosahedron")]
+    eight_rows = [(byn_cx[nm], label) for nm, label in EIGHT if nm in byn_cx]
+    eight_names = {nm for nm, _ in EIGHT}
+    rest = [r for r in convex if r["name"] not in eight_names]
+    cx_parts = [
+        '<h2>The eight without coplanar faces</h2>'
+        '<p class=desc>Convex with no two adjacent faces coplanar '
+        '&mdash; identified by Rausenberger, and later by Freudenthal '
+        'and van der Waerden. Forbidding coplanar faces is an arbitrary '
+        'conditioning, and a wrong road: it ends the story at eight, '
+        'where the convex family below begins. (The triangular '
+        'bipyramid is non-prime; no matter.)</p>',
+        grid([item(r, f'v={r["v"]} &middot; {label}')
+              for r, label in eight_rows]),
+        f'<h2>The convex family</h2>'
+        f'<p class=desc>Every bend nonnegative, coplanar faces welcome '
+        f'&mdash; all {cn["convex"]} among the {cn["total"]} prime nets '
+        f'with v &le; 30 (pancakes, the doubly covered flat case, are '
+        f'listed separately).</p>',
+        grid([item(r, f'v={r["v"]}') for r in rest])]
     gallery('convex.html', 'Convex',
-            f'Convex solids: every bend nonnegative &mdash; all '
-            f'{cn["convex"]} among the {cn["total"]} prime nets with '
-            f'v &le; 30 (pancakes listed separately). '
-            f'&ldquo;strictly&rdquo; marks strictly convex (every bend '
-            f'positive).',
-            grid([item(r, f'v={r["v"]}'
-                       + (' strictly' if r["flags"].get("strictly_convex") else ''))
-                  for r in convex]))
+            'The convex neoplatonic solids.',
+            ''.join(cx_parts))
 
     pancakes = sorted((r for r in recs.values() if r["flags"].get("pancake")),
                       key=lambda r: (r["v"], r["name"]))
@@ -289,6 +311,23 @@ def main():
             'Members up to v = 132 are built so far; each page lists '
             'the net&rsquo;s Eisenstein ancestors and descendants.',
             ''.join(parts))
+
+    # -- hyperbolic gallery (PD 2026-07-24: the degree-7 examples get
+    #    their own gallery; elsewhere they appear only where appropriate,
+    #    e.g. as the blue members of Platonic & Archimedean) -----------
+    hyp = sorted((r for r in recs.values() if r.get("maxdeg", 6) > 6),
+                 key=lambda r: (r["v"], r["name"]))
+    def hyp_cap(r):
+        nm = '; '.join(r.get("names", [])[:2])
+        return (f'v={r["v"]}' + (f' &middot; {nm}' if nm else ''))
+    gallery('hyperbolic.html', 'Hyperbolic',
+            f'The {len(hyp)} nets with a degree-7 vertex: no Euclidean '
+            f'realization (a 7-fold vertex needs corner angle '
+            f'&alpha; &le; 360/7 &lt; 60), realized instead as '
+            f'equilateral hyperbolic solids at &alpha; = 360/7, shown '
+            f'in the Klein model (blue). All are named solids in their '
+            f'neoplatonic reading.',
+            grid([item(r, hyp_cap(r)) for r in hyp]))
 
     # -- symmetry gallery ----------------------------------------------
     symrows = []
@@ -430,7 +469,7 @@ def main():
             parts.append(f'<h2>{SECT[rank]}</h2>')
             parts.append(grid([item(r, cap(v, names, hyp))
                                for v, names, r, hyp in sel]))
-        gallery('classics.html', 'The classics, neoplatonized',
+        gallery('classics.html', 'Platonic &amp; Archimedean, neoplatonized',
                 'Named solids in their neoplatonic reading: triangle faces '
                 'kept, squares and pentagons capped by unit pyramids, '
                 'hexagons filled by flat unit fans (faces are in the eye '
@@ -473,13 +512,167 @@ def main():
         return out
 
     for tag in ("phyllo31", "phyllo22", "phyllo41", "phyllo51",
-                "flops", "nonprime", "preapproved", "small"):
+                "flops", "preapproved", "small"):
         rows = theme_list(tag)
         title, desc = tdesc.get(tag, (tag, ""))
         if tag == "small":
             title = 'Primes v &le; 12'
         gallery(f'{tag}.html', title, desc,
                 grid([item(r, f'v={r["v"]}') for r in rows]))
+
+    # -- non-prime gallery, organized by the paper's three types -------
+    #    (separating-triangle decomposition: cut along non-facial
+    #    3-cycles; pieces are tets, octs, or a prime core. Single-face
+    #    fragments are cut debris -- faces whose three edges all lie in
+    #    separating triangles, e.g. the uncapped oct faces of a
+    #    subdivided tet -- and are merged into the piece that contains
+    #    their vertices.)
+    def nonprime_pieces(nc):
+        """Prime factors of a triangulated sphere by recursive splitting
+        along separating triangles (clique-sum decomposition): split
+        along a non-facial 3-clique, give BOTH sides the triangle as a
+        face, recurse until no separating triangle remains. Every factor
+        is a closed triangulated sphere (asserted via V-E+F=2); factors
+        are identified rigorously: tet = (V=4,F=4); oct = (V=6,F=8, all
+        vertex degrees 4); else core. Split choice is lexicographic, so
+        the recursion is canonical; each original face lands in exactly
+        one factor by construction (G1 2026-07-24: replaces the
+        debris-merge heuristic, which could guess hosts)."""
+        from itertools import combinations
+
+        def sphere_check(fs):
+            """closed-2-manifold + Euler 2 => sphere (G1 r2): every edge
+            exactly two incident faces, connected face dual, every vertex
+            link a single cycle, V - E + F = 2."""
+            V = {v for f in fs for v in f}
+            e2f = {}
+            for i, f in enumerate(fs):
+                for e in zip(f, f[1:] + f[:1]):
+                    e2f.setdefault(frozenset(e), []).append(i)
+            assert all(len(ff) == 2 for ff in e2f.values()), \
+                "factor edge without exactly two faces"
+            dual = {i: set() for i in range(len(fs))}
+            for ff in e2f.values():
+                dual[ff[0]].add(ff[1]); dual[ff[1]].add(ff[0])
+            comp, stack = set(), [0]
+            while stack:
+                k = stack.pop()
+                if k not in comp:
+                    comp.add(k); stack.extend(dual[k] - comp)
+            assert len(comp) == len(fs), "factor dual not connected"
+            for v in V:
+                nbr = {}
+                for f in fs:
+                    if v in f:
+                        i = f.index(v)
+                        a, b = f[(i + 1) % 3], f[(i + 2) % 3]
+                        nbr.setdefault(a, set()).add(b)
+                        nbr.setdefault(b, set()).add(a)
+                assert all(len(x) == 2 for x in nbr.values()), \
+                    "vertex link not a cycle (branching)"
+                start = next(iter(nbr))
+                seen, cur, prev = {start}, next(iter(nbr[start])), start
+                while cur != start:
+                    seen.add(cur)
+                    nxt = next(x for x in nbr[cur] if x != prev)
+                    prev, cur = cur, nxt
+                assert len(seen) == len(nbr), "vertex link not a single cycle"
+            assert len(V) - len(e2f) + len(fs) == 2, "Euler characteristic != 2"
+            return V, e2f.keys()
+
+        def factors(fs):
+            fset = {frozenset(f) for f in fs}
+            adj = {}
+            for a, b, c in fs:
+                adj.setdefault(a, set()).update((b, c))
+                adj.setdefault(b, set()).update((a, c))
+                adj.setdefault(c, set()).update((a, b))
+            seps = sorted(t for t in {frozenset(t) for v in adj
+                          for t in combinations(sorted(adj[v] | {v}), 3)
+                          if all(y in adj[x] for x, y in combinations(t, 2))}
+                          if t not in fset)
+            if not seps:
+                return [fs]
+            # frozensets have no total order (subset comparison only) --
+            # canonical choice needs an explicit sorted-tuple key (G1 r2)
+            T = sorted(min(seps, key=lambda t: tuple(sorted(t))))
+            cut = {frozenset(e) for e in combinations(T, 2)}
+            edge2f = {}
+            for i, f in enumerate(fs):
+                for e in zip(f, f[1:] + f[:1]):
+                    edge2f.setdefault(frozenset(e), []).append(i)
+            fadj = {i: set() for i in range(len(fs))}
+            for e, ff in edge2f.items():
+                if e in cut:
+                    continue
+                for i in ff:
+                    fadj[i].update(j for j in ff if j != i)
+            comps, seen = [], set()
+            for i in range(len(fs)):
+                if i in seen:
+                    continue
+                comp, stack = set(), [i]
+                while stack:
+                    k = stack.pop()
+                    if k not in comp:
+                        comp.add(k)
+                        stack.extend(fadj[k] - comp)
+                seen |= comp
+                comps.append(comp)
+            assert len(comps) == 2, "separating triangle must split in two"
+            out = []
+            for comp in comps:
+                side = [fs[i] for i in sorted(comp)] + [tuple(T)]
+                out.extend(factors(side))
+            return out
+
+        fs0 = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+        pieces = []
+        for fac in factors(fs0):
+            V, E = sphere_check(fac)
+            deg = {v: 0 for v in V}
+            for f in fac:
+                for v in f:
+                    deg[v] += 1
+            if len(V) == 4 and len(fac) == 4:
+                pieces.append('tet')
+            elif len(V) == 6 and len(fac) == 8 and all(d == 4 for d in deg.values()):
+                pieces.append('oct')
+            else:
+                pieces.append('core')
+        return pieces
+
+    np_rows = {1: [], 2: [], 3: []}
+    for r in theme_list("nonprime"):
+        pieces = nonprime_pieces(r["netcode"])
+        kinds = set(pieces)
+        typ = (1 if kinds <= {'tet'} else
+               2 if kinds <= {'oct', 'tet'} else 3)
+        nt, no = pieces.count('tet'), pieces.count('oct')
+        cap = (f"{nt} tets" if typ == 1 else
+               (f"{no} oct{'s' if no > 1 else ''}"
+                + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else "")))
+        np_rows[typ].append((r["v"], r, cap))
+    NP_SECT = (
+        (1, 'Assemblies of regular tetrahedra',
+         'Two to four sharing an axis edge, or helical stacks.'),
+        (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
+         'The octahedron itself (prime) is the one-stack base case.'),
+        (3, 'A prime neoplatonic core with attached tetrahedra',
+         'Up to four tetrahedra on the faces of a prime core. No '
+         'exemplars built yet.'))
+    parts = []
+    for typ, title, sub in NP_SECT:
+        parts.append(f'<h2>{title}</h2><p class=desc>{sub}</p>')
+        rows = sorted(np_rows[typ], key=lambda t: (t[0], t[1]["name"]))
+        if rows:
+            parts.append(grid([item(r, cap) for _, r, cap in rows]))
+    gallery('nonprime.html', 'Non-prime neoplatonics',
+            'A net is prime if every triangular circuit bounds a face. '
+            'Non-prime neoplatonics decompose along their separating '
+            'triangles into prime pieces; the three construction types '
+            'below follow the paper. Captions give the decomposition.',
+            ''.join(parts))
 
     # -- dentings gallery: regenerated from the certified dent-walk scan
     #    (data/walks/, committed) via build.py's model_glb. By undented
@@ -594,8 +787,8 @@ def main():
         ex = sorted(recs)[0]
     front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
 <meta name=viewport content="width=device-width,initial-scale=1">
-<title>Neoplatonic Solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
-<h1>Neoplatonic Solids</h1>
+<title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+<h1>Atlas of neoplatonic solids</h1>
 <p class="authors">Peter Doyle, Matthew Ellison</p>
 <p>
 A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
@@ -609,7 +802,9 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="by-v/13.html">Primes v=13</a>
 <a href="by-v/14.html">Primes v=14</a>
 <a href="gallery/nonprime.html">Non-prime</a>
+<a href="gallery/classics.html">Platonic &amp; Archimedean</a>
 <a href="gallery/convex.html">Convex</a>
+<a href="gallery/hyperbolic.html">Hyperbolic</a>
 <a href="gallery/dented.html">Dented</a>
 <a href="gallery/buried.html">Hull-buried</a>
 <a href="gallery/pancakes.html">Pancakes</a>
@@ -618,7 +813,6 @@ with equilateral triangle faces, meeting at most six to a vertex.
 <a href="gallery/subdiv.html">Eisenstein subdivisions</a>
 <a href="gallery/recognized.html">All angles recognized</a>
 <a href="gallery/decap.html">Cap-replaced convex</a>
-<a href="gallery/classics.html">Classics</a>
 <a href="gallery/phyllo31.html">(3,1)</a>
 <a href="gallery/phyllo22.html">(2,2)</a>
 <a href="gallery/phyllo41.html">(4,1)</a>

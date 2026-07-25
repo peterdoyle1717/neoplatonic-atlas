@@ -21,7 +21,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
 NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 OBJS = os.path.join(NEO, "data", "objs")
-FLOPPERS = os.path.join(NEO, "euclid_hp", "explore", "floppers.txt")
+# the 322-flopper census, pinned in-repo since 2026-07-24: the original
+# (neo/euclid_hp/explore/floppers.txt) vanished in neo's 2026-07-15
+# trash-sweep, and the old silent-empty default here zeroed all 67
+# committed floppy flags on the next census run. Bare-CLERS entries.
+FLOPPERS = os.path.join(TOP, "data", "floppers.txt")
 sys.path.insert(0, HERE)
 from walklib import bends_from_coords
 
@@ -31,9 +35,10 @@ clers_mod = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(clers_mod)
 decode = clers_mod.decode
 
-flopset = set()
-if os.path.exists(FLOPPERS):
-    flopset = {ln.strip() for ln in open(FLOPPERS) if ln.strip()}
+if not os.path.exists(FLOPPERS):
+    # a missing census input must never silently clear flags
+    raise SystemExit(f"FATAL: flopper census missing: {FLOPPERS}")
+flopset = {ln.strip() for ln in open(FLOPPERS) if ln.strip()}
 
 
 def classify(args):
@@ -92,12 +97,18 @@ def main():
                 jobs.append((v, fname))
     print(f"{len(jobs)} nets", flush=True)
     out = os.path.join(TOP, "data", "class_v30.tsv")
-    with Pool(6) as pool, open(out, "w") as f:
-        f.write("name\tv\tpancake\tconvex\tstrict\tnburied\tdepth\tfloppy\tedgeerr\n")
+    rows = []
+    with Pool(6) as pool:
         for i, row in enumerate(pool.imap_unordered(classify, jobs, chunksize=200)):
-            f.write(row + "\n")
+            rows.append(row)
             if i % 10000 == 0:
                 print(i, flush=True)
+    rows.sort()          # deterministic output (imap_unordered completion
+                         # order was measured to reorder ~3.1k rows/run)
+    with open(out, "w") as f:
+        f.write("name\tv\tpancake\tconvex\tstrict\tnburied\tdepth\tfloppy\tedgeerr\n")
+        for row in rows:
+            f.write(row + "\n")
     print("done", flush=True)
 
 

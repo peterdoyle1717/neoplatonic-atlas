@@ -1,0 +1,286 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8be3-8d6c-7d01-8c0b-c9ffb772f39b
+--------
+user
+RETROACTIVE commit-gate review, round 2 (atlas, commit e1a814b, tree 672fac7). You BLOCKed the prior tree 8c647ef8 with three findings (regen script masking failure; missing entry-point test; message overclaim). The bundle shows the fixes, the executed tests, the disclosed scipy gap, the delta diff vs the tree you already reviewed, the final message, and the updated evidence. Audit ONLY the delta and whether your findings are resolved. First line exactly one of: PASS / WARN / BLOCK. Max 20 lines.
+
+<stdin>
+=== RETROACTIVE G2 v2: commit e1a814b, tree 672fac7 (amended from 1c4fcf6 after your BLOCK) ===
+Your three BLOCK findings and their fixes:
+1. regen_personal.sh masked failure -> set -euo pipefail + numpy/scipy preflight BEFORE the destructive rm + dead network step fetch_dents removed (new abort-vector under -e, consumed by nothing).
+2. no entry-point test -> EXECUTED: PYTHON=false bash regen_personal.sh -> 'FATAL: false lacks numpy/scipy', exit 1, site intact (2245 nets before AND after -- preflight precedes rm); set -euo pipefail semantics demonstrated (false; echo UNREACHABLE -> exit 1, not printed); no python step carries || or trailing true. The preflight also EXPOSED and we disclose: python3.13 lacks scipy on this box; classify.py (sole scipy importer) needs PYTHON=/usr/bin/python3 (numpy 2.0.2 + scipy 1.13.1 verified) or a scipy install; the consumer path needs numpy only.
+3. message overclaim -> corrected: gated GLB artifacts regenerate through the gates; ideal_net/clers_layout SVGs disclosed as existence-cached (ungated, deterministic). Also fixed a stale round-count line (seven G1 rounds, not five).
+
+--- delta diff vs the tree you reviewed (8c647ef8 -> 672fac7) ---
+diff --git a/regen_personal.sh b/regen_personal.sh
+index f623f0f..1fb6d07 100755
+--- a/regen_personal.sh
++++ b/regen_personal.sh
+@@ -1,7 +1,10 @@
+ #!/bin/bash
+ # Regenerate the personal pages from scratch. Everything is derived from
+ # builders/ + data/nets_v4_14.txt; solver binaries are built if missing.
+-set -u
++# set -e: any failing step ABORTS the regen (G2 2026-07-22: personal.py
++# exits nonzero on a failed net -- BUILD-FAIL/dented hero -- and that
++# signal must stop the pipeline, not roll into special.py).
++set -euo pipefail
+ cd "$(dirname "$0")"
+ # neo is a sibling of atlas since the 2026-07-21 move (was the parent);
+ # override with NEO_SRC. PYTHON must have numpy/scipy (bare python3 on this
+@@ -9,15 +12,21 @@ cd "$(dirname "$0")"
+ NEO="${NEO_SRC:-$(cd .. && pwd)/neo}"
+ PYTHON="${PYTHON:-python3.13}"
+ 
++# preflight BEFORE the destructive rm: wrong interpreter or missing
++# toolchain must fail while the built site is still intact
++"$PYTHON" -c 'import numpy, scipy' || {
++    echo "FATAL: $PYTHON lacks numpy/scipy -- set PYTHON" >&2; exit 1; }
+ [ -x "$NEO/bendprover/csrc/euclid_lm_mp" ] || make -C "$NEO/bendprover/csrc" euclid_lm_mp
+ [ -x builders/horoz_c ] || cc -O2 -o builders/horoz_c builders/horoz_c.c -lm
+ 
+ /bin/rm -rf site/personal
+ # classification sweep (from neo/data/objs, ~2 min) and the page-worthy
+-# list; then records+artifacts+pages; then galleries/by-v/front
++# list; then records+artifacts+pages; then galleries/by-v/front.
++# fetch_dents.py removed 2026-07-22: its dent_v GLBs are consumed by
++# nothing (the dented gallery reads committed data/walks), and a dead
++# network step must not be an abort vector under set -e.
+ "$PYTHON" builders/classify.py
+ "$PYTHON" builders/members.py
+ "$PYTHON" builders/personal.py
+-"$PYTHON" builders/fetch_dents.py
+ "$PYTHON" builders/symmetry.py
+ "$PYTHON" builders/special.py
+
+--- final commit message ---
+display gates + committed bend store + gallery round (next)
+
+The atlas now consumes committed solver output (data/bends/, 2245 nets)
+and regenerates everything it displays through certification gates.
+
+- personal.py: producer persists complete gate-passing bend snapshots;
+  consumer builds from the store, solver never invoked when a store is
+  present (store-only rule = the no-giant-chase ruling in code). Gated
+  displayed artifacts (hero + morph GLBs) regenerate each build through
+  the gates -- no reuse; measured byte-deterministic (ideal_net /
+  clers_layout SVGs stay existence-cached: ungated, deterministic). Gates, per the PD 1%-length-fidelity
+  spec: normalized Lorentz edge metric post-center with per-point
+  timelike/future validation; per-event normalized Lorentz closure;
+  euclidean closure over all face adjacencies + edge lengths; dent_index
+  link-turning on displayed coordinates with flat-bends-certified
+  coplanar skip. Hero failures raise -> BUILD-FAIL, main exits nonzero.
+  Seven same-day G1 rounds (notes/codex-consults/2026-07-22-*-g1*) to
+  APPROVE, incl. the PD certify-where-resolvable ruling and the measured
+  closure-noise coefficient (C=128 vs measured 62); the audited gates
+  caught two production nets the superseded metrics passed (v30 57%
+  off-hyperboloid; v28 1.5% path disagreement) -- both now omitted with
+  measured reasons. Calibration: notes/gate-calibration-20260722/.
+- realize_h.py: develop_h returns closure events ([0]-compatible).
+- views.py: morph block requires both artifacts.
+- special.py: classics Platonic+Archimedean only; Odds-and-ends off;
+  Non-prime after the three Primes; front page promises morphs only
+  where certified; dented gallery self-regenerates from committed
+  data/walks (0-first dent sets, orbit xk + gap), geometry-exact with
+  published bytes.
+- regen_personal.sh: set -euo pipefail (failed step aborts; personal.py
+  exits nonzero on failed nets), numpy/scipy preflight before the
+  destructive rm, dead fetch_dents step removed, python3.13 +
+  NEO=sibling projects/neo (PYTHON/NEO_SRC overridable).
+- data/dentings.tsv: dent-set scan manifest. MORPH_GATE_TODO.md: full
+  design record. .claude/launch.json: preview config.
+
+Evidence: .session/claude-commit-evidence.md (calibrations, executed
+failure tests, determinism proofs, zero-state sweep).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+--- updated evidence file ---
+# Commit evidence — 2026-07-22: display gates, committed bend store, gallery round
+
+Branch `next`. One batch: the display-gate architecture (producer→consumer
+bend store + gated regeneration), the gallery reorganization round, and regen
+fixes. No Lean; solver untouched (atlas consumes its committed output).
+
+## Staged tree
+
+**builders/personal.py** — (a) Committed bend store: producer persists solved
+bends to `data/bends/<nid>.json` — ONLY as complete, gate-passing snapshots;
+consumer builds from the store, and with a store present the solver is NEVER
+invoked (store-only rule; incomplete store ⇒ morphs stay unbuilt — the
+no-giant-chase ruling in code). (b) Always-regenerate: every displayed
+artifact is rebuilt from committed bends through the gates each build; no
+reuse (regeneration measured byte-deterministic), stale morph GLBs deleted
+unconditionally. (c) Length-fidelity gate (PD spec: every displayed edge
+within 1% of exact): normalized Lorentz metric post-`center` with per-point
+finite/timelike/future validation; per-event normalized Lorentz closure on
+every development closure event (≤1% of ell); Euclidean closure over all
+directed face adjacencies (`euclid_closure_resid`) + edge lengths; develop
+blow-up = hard reject. (d) Undented display gate: `dent_index` link-turning
+port on displayed coordinates; coplanar-degenerate vertices skipped only
+under the flat-bends certificate (missing bend ⇒ uncertified ⇒ reject).
+(e) Hero tripwires raise → BUILD-FAIL; `main()` exits nonzero on any failed
+net. (f) Backstop wrapper; `ATLAS_MORPHS=0` opt-out ships nothing;
+`morph_note` audit field.
+
+**builders/realize_h.py** — `develop_h` additionally returns closure events
+(callers use `[0]`; the gate consumes the third element).
+
+**builders/views.py** — morph block renders only when BOTH morph artifacts
+are present.
+
+**builders/special.py** — galleries: classics → Platonic+Archimedean only;
+Odds-and-ends off + delinked; Non-prime chip after the three Primes; front
+page promises morphs only where certified; dented gallery self-regenerates
+from committed `data/walks` via `build.model_glb` (∅-first dent sets, orbit
+×k + gap), geometry-exact with published bytes; CSS extended.
+
+**regen_personal.sh** — `set -euo pipefail` (a failed builder step ABORTS —
+the personal.py nonzero exit must stop the pipeline, per retro-G2);
+numpy/scipy preflight BEFORE the destructive `rm` (wrong interpreter fails
+with the site intact); dead network step `fetch_dents.py` removed (consumed
+by nothing; must not be an abort vector under -e); `python3.13` + `NEO` →
+sibling `projects/neo`; `NEO_SRC`/`PYTHON` overridable. Integration tests
+executed: `PYTHON=false` → exit 1 at preflight, site untouched (2245 nets
+before and after); `set -euo pipefail; false; echo UNREACHABLE` → exit 1,
+unreachable not printed. DISCLOSED: python3.13 lacks scipy on this box, so
+the full-regen path (classify.py, its only importer) needs
+`PYTHON=/usr/bin/python3` (has numpy 2.0.2 + scipy 1.13.1) or a scipy
+install for 3.13 — the consumer build path (personal/symmetry/special)
+needs only numpy and runs under python3.13.
+
+**data/bends/** (2245 json, 56 MB) — the committed bend store (2026-07-22
+full solver run; deterministic — bend-identical repeat solves, byte-identical
+GLB round-trip).
+
+**data/dentings.tsv** — published dent-set scan manifest (47 nets, 195
+dentings).
+
+**notes/gate-calibration-20260722/** — the calibration record: `rel_v50.tsv`,
+`klein_v50.tsv` (superseded metrics, kept as history), `edge_len.tsv`,
+`dent_turn.tsv`, `numcal.txt` (|num| separation ×1.1e5; 4449 skips, 0
+uncertified), `closure_C.txt` (measured closure-noise coefficient),
+`final_sweep.txt` (zero-state).
+
+**MORPH_GATE_TODO.md** — the full design record: spec, superseded metrics,
+all seven G1 rounds with findings and fixes, calibrations, production catches, and the PD certify-where-resolvable ruling.
+
+**notes/codex-consults/** — the 2026-07-21 G2 transcript + seven G1 consults
+(161343, 162535, 162856, 163649, 164416, 164845, 175729).
+
+**.claude/launch.json** — local preview server config.
+
+## Verification (all run this session)
+
+- `py_compile` clean (personal, realize_h, views, special).
+- Solver determinism: bend-identical repeat solves (tet, v13, v794).
+  Store round-trip: `rb.glb` byte-identical from stored bends. Build
+  determinism: fresh-vs-fresh byte-identical.
+- Gate calibrations in `notes/gate-calibration-20260722/`; final zero-state:
+  hero closure max 8.97e-14 over 2220, 0 hero failures, 0 morph-carrier
+  failures (all 2245 stores).
+- Executed failure tests: corrupted-store hero → BUILD-FAIL
+  (`closure 5.58e-01, eerr 1.11e-16` — the closure-vacuousness proof);
+  bad input through real `main()` → exit 1; healthy → exit 0;
+  `morphs=False` → no GLBs, no flags, store untouched.
+- Production catches by the audited gates: v30 (α=2.1 frame 57%
+  off-hyperboloid, unnormalized metric read 7.3e-5, normalized 5.5e-2) and
+  v28 (per-event closure 1.49e-2, invisible to retained-edge metric) — both
+  rebuilt, morphs omitted with measured reasons. v>50 notes made truthful
+  (55 incomplete-store / 66 gate-failed).
+- Site state: 2245 pages rendered; galleries + front page regenerated;
+  dented gallery 242/242 filenames match published, geometry-exact.
+
+## Retroactive G2 (the automatic gate failed open)
+
+The commit-time gate errored (codex context exhausted on the raw 2245-file
+diff; `tokens used 0`, exit 1) and the wrapper FAILED OPEN — the initial
+commit of this tree landed unreviewed. A retroactive review of the exact
+tree (full code diff + summarized data files) returned BLOCK
+(notes/codex-consults/2026-07-22-180254-g2retro-1c4fcf6.txt) with three
+findings, all fixed in the amended commit: (1) regen_personal.sh masked
+the failure signal (`set -u` only) → `set -euo pipefail` + preflight +
+executed propagation tests; (2) the evidence lacked an entry-point
+integration test → executed (see regen_personal.sh above; the preflight
+also EXPOSED the python3.13 scipy gap, disclosed); (3) the commit message
+overclaimed "every displayed artifact regenerates" → corrected to the
+gated GLB artifacts (ideal_net/clers_layout SVGs remain existence-cached,
+ungated and deterministic). Gate-hook fail-open flagged to Peter as a
+process bug (fail closed on codex error; summarize oversized diffs).
+
+## New conventions / invariants (G1)
+
+Two display invariants (1% length fidelity incl. closure; dent_index with
+certified coplanar skip) — spec and full revision history in
+MORPH_GATE_TODO.md; calibration evidence in notes/gate-calibration-20260722/.
+
+G1 consults (all in notes/codex-consults/, same-day, seven rounds):
+- r1 161343: REVISE (6 findings) — fixed (normalized metric, post-center
+  certification, certified coplanar skip, isfinite, reuse recert,
+  exit chain).
+- r2 162535: REVISE (4 residuals) — fixed (missing-bend uncertified,
+  storeless reuse removed, store-only rule, hero recertification).
+- r3 162856: REVISE (2 residuals) — fixed (reuse ELIMINATED:
+  always-regenerate; euclid+hyperbolic closure gates added after the
+  corrupted-store test exposed closure vacuousness — rigid placement
+  keeps kept edges exact, walklib.develop computes no residual).
+- r4 163649: REVISE (3 findings) — fixed (opt-out hygiene,
+  complete-snapshot-only store persistence, per-event Lorentz closure).
+- r5 164416: REVISE (2 findings) — fixed (stale-morph deletion FIRST —
+  proven by pre-planted-stale + failing-build test; materiality made
+  scale-aware after a fixed 1e-9 was measured to false-trip every
+  deepest rung via eps*s^2 Minkowski cancellation).
+- r6 164845: REVISE (clamp inverted to acceptance hole) — fixed by the
+  conservative-upper-bound rule; the noise coefficient was then MEASURED
+  (closure_C.txt: 756001 events, large-s bound 62; C_CLOSURE=128); the
+  25 small nets unresolvable at 1% in float64 went to Peter, whose
+  recorded RULING is certify-where-resolvable: closure certified
+  wherever float64 resolves 1%, unverifiable events skipped + counted +
+  disclosed via morph_caveat, corruption rejection retained. (Incident,
+  recorded in the baton: a scripted bulk edit duplicated a code block;
+  caught by the spot suite, copies diffed identical, excised
+  line-precise, all signatures re-verified.)
+- r7 175729: APPROVE — "the implementation matches the recorded
+  certify-where-resolvable semantics"; C_CLOSURE confirmed against the
+  measurement; acceptance hole confirmed removed.
+
+Final zero-state (final_sweep.txt): hero euclid closure max 8.97e-14
+over 2220 nets, 0 hero failures; morph-carrying nets failing: 0. The
+v22-25 marginals are KEPT (certified-where-resolvable, caveats count
+their unverifiable events); v28/v30/v48 and the gate-failed giants stay
+omitted on measured error; 55 giants remain "store incomplete" (no
+chase). Caveat fields stamp at the next full build (which promotion's
+build-twice-diff gate requires regardless).
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+BLOCK
+
+Findings 1 and 2 are resolved by the delta and recorded tests.
+
+Finding 3 remains: the opening sentence still claims atlas “regenerates everything it displays through certification gates,” contradicting the later disclosure that `ideal_net` and `clers_layout` SVGs are existence-cached and ungated.
+
+Replace it with, for example: “The atlas now consumes committed solver output and regenerates its gated GLB artifacts through certification gates.”
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+11,246
+BLOCK
+
+Findings 1 and 2 are resolved by the delta and recorded tests.
+
+Finding 3 remains: the opening sentence still claims atlas “regenerates everything it displays through certification gates,” contradicting the later disclosure that `ideal_net` and `clers_layout` SVGs are existence-cached and ungated.
+
+Replace it with, for example: “The atlas now consumes committed solver output and regenerates its gated GLB artifacts through certification gates.”

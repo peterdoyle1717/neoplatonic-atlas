@@ -62,7 +62,7 @@ def flag_line(rec):
     if fl.get("pancake"):
         bits.append("pancake")
     elif fl.get("strictly_convex"):
-        bits.append("strictly convex")
+        bits.append("convex, no coplanar faces")
     elif fl.get("convex"):
         bits.append("convex")
     if fl.get("buried"):
@@ -144,8 +144,9 @@ def render_page(netdir):
     if art.get("morph_p") and art.get("morph_k"):   # both or neither (G1)
         lab = ''
         end = 'Euclidean'
+        if rec.get("morph_labels"):     # deg-7 scaled or partial ladders
+            lab = '&labels=' + ','.join(rec["morph_labels"])
         if amax:
-            lab = '&labels=' + ','.join(rec.get("morph_labels", []))
             end = f'&alpha;={amax:.2f}&deg;'
         body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb{lab}',
                              f'ideal to {end}, Poincar&eacute;'),

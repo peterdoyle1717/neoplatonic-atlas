@@ -1,0 +1,75 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: xhigh
+reasoning summaries: none
+session id: 019f8be6-90bf-7111-bd53-0518460dc534
+--------
+user
+RETROACTIVE commit-gate review, round 3 (atlas, commit c0a599a, tree 672fac7 -- unchanged from your round-2 review; message-only amend). Your remaining finding was the opening-sentence overclaim; it now reads "regenerates its gated GLB artifacts through certification gates" per your suggestion. Audit ONLY whether the message now matches the tree you reviewed. First line exactly one of: PASS / WARN / BLOCK. Max 8 lines.
+
+<stdin>
+=== RETROACTIVE G2 v3: commit c0a599a, tree 672fac7 (message-only amend after your round-2 BLOCK) ===
+Round-2: findings 1-2 resolved; finding 3 remained in the OPENING sentence. Fixed with your suggested wording. The tree is UNCHANGED (672fac7 -- the one whose delta you already reviewed).
+
+--- final commit message, in full ---
+display gates + committed bend store + gallery round (next)
+
+The atlas now consumes committed solver output (data/bends/, 2245 nets)
+and regenerates its gated GLB artifacts through certification gates.
+
+- personal.py: producer persists complete gate-passing bend snapshots;
+  consumer builds from the store, solver never invoked when a store is
+  present (store-only rule = the no-giant-chase ruling in code). Gated
+  displayed artifacts (hero + morph GLBs) regenerate each build through
+  the gates -- no reuse; measured byte-deterministic (ideal_net /
+  clers_layout SVGs stay existence-cached: ungated, deterministic). Gates, per the PD 1%-length-fidelity
+  spec: normalized Lorentz edge metric post-center with per-point
+  timelike/future validation; per-event normalized Lorentz closure;
+  euclidean closure over all face adjacencies + edge lengths; dent_index
+  link-turning on displayed coordinates with flat-bends-certified
+  coplanar skip. Hero failures raise -> BUILD-FAIL, main exits nonzero.
+  Seven same-day G1 rounds (notes/codex-consults/2026-07-22-*-g1*) to
+  APPROVE, incl. the PD certify-where-resolvable ruling and the measured
+  closure-noise coefficient (C=128 vs measured 62); the audited gates
+  caught two production nets the superseded metrics passed (v30 57%
+  off-hyperboloid; v28 1.5% path disagreement) -- both now omitted with
+  measured reasons. Calibration: notes/gate-calibration-20260722/.
+- realize_h.py: develop_h returns closure events ([0]-compatible).
+- views.py: morph block requires both artifacts.
+- special.py: classics Platonic+Archimedean only; Odds-and-ends off;
+  Non-prime after the three Primes; front page promises morphs only
+  where certified; dented gallery self-regenerates from committed
+  data/walks (0-first dent sets, orbit xk + gap), geometry-exact with
+  published bytes.
+- regen_personal.sh: set -euo pipefail (failed step aborts; personal.py
+  exits nonzero on failed nets), numpy/scipy preflight before the
+  destructive rm, dead fetch_dents step removed, python3.13 +
+  NEO=sibling projects/neo (PYTHON/NEO_SRC overridable).
+- data/dentings.tsv: dent-set scan manifest. MORPH_GATE_TODO.md: full
+  design record. .claude/launch.json: preview config.
+
+Evidence: .session/claude-commit-evidence.md (calibrations, executed
+failure tests, determinism proofs, zero-state sweep).
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+PASS
+The revised opening sentence now matches the previously reviewed tree. It no longer implies that all committed solver outputs passed certification; it correctly attributes gating to artifact regeneration. No remaining message/tree mismatch.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+7,622
+PASS
+The revised opening sentence now matches the previously reviewed tree. It no longer implies that all committed solver outputs passed certification; it correctly attributes gating to artifact regeneration. No remaining message/tree mismatch.

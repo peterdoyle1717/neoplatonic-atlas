@@ -248,3 +248,84 @@ C_CLOSURE=128 confirmed against the measured 61.586 with stated margin;
 "the implementation matches the recorded certify-where-resolvable
 semantics." Zero-check sweep: hero closure max 8.97e-14 / 0 failures;
 morph-carrier failures 0. THE DISPLAY-GATE DESIGN IS G1-APPROVED.
+
+## Landed — commit c0a599a (next), 2026-07-22
+
+G2 story, recorded: the automatic commit gate ERRORED on the raw
+2245-file diff (codex context exhaustion, tokens used 0, exit 1) and the
+wrapper FAILED OPEN -- the initial commit 1c4fcf6 landed unreviewed.
+Approval was then obtained retroactively on the exact tree via
+code-diff-in-full + data-summarized bundles:
+- retro-1 (notes/codex-consults/2026-07-22-180254-g2retro-1c4fcf6.txt):
+  BLOCK -- regen_personal.sh masked the failure signal (set -u only);
+  no entry-point test; message overclaim. Fixed: set -euo pipefail,
+  numpy/scipy preflight BEFORE the destructive rm, dead fetch_dents
+  step removed, executed propagation tests (PYTHON=false -> exit 1,
+  site intact; the preflight EXPOSED python3.13's missing scipy --
+  full regen needs PYTHON=/usr/bin/python3 or a scipy install;
+  consumer path needs numpy only).
+- retro-2 (g2retro2-e1a814b): BLOCK -- opening sentence still
+  overclaimed. retro-3 (g2retro3-c0a599a): PASS.
+Final: commit c0a599a, tree 672fac7, ~2268 files.
+
+PROCESS BUG, Peter's hook to fix: the gate wrapper fails OPEN on codex
+error (two measured instances: the gpt-5.6-sol model-cache breakage in
+the 1338c63f transcript, and today's context exhaustion). Narrow fix:
+fail CLOSED on nonzero codex exit (block + print transcript path), and
+bundle oversized diffs as code-diff-in-full + data-files-summarized
+(the retro bundle shape) instead of raw git diff --cached.
+
+## Morph policy final (PD 2026-07-24) + frames capability
+
+bendprover 672a603 delivers --frames (MPFR development, Klein-normalized
+emission, producer-side acceptance <= 1e-4 edge, refusals over lies) --
+verified here on tet + v506 controls and an end-to-end 9-frame assembly
+(notes/FOR_NEO_morph_frames.md, answered). PD rulings:
+- MORPH_VMAX = 30 (personal.py): morph movies only for v <= 30; the 155
+  v>30 nets carry "not built: v>30 morph policy (PD 2026-07-24)" and no
+  morph artifacts. 2088 carriers remain, all v <= 30. A build-policy
+  choice, not a gate: the realizer generates any finite realization on
+  demand and the atlas owns assembly (fetch/assemble tooling exercised
+  in scratchpad, adoptable into builders/ when a use arises).
+- No --frames-tol; refusals stand. The v506 demo (partial ladder) was
+  built, verified, and REVERTED under the policy.
+- Hyperbolic gallery (special.py): the 25 degree-7 nets get their own
+  gallery (Klein heroes, blue); elsewhere they appear only where they
+  belong (blue members of Platonic & Archimedean; excluded from
+  symmetry/convex/census galleries as before).
+
+## Alpha hypersensitivity of closure certification (measured 2026-07-24)
+
+During the build-twice verification a one-net discrepancy (v28 built
+morphs; my ad-hoc check said it should fail) was traced to a TEST BUG
+with a striking mechanism: the ad-hoc checks hardcoded alpha=2.1 while
+the ladder (and the store's solved bends) carry alpha=2.1000000000000014.
+Measured, same bends, same code, one process:
+  alpha = 2.1000000000000014 (solved value): edge err 5.37e-3, PASS
+  alpha = 2.1 (1.4e-15 away):               closure  1.95e-2, FAIL
+Closure of near-ideal developments is exponentially conditioned in
+alpha: a 1e-15 perturbation of alpha against solved bends flips closure
+by ~1e-2 (amplification ~1e12 at v28 scale). RULE: certification is
+meaningful only AT the solved alpha (glb_movies always does this; any
+external re-check must take alpha from the store, never retype it).
+Corrections to this record: the "v28 production catch at 1.49e-2" was
+real under the C=32-era calibration; under the final gate at the TRUE
+alpha v28 PASSES (5.37e-3) with 29 caveated events and legitimately
+carries morphs. v30 and v48 fail at their true alphas (5.53e-2 /
+5.13e-2) -- their omissions are genuine. Final census after the v<=30
+policy: 2089 carriers.
+
+## Floppy disparity resolved (2026-07-24)
+
+The producer-census drift's 67 floppy flips were NOT a revised flopper
+census: neo's 2026-07-15 trash-sweep removed euclid_hp/explore/ (the
+322-flopper list now lives only in _trash-20260715 and sandbox copies),
+and classify.py silently defaulted the missing file to an EMPTY set --
+zeroing all 67 committed flags. Verified: the trashed list's bare-CLERS
+entries match the committed 67 floppies 67/67. Fixes: the census input
+is pinned in-repo (data/floppers.txt, 322 entries); classify.py hard-
+fails on a missing flopper census (silent-empty default removed); and
+classify output is now sorted (imap_unordered completion order was the
+measured ~3.1k-row reorder). The committed census stands unchanged --
+no science moved, a file did. (PD: floppy mattered before frozen-0-bend
+handling; the gallery stays for now, census pinned.)

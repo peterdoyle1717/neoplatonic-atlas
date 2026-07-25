@@ -1,0 +1,151 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f9705-5777-7bd1-8ef4-732703ac6b68
+--------
+user
+G1 round 2 (atlas nonprime decomposition). Round 1 found the debris-merge unjustified, vertex-count identification insufficient, and the conservation check weak. The construction was REPLACED by recursive clique-sum splitting (split along a separating triangle, both sides get it as a face, recurse; canonical lexicographic choice; per-split 2-component assertion; per-factor sphere assertion; tet/oct identified as closed (4,4)/(6,8 all-degree-4) spheres; assertions fail the build). Audit ONLY whether round-1 findings are resolved and whether the recursion introduces defects. First line exactly one of: APPROVE / REVISE / BLOCK. Max 12 lines.
+
+<stdin>
+=== G1 ROUND 2: nonprime_pieces reimplemented as recursive clique-sum decomposition ===
+Your findings, each addressed by REPLACING the construction (no debris rule remains):
+- split along the lexicographically-least separating triangle; BOTH sides receive the triangle as a face; recurse until no separating triangle remains. Canonical (deterministic choice), and every original face lands in exactly one factor by construction.
+- each split asserts exactly 2 components (Jordan on the sphere); each terminal factor asserts V-E+F=2.
+- identification is structural, not vertex-count-only: tet = (V=4,F=4) sphere; oct = (V=6,F=8) sphere with ALL vertex degrees 4; anything else = core. Cut patches are never classified: only closed factors are.
+- one-face regions cannot be mislabeled: they are never isolated (a face stays a face through every split; added triangles become faces of both sides).
+- assertions raise -> the gallery build FAILS rather than mislabeling.
+
+--- THE CODE ---
+    def nonprime_pieces(nc):
+        """Prime factors of a triangulated sphere by recursive splitting
+        along separating triangles (clique-sum decomposition): split
+        along a non-facial 3-clique, give BOTH sides the triangle as a
+        face, recurse until no separating triangle remains. Every factor
+        is a closed triangulated sphere (asserted via V-E+F=2); factors
+        are identified rigorously: tet = (V=4,F=4); oct = (V=6,F=8, all
+        vertex degrees 4); else core. Split choice is lexicographic, so
+        the recursion is canonical; each original face lands in exactly
+        one factor by construction (G1 2026-07-24: replaces the
+        debris-merge heuristic, which could guess hosts)."""
+        from itertools import combinations
+
+        def sphere_check(fs):
+            V = {v for f in fs for v in f}
+            E = {frozenset(e) for f in fs for e in zip(f, f[1:] + f[:1])}
+            assert len(V) - len(E) + len(fs) == 2, "factor is not a sphere"
+            return V, E
+
+        def factors(fs):
+            fset = {frozenset(f) for f in fs}
+            adj = {}
+            for a, b, c in fs:
+                adj.setdefault(a, set()).update((b, c))
+                adj.setdefault(b, set()).update((a, c))
+                adj.setdefault(c, set()).update((a, b))
+            seps = sorted(t for t in {frozenset(t) for v in adj
+                          for t in combinations(sorted(adj[v] | {v}), 3)
+                          if all(y in adj[x] for x, y in combinations(t, 2))}
+                          if t not in fset)
+            if not seps:
+                return [fs]
+            T = sorted(seps[0])                    # lexicographic: canonical
+            cut = {frozenset(e) for e in combinations(T, 2)}
+            edge2f = {}
+            for i, f in enumerate(fs):
+                for e in zip(f, f[1:] + f[:1]):
+                    edge2f.setdefault(frozenset(e), []).append(i)
+            fadj = {i: set() for i in range(len(fs))}
+            for e, ff in edge2f.items():
+                if e in cut:
+                    continue
+                for i in ff:
+                    fadj[i].update(j for j in ff if j != i)
+            comps, seen = [], set()
+            for i in range(len(fs)):
+                if i in seen:
+                    continue
+                comp, stack = set(), [i]
+                while stack:
+                    k = stack.pop()
+                    if k not in comp:
+                        comp.add(k)
+                        stack.extend(fadj[k] - comp)
+                seen |= comp
+                comps.append(comp)
+            assert len(comps) == 2, "separating triangle must split in two"
+            out = []
+            for comp in comps:
+                side = [fs[i] for i in sorted(comp)] + [tuple(T)]
+                out.extend(factors(side))
+            return out
+
+        fs0 = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
+        pieces = []
+        for fac in factors(fs0):
+            V, E = sphere_check(fac)
+            deg = {v: 0 for v in V}
+            for f in fac:
+                for v in f:
+                    deg[v] += 1
+            if len(V) == 4 and len(fac) == 4:
+                pieces.append('tet')
+            elif len(V) == 6 and len(fac) == 8 and all(d == 4 for d in deg.values()):
+                pieces.append('oct')
+            else:
+                pieces.append('core')
+        return pieces
+
+--- REPRODUCTION: full site regenerated with the new classifier; census identical to the reviewed captions: 8 tet-assemblies / 13 oct-stacks / 0 cores; per-section model counts 8-13-0 ---
+   1 <span class=v>1 oct + 1 tet</span>
+   1 <span class=v>1 oct + 2 tets</span>
+   1 <span class=v>1 oct + 3 tets</span>
+   1 <span class=v>1 oct + 4 tets</span>
+   1 <span class=v>1 oct</span>
+   1 <span class=v>11 tets</span>
+   1 <span class=v>2 octs + 1 tet</span>
+   1 <span class=v>2 octs + 2 tets</span>
+   1 <span class=v>2 octs</span>
+   1 <span class=v>2 tets</span>
+   1 <span class=v>3 octs + 1 tet</span>
+   1 <span class=v>3 octs + 2 tets</span>
+   1 <span class=v>3 octs</span>
+   1 <span class=v>3 tets</span>
+   1 <span class=v>4 octs + 2 tets</span>
+   1 <span class=v>4 octs</span>
+   2 <span class=v>4 tets</span>
+   1 <span class=v>5 tets</span>
+   1 <span class=v>6 tets</span>
+   1 <span class=v>7 tets</span>
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+REVISE
+Round-1 debris assignment and vertex-count-only identification are resolved.
+Recursion has a canonicality defect: `sorted(seps)` compares `frozenset`s by subset ordering, not lexicographically; distinct 3-sets are incomparable, so set iteration can determine the chosen split.
+Use `min(seps, key=lambda t: tuple(sorted(t)))`.
+`sphere_check` does not establish that a factor is a sphere: Euler characteristic 2 alone permits nonmanifold or disconnected complexes.
+Given a validated triangulated-sphere input and topology-preserving splits, this may be inherited, but the advertised per-factor sphere assertion remains unsupported.
+Add/check closed 2-manifold conditions: every edge has exactly two incident faces, connected face dual, and vertex links are single cycles; then Euler 2 establishes a sphere.
+The two-component assertion, bilateral insertion of the cut face, terminal-only classification, and tet/oct structural tests otherwise address the stated round-1 failures.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+22,344
+REVISE
+Round-1 debris assignment and vertex-count-only identification are resolved.
+Recursion has a canonicality defect: `sorted(seps)` compares `frozenset`s by subset ordering, not lexicographically; distinct 3-sets are incomparable, so set iteration can determine the chosen split.
+Use `min(seps, key=lambda t: tuple(sorted(t)))`.
+`sphere_check` does not establish that a factor is a sphere: Euler characteristic 2 alone permits nonmanifold or disconnected complexes.
+Given a validated triangulated-sphere input and topology-preserving splits, this may be inherited, but the advertised per-factor sphere assertion remains unsupported.
+Add/check closed 2-manifold conditions: every edge has exactly two incident faces, connected face dual, and vertex links are single cycles; then Euler 2 establishes a sphere.
+The two-component assertion, bilateral insertion of the cut face, terminal-only classification, and tet/oct structural tests otherwise address the stated round-1 failures.

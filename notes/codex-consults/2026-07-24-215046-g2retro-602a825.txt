@@ -1,0 +1,1000 @@
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: low
+reasoning summaries: none
+session id: 019f96f7-c015-73c2-badf-b90de7f0eb80
+--------
+user
+RETROACTIVE commit-gate review (atlas, commit 602a825, tree ee9d3c1b; the gate hook did not fire at commit time). Bundle: full code diff, summarized notes, committer evidence. Review as a commit gate: correctness of the diff, undisclosed changes, message-vs-diff consistency, evidence adequacy. The batch is galleries reorganization per architect instruction, a v<=30 morph build policy, the consumer/producer regen split with an executed build-twice byte-identity proof, and a census-input pin fixing a measured silent-zero fault. First line exactly one of: PASS / WARN / BLOCK. Max 25 lines.
+
+<stdin>
+=== RETROACTIVE G2: commit 602a825, tree ee9d3c1b (the gate hook did not fire on this commit) ===
+--- commit message ---
+galleries by paper types + morph v<=30 policy + proven regen + census pin
+
+- special.py: non-prime gallery organized by the paper's three types
+  (separating-triangle decomposition computed at build: 8 tet
+  assemblies, 13 oct stacks +- caps, type 3 honestly empty); convex
+  gallery opens with the eight no-coplanar-faces solids (Rausenberger,
+  later Freudenthal & van der Waerden; the conditioning called what it
+  is); Classics renamed Platonic & Archimedean and moved up; NEW
+  Hyperbolic gallery (25 degree-7 nets, Klein heroes); front title
+  "Atlas of neoplatonic solids" (the paper's search-fallback phrase).
+- personal.py: MORPH_VMAX=30 -- morph movies only for v<=30 (PD:
+  build policy, not a gate; bendprover 672a603 --frames generates any
+  finite realization on demand, atlas owns assembly -- capability
+  verified end-to-end on v506 and reverted under the policy). 155 v>30
+  nets stripped to a uniform policy note; 2089 carriers, all v<=30.
+- regen split: regen_personal.sh = pure consumer (numpy-only; no
+  solver/neo/network) -- BUILD-TWICE PROVEN: two rm -rf rebuilds,
+  2.5 min each, 20438 files byte-identical. producer_census.sh = the
+  attended editorial tier (tested under new scipy 1.18.0; drift vs
+  committed census decomposed and the census left pinned).
+- classify.py: flopper census pinned in-repo (data/floppers.txt, 322
+  entries -- the neo original vanished in the 2026-07-15 trash-sweep
+  and the silent-empty default zeroed 67 flags; verified 67/67);
+  missing census now hard-fails; output sorted (was imap_unordered
+  completion order, ~3.1k-row reorder per run).
+- views.py: "convex, no coplanar faces"; labels for partial ladders.
+- MORPH_GATE_TODO.md: policy ruling, frames correspondence closed
+  (notes/FOR_NEO + FOR_ATLAS), alpha-hypersensitivity rule (certify
+  only at the solved alpha), floppy resolution.
+
+Evidence: .session/claude-commit-evidence.md.
+
+Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+--- FULL DIFF (code + notes + one 322-line data file; no bulk data) ---
+    Co-Authored-By: Claude Opus 4.8 (1M context) <noreply@anthropic.com>
+
+ MORPH_GATE_TODO.md                                 |   81 +
+ builders/classify.py                               |   25 +-
+ builders/personal.py                               |   17 +-
+ builders/special.py                                |  157 +-
+ builders/views.py                                  |    5 +-
+ data/floppers.txt                                  |  322 +
+ notes/FOR_ATLAS_frames_ready.md                    |   60 +
+ notes/FOR_NEO_morph_frames.md                      |  115 +
+ ...te-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt | 6246 +++++++++++++
+ .../2026-07-22-180254-g2retro-1c4fcf6.txt          | 2775 ++++++
+ ...te-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt |  377 +
+ ...te-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt | 3790 ++++++++
+ .../2026-07-22-181253-g2retro2-e1a814b.txt         |  286 +
+ ...te-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt | 9405 ++++++++++++++++++++
+ .../2026-07-22-181610-g2retro3-c0a599a.txt         |   75 +
+ producer_census.sh                                 |   30 +
+ regen_personal.sh                                  |   37 +-
+ 17 files changed, 23756 insertions(+), 47 deletions(-)
+diff --git a/builders/classify.py b/builders/classify.py
+index fd42ebf..ccba0b0 100644
+--- a/builders/classify.py
++++ b/builders/classify.py
+@@ -21,7 +21,11 @@ HERE = os.path.dirname(os.path.abspath(__file__))
+ TOP = os.path.dirname(HERE)
+ NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
+ OBJS = os.path.join(NEO, "data", "objs")
+-FLOPPERS = os.path.join(NEO, "euclid_hp", "explore", "floppers.txt")
++# the 322-flopper census, pinned in-repo since 2026-07-24: the original
++# (neo/euclid_hp/explore/floppers.txt) vanished in neo's 2026-07-15
++# trash-sweep, and the old silent-empty default here zeroed all 67
++# committed floppy flags on the next census run. Bare-CLERS entries.
++FLOPPERS = os.path.join(TOP, "data", "floppers.txt")
+ sys.path.insert(0, HERE)
+ from walklib import bends_from_coords
+ 
+@@ -31,9 +35,10 @@ clers_mod = importlib.util.module_from_spec(spec)
+ spec.loader.exec_module(clers_mod)
+ decode = clers_mod.decode
+ 
+-flopset = set()
+-if os.path.exists(FLOPPERS):
+-    flopset = {ln.strip() for ln in open(FLOPPERS) if ln.strip()}
++if not os.path.exists(FLOPPERS):
++    # a missing census input must never silently clear flags
++    raise SystemExit(f"FATAL: flopper census missing: {FLOPPERS}")
++flopset = {ln.strip() for ln in open(FLOPPERS) if ln.strip()}
+ 
+ 
+ def classify(args):
+@@ -92,12 +97,18 @@ def main():
+                 jobs.append((v, fname))
+     print(f"{len(jobs)} nets", flush=True)
+     out = os.path.join(TOP, "data", "class_v30.tsv")
+-    with Pool(6) as pool, open(out, "w") as f:
+-        f.write("name\tv\tpancake\tconvex\tstrict\tnburied\tdepth\tfloppy\tedgeerr\n")
++    rows = []
++    with Pool(6) as pool:
+         for i, row in enumerate(pool.imap_unordered(classify, jobs, chunksize=200)):
+-            f.write(row + "\n")
++            rows.append(row)
+             if i % 10000 == 0:
+                 print(i, flush=True)
++    rows.sort()          # deterministic output (imap_unordered completion
++                         # order was measured to reorder ~3.1k rows/run)
++    with open(out, "w") as f:
++        f.write("name\tv\tpancake\tconvex\tstrict\tnburied\tdepth\tfloppy\tedgeerr\n")
++        for row in rows:
++            f.write(row + "\n")
+     print("done", flush=True)
+ 
+ 
+diff --git a/builders/personal.py b/builders/personal.py
+index 22dd8c5..329ec8d 100644
+--- a/builders/personal.py
++++ b/builders/personal.py
+@@ -328,6 +328,13 @@ def align_frames(frames):
+ # endpoints arrive via different development paths inherit the drift.
+ EDGE_LEN_TOL = 1e-2
+ 
++# Morph movies are built only for v <= MORPH_VMAX (PD 2026-07-24: "no
++# need to include any morph movies beyond v=30 -- waste of time and
++# space"). A build-policy choice, not a correctness gate: the realizer
++# (bendprover --frames) can generate any finite realization on demand,
++# and the atlas owns frame assembly; what gets built is up to us.
++MORPH_VMAX = 30
++
+ 
+ def _edges_of(faces):
+     return {tuple(sorted((a, b))) for f in faces
+@@ -671,8 +678,13 @@ def _build_net(job, morphs=True):
+         glb_hero(name, faces, V, {v: np.asarray(K[v]) for v in K}, netdir,
+                  bends=bd)
+     morph_note, morph_bends, n_unv = None, None, 0
++    vpolicy = morphs and V > MORPH_VMAX
++    if vpolicy:
++        morphs = False
++        morph_note = f"not built: v>{MORPH_VMAX} morph policy (PD 2026-07-24)"
+     if not morphs:
+-        built = "skipped (morphs=False)"          # generation-time opt-out
++        built = (f"skipped (v>{MORPH_VMAX} policy)" if vpolicy
++                 else "skipped (morphs=False)")   # generation-time opt-out
+     else:
+         nframes, morph_note, morph_bends, n_unv = glb_movies(
+             name, faces, V, nc, netdir,
+@@ -701,7 +713,10 @@ def _build_net(job, morphs=True):
+                 "maxdeg": maxdeg})
+     if maxdeg > 6:
+         rec["alpha_max"] = amax
++    if maxdeg > 6 and not morph_note:
+         rec["morph_labels"] = [f"{a:.1f}" for a in alphas]
++    else:
++        rec.pop("morph_labels", None)
+     if morph_note:
+         rec["morph_note"] = morph_note      # why the morphs are absent (audit)
+     else:
+diff --git a/builders/special.py b/builders/special.py
+index 923dbe6..1e6751a 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -242,15 +242,37 @@ def main():
+     convex = sorted((r for r in recs.values() if r["flags"].get("convex")
+                      and not r["flags"].get("pancake")),
+                     key=lambda r: (r["v"], r["name"]))
++    byn_cx = {r["name"]: r for r in recs.values()}
++    EIGHT = [("v4CCAE", "tetrahedron"),
++             ("v5CCACAE", "triangular bipyramid"),
++             ("v6CCCACAAE", "octahedron"),
++             ("v7CCCACACAAE", "pentagonal bipyramid"),
++             ("v8CCCACACACAAE", "snub disphenoid"),
++             ("v9CCCACCACACAAAE", "triaugmented triangular prism"),
++             ("v10CCCACCACACAACAAE", "gyroelongated square bipyramid"),
++             ("v12CCCCACCACACACAACAAAE", "icosahedron")]
++    eight_rows = [(byn_cx[nm], label) for nm, label in EIGHT if nm in byn_cx]
++    eight_names = {nm for nm, _ in EIGHT}
++    rest = [r for r in convex if r["name"] not in eight_names]
++    cx_parts = [
++        '<h2>The eight without coplanar faces</h2>'
++        '<p class=desc>Convex with no two adjacent faces coplanar '
++        '&mdash; identified by Rausenberger, and later by Freudenthal '
++        'and van der Waerden. Forbidding coplanar faces is an arbitrary '
++        'conditioning, and a wrong road: it ends the story at eight, '
++        'where the convex family below begins. (The triangular '
++        'bipyramid is non-prime; no matter.)</p>',
++        grid([item(r, f'v={r["v"]} &middot; {label}')
++              for r, label in eight_rows]),
++        f'<h2>The convex family</h2>'
++        f'<p class=desc>Every bend nonnegative, coplanar faces welcome '
++        f'&mdash; all {cn["convex"]} among the {cn["total"]} prime nets '
++        f'with v &le; 30 (pancakes, the doubly covered flat case, are '
++        f'listed separately).</p>',
++        grid([item(r, f'v={r["v"]}') for r in rest])]
+     gallery('convex.html', 'Convex',
+-            f'Convex solids: every bend nonnegative &mdash; all '
+-            f'{cn["convex"]} among the {cn["total"]} prime nets with '
+-            f'v &le; 30 (pancakes listed separately). '
+-            f'&ldquo;strictly&rdquo; marks strictly convex (every bend '
+-            f'positive).',
+-            grid([item(r, f'v={r["v"]}'
+-                       + (' strictly' if r["flags"].get("strictly_convex") else ''))
+-                  for r in convex]))
++            'The convex neoplatonic solids.',
++            ''.join(cx_parts))
+ 
+     pancakes = sorted((r for r in recs.values() if r["flags"].get("pancake")),
+                       key=lambda r: (r["v"], r["name"]))
+@@ -290,6 +312,23 @@ def main():
+             'the net&rsquo;s Eisenstein ancestors and descendants.',
+             ''.join(parts))
+ 
++    # -- hyperbolic gallery (PD 2026-07-24: the degree-7 examples get
++    #    their own gallery; elsewhere they appear only where appropriate,
++    #    e.g. as the blue members of Platonic & Archimedean) -----------
++    hyp = sorted((r for r in recs.values() if r.get("maxdeg", 6) > 6),
++                 key=lambda r: (r["v"], r["name"]))
++    def hyp_cap(r):
++        nm = '; '.join(r.get("names", [])[:2])
++        return (f'v={r["v"]}' + (f' &middot; {nm}' if nm else ''))
++    gallery('hyperbolic.html', 'Hyperbolic',
++            f'The {len(hyp)} nets with a degree-7 vertex: no Euclidean '
++            f'realization (a 7-fold vertex needs corner angle '
++            f'&alpha; &le; 360/7 &lt; 60), realized instead as '
++            f'equilateral hyperbolic solids at &alpha; = 360/7, shown '
++            f'in the Klein model (blue). All are named solids in their '
++            f'neoplatonic reading.',
++            grid([item(r, hyp_cap(r)) for r in hyp]))
++
+     # -- symmetry gallery ----------------------------------------------
+     symrows = []
+     spath = os.path.join(TOP, "data", "symmetry.tsv")
+@@ -430,7 +469,7 @@ def main():
+             parts.append(f'<h2>{SECT[rank]}</h2>')
+             parts.append(grid([item(r, cap(v, names, hyp))
+                                for v, names, r, hyp in sel]))
+-        gallery('classics.html', 'The classics, neoplatonized',
++        gallery('classics.html', 'Platonic &amp; Archimedean, neoplatonized',
+                 'Named solids in their neoplatonic reading: triangle faces '
+                 'kept, squares and pentagons capped by unit pyramids, '
+                 'hexagons filled by flat unit fans (faces are in the eye '
+@@ -473,7 +512,7 @@ def main():
+         return out
+ 
+     for tag in ("phyllo31", "phyllo22", "phyllo41", "phyllo51",
+-                "flops", "nonprime", "preapproved", "small"):
++                "flops", "preapproved", "small"):
+         rows = theme_list(tag)
+         title, desc = tdesc.get(tag, (tag, ""))
+         if tag == "small":
+@@ -481,6 +520,97 @@ def main():
+         gallery(f'{tag}.html', title, desc,
+                 grid([item(r, f'v={r["v"]}') for r in rows]))
+ 
++    # -- non-prime gallery, organized by the paper's three types -------
++    #    (separating-triangle decomposition: cut along non-facial
++    #    3-cycles; pieces are tets, octs, or a prime core. Single-face
++    #    fragments are cut debris -- faces whose three edges all lie in
++    #    separating triangles, e.g. the uncapped oct faces of a
++    #    subdivided tet -- and are merged into the piece that contains
++    #    their vertices.)
++    def nonprime_pieces(nc):
++        from itertools import combinations
++        faces = [tuple(int(x) for x in f.split(',')) for f in nc.split(';')]
++        V = max(max(f) for f in faces)
++        fset = {frozenset(f) for f in faces}
++        adj = {v: set() for v in range(1, V + 1)}
++        for a, b, c in faces:
++            adj[a] |= {b, c}; adj[b] |= {a, c}; adj[c] |= {a, b}
++        seps = [t for t in ({frozenset(t) for v in adj
++                             for t in combinations(sorted(adj[v] | {v}), 3)
++                             if all(y in adj[x] for x, y in combinations(t, 2))})
++                if t not in fset]
++        sep_edges = {frozenset(e) for t in seps for e in combinations(t, 2)}
++        edge2f = {}
++        for i, f in enumerate(faces):
++            for e in (frozenset((f[0], f[1])), frozenset((f[1], f[2])),
++                      frozenset((f[2], f[0]))):
++                edge2f.setdefault(e, []).append(i)
++        fadj = {i: set() for i in range(len(faces))}
++        for e, fs in edge2f.items():
++            if e in sep_edges:
++                continue
++            for i in fs:
++                fadj[i].update(j for j in fs if j != i)
++        comps, seen = [], set()
++        for i in range(len(faces)):
++            if i in seen:
++                continue
++            comp, stack = set(), [i]
++            while stack:
++                k = stack.pop()
++                if k not in comp:
++                    comp.add(k); stack.extend(fadj[k] - comp)
++            seen |= comp; comps.append(comp)
++        big = [(c, {v for i in c for v in faces[i]}) for c in comps if len(c) > 1]
++        for c in [c for c in comps if len(c) == 1]:      # merge cut debris
++            vs = {v for i in c for v in faces[i]}
++            host = next((bc for bc in big if vs <= bc[1]), None)
++            if host:
++                host[0].update(c)
++            else:
++                big.append((set(c), vs))
++        pieces = []
++        for comp, vs in big:
++            if len(vs) == 4:
++                pieces.append('tet')
++            elif len(vs) == 6:
++                pieces.append('oct')
++            else:
++                pieces.append('core')
++        return pieces
++
++    np_rows = {1: [], 2: [], 3: []}
++    for r in theme_list("nonprime"):
++        pieces = nonprime_pieces(r["netcode"])
++        kinds = set(pieces)
++        typ = (1 if kinds <= {'tet'} else
++               2 if kinds <= {'oct', 'tet'} else 3)
++        nt, no = pieces.count('tet'), pieces.count('oct')
++        cap = (f"{nt} tets" if typ == 1 else
++               (f"{no} oct{'s' if no > 1 else ''}"
++                + (f" + {nt} tet{'s' if nt > 1 else ''}" if nt else "")))
++        np_rows[typ].append((r["v"], r, cap))
++    NP_SECT = (
++        (1, 'Assemblies of regular tetrahedra',
++         'Two to four sharing an axis edge, or helical stacks.'),
++        (2, 'Stacks of regular octahedra, optionally capped by tetrahedra',
++         'The octahedron itself (prime) is the one-stack base case.'),
++        (3, 'A prime neoplatonic core with attached tetrahedra',
++         'Up to four tetrahedra on the faces of a prime core. No '
++         'exemplars built yet.'))
++    parts = []
++    for typ, title, sub in NP_SECT:
++        parts.append(f'<h2>{title}</h2><p class=desc>{sub}</p>')
++        rows = sorted(np_rows[typ], key=lambda t: (t[0], t[1]["name"]))
++        if rows:
++            parts.append(grid([item(r, cap) for _, r, cap in rows]))
++    gallery('nonprime.html', 'Non-prime neoplatonics',
++            'A net is prime if every triangular circuit bounds a face. '
++            'Non-prime neoplatonics decompose along their separating '
++            'triangles into prime pieces; the three construction types '
++            'below follow the paper. Captions give the decomposition.',
++            ''.join(parts))
++
+     # -- dentings gallery: regenerated from the certified dent-walk scan
+     #    (data/walks/, committed) via build.py's model_glb. By undented
+     #    original, empty set first, one model per symmetry orbit. Fully
+@@ -594,8 +724,8 @@ def main():
+         ex = sorted(recs)[0]
+     front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
+ <meta name=viewport content="width=device-width,initial-scale=1">
+-<title>Neoplatonic Solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+-<h1>Neoplatonic Solids</h1>
++<title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
++<h1>Atlas of neoplatonic solids</h1>
+ <p class="authors">Peter Doyle, Matthew Ellison</p>
+ <p>
+ A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+@@ -609,7 +739,9 @@ with equilateral triangle faces, meeting at most six to a vertex.
+ <a href="by-v/13.html">Primes v=13</a>
+ <a href="by-v/14.html">Primes v=14</a>
+ <a href="gallery/nonprime.html">Non-prime</a>
++<a href="gallery/classics.html">Platonic &amp; Archimedean</a>
+ <a href="gallery/convex.html">Convex</a>
++<a href="gallery/hyperbolic.html">Hyperbolic</a>
+ <a href="gallery/dented.html">Dented</a>
+ <a href="gallery/buried.html">Hull-buried</a>
+ <a href="gallery/pancakes.html">Pancakes</a>
+@@ -618,7 +750,6 @@ with equilateral triangle faces, meeting at most six to a vertex.
+ <a href="gallery/subdiv.html">Eisenstein subdivisions</a>
+ <a href="gallery/recognized.html">All angles recognized</a>
+ <a href="gallery/decap.html">Cap-replaced convex</a>
+-<a href="gallery/classics.html">Classics</a>
+ <a href="gallery/phyllo31.html">(3,1)</a>
+ <a href="gallery/phyllo22.html">(2,2)</a>
+ <a href="gallery/phyllo41.html">(4,1)</a>
+diff --git a/builders/views.py b/builders/views.py
+index f6aaf9b..23bade2 100644
+--- a/builders/views.py
++++ b/builders/views.py
+@@ -62,7 +62,7 @@ def flag_line(rec):
+     if fl.get("pancake"):
+         bits.append("pancake")
+     elif fl.get("strictly_convex"):
+-        bits.append("strictly convex")
++        bits.append("convex, no coplanar faces")
+     elif fl.get("convex"):
+         bits.append("convex")
+     if fl.get("buried"):
+@@ -144,8 +144,9 @@ def render_page(netdir):
+     if art.get("morph_p") and art.get("morph_k"):   # both or neither (G1)
+         lab = ''
+         end = 'Euclidean'
++        if rec.get("morph_labels"):     # deg-7 scaled or partial ladders
++            lab = '&labels=' + ','.join(rec["morph_labels"])
+         if amax:
+-            lab = '&labels=' + ','.join(rec.get("morph_labels", []))
+             end = f'&alpha;={amax:.2f}&deg;'
+         body += [cell_iframe(f'../../morph.html?file=nets/{nid}/morph_p.glb{lab}',
+                              f'ideal to {end}, Poincar&eacute;'),
+diff --git a/data/floppers.txt b/data/floppers.txt
+new file mode 100644
+index 0000000..38653e6
+--- /dev/null
++++ b/data/floppers.txt
+@@ -0,0 +1,322 @@
++CCCACACCAABE
++CCCACACCAACACACCAABE
++CCCACCACACCACACACAAABE
++CCCCACCACACACACACAACAAAE
++CCCACACCACCACACACCACAABABE
++CCCACACCAACACACCAACACACCAABE
++CCCACCACACCACACACAACACAACAAE
++CCCCACCACACCACACACACAACAAAAE
++CCCACACCACCACACACCACAACADECACAAE
++CCCACCACACCACACACACACCACAACACAAABE
++CCCACCCACCACCACACACACAACAACAACAAAE
++CCCACACCAACACACCAACACACCAACACACCAABE
++CCCACCCACCACCACAACCACACDECACAAACADEE
++CCCCACCACCACACCACACCAACAACACAAACAAAE
++CCCACACCACCACACACCACAACACACACCACAABABE
++CCCACCCACCACCACACACCACAACAACACAACAAAAE
++CCCACCCACCACCACACCAACAACACACAACCAAABAE
++CCCACCACACCACACACACACCACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACACACAAABABE
++CCCACCACCACCACACCACACCACACACACAADECAAAAE
++CCCCACCACACCACACACACAACCACACACACAACAAAAE
++CCCACCACCACCACACCACACCACACACACAACAAACAAAAE
++CCCACCCACCACCACAACCACACCAACCACAAACACADEABE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACACCACCACACACCACAACACACACCACAACADECACAAE
++CCCACACCACCACACACCACACCACACACACCACACAABABABE
++CCCACCACCACCACACCACACCACACACACACACAAACAAADEE
++CCCACCCACCACCACACCACACACACACACAACAACACAAABAE
++CCCCACCACACCACACACACAACCACACACACAACACAACAAAE
++CCCCACCACACCACACACACAACCACACACACAACCAACAADEE
++CCCCACCACCACACCACACACACCAACACCACAACACADBEABE
++CCCACCACACCACACACACACCACAACACACACCACAACACAAABE
++CCCACCCACCACCACACACACACAACCACACACACACAAACADEAE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACAAAABE
++CCCACCCACCACCACACCACACACCACACACACACAAAABCAAAAE
++CCCACCCACCACCACACACCAACCAACCACACACACAACAAACADEAE
++CCCACCCACCACCACACACCACACCAACCACACAACACACADEABABE
++CCCACCCACCACCACACCAACACACACCACAACCAACAACAADECAAE
++CCCACCCACCACCACACCAACACCACAACACACCAABACCACAABABE
++CCCACCCACCACCACACCACACACCACACACACACAAACAACAAAABE
++CCCCACCACACACCACACACACAACCACACACACAACACACAACAAAE
++CCCCACCACCACACCACACACACCACAACCACACAACACCADEABABE
++CCCCACCACCACACCACACCAACAACACCACACACCAAACACAAAABE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAABABE
++CCCACCACACCACACCACACACCACACACACACAACACACAACACAAABE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACACAACADEAE
++CCCACCCACCACCACACCACACACCACACACACACCAAACAACAAADEBE
++CCCCACCACACCACACACCACACACCACACACACACACAACAACAAAABE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACCACACCACACACACACCACAACACACACCACAACACAACACAACAAE
++CCCACCCACCACCACAACCACACCAACCACAACACACACDECACAAACADEE
++CCCACCCACCACCACACACCACACCAACCACACACAACACAAACCAAABAAE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCCACCACACCACCACACCACACACACACACACACACAACACAAACAAAAE
++CCCCACCACCACACCACACCACACCACACACAAACCACAACAACADECAAAE
++CCCACACCACCACACACCACACCACACACACCACACAACACADECACACAABAE
++CCCACCACCACCACACCACACACACCACAACCACACACACACCACAABABABAE
++CCCACCCACCACCACAACCACACCACACCACAACCACACAACACAACAABBABE
++CCCACCCACCACCACACCAACACACACCACAACCAACAACACACAACCAAABAE
++CCCCACCACACACCACACCACACACACCACACACACACACAACACACAAABABE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACADECACAAE
++CCCACCACACCACACCACACACCACACACACACAACACACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACAAABABE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACAACADEDEABE
++CCCACCCACCACCACACACACACCACACCACACACACACACDEACACADEACADEE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACACAACAAAE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACACAAACAAADEE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACAAABE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACAACACAAAABABE
++CCCACCCACCACCACAACCACACCAACCACAACACACACCAACCACAAACACADEABE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACAAAAE
++CCCACCCACCACCACACCACACACACACCACACACCAACACAACAACADECAACAAAE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAABABABE
++CCCACACCACCACACACCACACCACACACACCACACAACACADECACACAACAACACAAE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACACACACAAAABABAE
++CCCCACCACACCACACACACACACCACACACACACAACCACACAACACAACCAACAADEE
++CCCCACCACACCACACACACACACCACACACACACACACCACACAACACACAACAADEAE
++CCCCACCACCACACCACACACACCAACACCACAACACACCAACACCACAACACADBEABE
++CCCCACCACCACACCACACCAACAACACCACACACCAAACACCACACACACDEACAAAAE
++CCCCACCACCACCACCACACCACACAACCACACCAAACCACACAACACACADEACADEAE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAABABE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACAAABABABE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACDECACACAAACACADEABE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACACAACAAAE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCAACAADEE
++CCCCACCACCACCACCACACCACACAACCACACACACACACACAACCAACAACAACAAABBE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACAACACAACAAE
++CCCACCCACCACCACACACCACACCACACCACACAACCACACAACACAACACAACCAAAABAAE
++CCCACCCACCACCACACCAACACACACCACAACCAACACACACCACAACCAACAACAADECAAE
++CCCACCCACCACCACACCAACACCACAACACACCAACACCACAACACACCAABACCACAABABE
++CCCACCCACCACCACACCACACACACACCACACACCAACACACACACACADECAACACAAABAE
++CCCCACCACACACCACACACACACACCACACACACACAACCACACAACACAACACACAACAAAE
++CCCCACCACACACCACACACACACACCACACACACACACACCACACAACACACAACACADEABE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCCACCACCACACCACACCACACACACACCACACACACACACACAACACACAACAACAAAABE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAABABABABE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACAACACACAACACAAABE
++CCCACCACCACCACACCACACCACACACACACCACACACCACACACACACAACADECAAACAAAAE
++CCCACCACCACCACACCACACCACACCACACACCAACACCACACAACACACACDEABCACADEABE
++CCCACCCACCACCACACACACACCACACCACACACACACACDEACCACACAACACACAAACADEAE
++CCCACCCACCACCACACACCACACCACACCACACACACACACAACACAACACAACACAAACAAAAE
++CCCACCCACCACCACACCACCACACCACACCACACACAACACACACAAACACACAAACACADEABE
++CCCCACCACCACACCACACCACACCACACACCACACACACAACCAACAACACACAACAACAAAABE
++CCCCACCACCACCACCACACCACACACACACACACACACACACACAACACAACAACAACAACAAAE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAACADECACAAE
++CCCACCACCACCACACCACACCACACACACACCACACACCACACACACACAACACAAACAACAAAABE
++CCCACCCACCACCACAACCACACCAACCACAACACACACCAACCACAACACACACDECACAAACADEE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACCAACCACACAAACACACADEABABE
++CCCACCCACCACCACACCACACACACACCACACACCAACACAACACACACAACCAACAACAADECAAE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACACAACAAAE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCAACAADEE
++CCCCACCACCACACCACACCACACCACACACAAACCACACACCACACADECACACAACAACAACAAAE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACACAACACAACAACAACAACAAAE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACADECACACAABAE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACAAABE
++CCCACCACCACCACACCACACCACACACACACCACACACCACACACACACACACACAAACAACAADEABE
++CCCACCCACCACCACACACCACACCACACCACACACACCACACAACACAACACACAACACAAACAAADEE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACAAAAE
++CCCACCCACCACCACACCAACACACACCACAACCAACACACACCACAACCAACAACACACAACCAAABAE
++CCCACCCACCACCACACCACACACACACCACACACCACACACACACACACACAACAACACACAAABABAE
++CCCCACCACACCACCACACCACACACACACCACAACCACACACACACACCACAACACACACAAABABABE
++CCCCACCACACCACCACACCACACACCACACCACACACCACACACACACAACAACAACAACAAACAAAAE
++CCCCACCACCACACCACACCAACCACACACCACACACCAACCACACAACACACACADECACACAAABABE
++CCCCACCACCACCACCACACCACACACACACACACAACCACACACACACACACAACACACAAACAADEAE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACACAACACACAACACAACAACAAAAE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACAACACACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACACACCACACAACACACAAABABE
++CCCACCACCACCACACCACACCACACCACACACCAACACCACACAACACACACCAACACCACADEABABABE
++CCCACCACCACCACACCACACCACACCACACACCACACACCACAACCAACACACACACAAACAACAADEABE
++CCCACCACCACCACACCACACCACACCACACACCACACACCACACACACACACAACADECAACAAACAAAAE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACDECACACAACACACACAACACAAACADEE
++CCCACCCACCACCACACCACACACACACACACACCACACACACACACACACACCAACAACAACAADECAAAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACAACADECACAACAACAAACAAE
++CCCCACCACCACACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACAAAAE
++CCCCACCACCACCACCACACCACACAACCACACACACACACACAACCAACACACACACAAACCAACAAADEE
++CCCCACCACCACCACCACACCACACACACCAACCACAACCACACACACACAACACAACACACAAACAADEAE
++CCCCACCACCACCACCACACCACACACACCACACAACACCACAACACACCACACAACACCACAAABABABAE
++CCCCACCCACCACCACCACACACCAACCAACCAACCACACACACAACCAACAACACACAACAACCAAABAAE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAABABE
++CCCACCACCACCACACCACACCACACCACACACCACACACCACACACACACACAACACAAACACAAACAAADEE
++CCCACCCACCACCACAACCACACCAACCACAACACACACCAACCACAACACACACCAACCACAAACACADEABE
++CCCACCCACCACCACACACCACACCAACCACACACACCACACACCAACCACACACAACACACACADEABABABE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACACAACAAAE
++CCCACCCACCACCACACCAACACCACACCACACACCAACACCACACAACACACACCAABACCACACAABABABE
++CCCACCCACCACCACACCACACACACACCACACACCAACACAACACACACAACCAACAACACACAACCAAABAE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACCACACACACACACACAACCAAACAAADAEE
++CCCCACCACCACCACCACACCACACCACACACACACACACCAACACCACAACACAACACACDEACAAACAAAAE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACACACACCACACAABABABE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACADECACACAACAACACAAE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACAACACACACAACACACAAABABE
++CCCACCACCACCACACCACACCACACCACACACCACACACCACACACACACACACACACAAACACAAACADEADEE
++CCCACCCACCACCACACACACACCACACCACACACACACACCAACACCACACAACACACACDEACACADEACADEE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACDECACACAACACACACAACACAACACACAABAE
++CCCACCCACCACCACACCACACACCACACACACACCACACACACCACACACACACACAACAAACCAAACAAADAEE
++CCCACCCACCACCACACCACCACACCACACCACACACAACCACACAACACAACACACAACCAACAACAACAAABBE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCCACCACACCACACACACACACCACACACACACACACCACACAACACACAACCACACAACACAACCAACAADEE
++CCCCACCACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACAACAADEAE
++CCCCACCACACCACACACCACACACCACACACACCACACACACCACACACACACACACACAACAACACAAAABABE
++CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCAACACACAACACACAACAACDEADEABE
++CCCCACCACCACACCACACACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACADBEABE
++CCCCACCACCACCACCACACCACACACACCACACCACAACCACACAACACACACACADECACACAAACACADEABE
++CCCCACCACCACCACCACACCACACCACACACACACACACCAACACCACAACACAACACACAAACCAAACAAADEE
++CCCACCCACCACCACACACCACACACACACACACACCACACACACACACACAACCACACACAACACACAAACAADEAE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACDECACACAACACACACAACACAACACACAACAAAE
++CCCACCCACCACCACACCACACACACACCACACACCAACACACACACCACACAACCAACACAACAACADECAACAAAE
++CCCACCCACCACCACACCACACACCACACACACACCACACACACCACACACACACACAACAACAACAACAAACAAAAE
++CCCACCCACCACCACACCACACACCACACCACACACACACAACCACACACCACACACACACAACADEACCADEAABAE
++CCCCACCACCACACCACACCACACCACACACACAACCACACACCACACACACAACCACACAACAACACADEACAAAAE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACADECACAAE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAACACACADECACACACAABABAE
++CCCACCCACCACCACAACCACACCACACCACAACCACACACCACACACCACAACCACACACAACACACAACAABBABABE
++CCCACCCACCACCACACCAACACACACCACAACCAACACACACCACAACCAACACACACCACAACCAACAACAADECAAE
++CCCACCCACCACCACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACACCAABACCACAABABE
++CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCAAACACCACACAACACACACDEABCAADEAE
++CCCACCCACCACCACACCACACACCACACACACACCACACACACCACACACACACACCAACAACAACAACAADECAAAAE
++CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACCADECACACAACAACACACAAACACAAACADEE
++CCCACCCACCACCACACCACCACACCACACCACACACACACACACACACAACACACAACAACACACAAACACAAACADEE
++CCCCACCACACACCACACACACACACCACACACACACACACCACACAACACACAACCACACAACACAACACACAACAAAE
++CCCCACCACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACAACACADEABE
++CCCCACCACACACCACACCACACACACCACACACCACACACACACCACACACACACACACACAACACACACAAABABABE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACACAACAAAE
++CCCCACCACACCACACACCACACACCACACACACACACAACCACACACACACACAACCAACACAACACAACCAACAADEE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACCACACACACACACACAACACACAACACAACAAADEE
++CCCCACCACACCACCACACCACACACCACACACACACACACACACCACACACACACACACACAACACAACAAACAADEAE
++CCCCACCACCACACCACACCAACCACACACCACACACCAACCACACAACACACACADECACACAACACACAACACAAABE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCAAACAACAAADEBE
++CCCCACCACCACCACCACACCACACCACACACACCACACACCACAACACAACACACAACAACACAACAACACAAACAAAE
++CCCACACCACCACACACCACACCACACACACCACACACACACACAACCACACACACACACAACACACACAACACAAACADEE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACAAABE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACACACCACACAACACACAACACACAACACAAABE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACACACCACACACAACACACACAAABABABE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACAACACADEDEABABE
++CCCACCACCACCACACCACACCACACCACACACACAACCACACACCACACACACAACCACACACAACACACADEACAADEAE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACCAACCACACAACACACACACDECACACAAACACADEABE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACAAAAE
++CCCACCCACCACCACACCAACACCACACACACACCAACACCACACACACACACDEACCACACAACACADECACACAACAAAE
++CCCACCCACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACAACAAACCAACAAACAADAEAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACACACACAACCACAACAACACAADECACAAABE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACCACACACACACACACAACACACAACACAACAACAAAAE
++CCCCACCACCACCACCACACCACACAACCACACACACACCACACAACCAACACACACACACACAACCAACAACAACAAABBE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACAACACACAAAABABABE
++CCCACCCACCACCACAACCACACCAACCACAACACACACCAACCACAACACACACCAACCACAACACACACDECACAAACADEE
++CCCACCCACCACCACACCAACACCACACCACACACCAACACCACACAACACACACCAABACCACACAACACADECACACAABAE
++CCCACCCACCACCACACCACACACACACCACACACCAACACACACACCACACAACCAACACACACACACADECAACACAAABAE
++CCCACCCACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACAACAACAACACAAACAACAAAABE
++CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACDEACCACACAACACCACACACAABCACADAEACADEE
++CCCACCCACCACCACACCACCACACCACACCACACACAACCACACACCAAACCACACACAACACACACADEACACADEACADEE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACACACACAACCACAACAACACACAAACACAAABAE
++CCCCACCACACACCACACCACACACACCACACACACACACAACCACACACACACACAACACACACAACACAACACACAACAAAE
++CCCCACCACACCACCACACCACACACCACACACACACACACACACCACACACACACACACACACACCAAABACACACAAABABE
++CCCCACCACCACACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACAAAAE
++CCCCACCACCACACCACACCACACCACACACAAACCACACACCACACADECACACACACCACACAACACACAACAACAACAAAE
++CCCCACCCACCACCACCACACACCACACACACCAACCACACACACCAACACAACCAACACACAACACAACAACAACAAACAAAE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAABABE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACACACACCACACAACACADECACACAABAE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAACACACACACACCACACACAABABABABE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACAACACACACAACACACAACACACAACACAAABE
++CCCACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACACACACAAAABABABAE
++CCCACCACCACCACACCACACCACACCACACACCAACACCACACACCACACACACDEACCACACACAACACACADEACACADEABE
++CCCACCCACCACCACACACACACCACACCACACACACACACCAACACCACACAACACACACDEACCACACAACACACAAACADEAE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACACAACAAAE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACCAACAADEE
++CCCACCCACCACCACACCAACACACACCACAACCAACACACACCACAACCAACACACACCACAACCAACAACACACAACCAAABAE
++CCCACCCACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACCAACAACAACACAAACADECAAAABE
++CCCACCCACCACCACACCACCACACCACACCACACACAACCACACACCAAACCACACACAACCAACAACDECAACAAACCAAABAE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACCACACACACACACACAACACACAACACAACAACACAACAAAE
++CCCCACCACACCACCACACCACACACCACACACACACCACACACACCACACACACACACACACACAACACAACAACAAACADEAAE
++CCCCACCACCACACCACACCAACCACACACCACACACCAACCAACACACCACAACACCAACCAACACACCADEACCAACDEAADEE
++CCCCACCACCACCACCACACCACACACACACACACACACCACACACAACACACACACACACACACAACACAACAACAACAACAAAE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACACACAACAACACAAACAAAAE
++CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACCAAACACACAACAACAACDEAAAE
++CCCCACCACCACCACCACACCACACCACACCAACCACACACCAACACACAACCAACACACACACAACACAACCAAACACAAADEBE
++CCCACACCACCACACACCACACCACACACACCACACACACACACAACCACACACACACACAACACACACAACACAACACACAACAAAE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACACACCACACAACACACAACACACAACACAACACAACAAE
++CCCACCACACCACACCACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACACAACACACAAABABE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACCACACACACACCACACACACACACACACACAAABABABABE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACCAACCACACAACACACACACCAACCACACAAACACACADEABABE
++CCCACCCACCACCACACACCACACCACACCACACACACCAACACCACACACCACAACACACCAACAACACACAACAACACADBEABAE
++CCCACCCACCACCACACCACACACACACCACACACCAACACACACACCACACAACCAACACAACACACACAACCAACAACAADECAAE
++CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCACACACACCAACACACAACAACACADECAACACAAABAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACACACACAACCACAACAACACACACAACCACAAABABAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACCACACACACACACACACAAACAACCAACAAACAADABEAE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCCACCACACCACCACACCACACACCACACCACACACCACACACACACACACACACACACACACAACACACAAACACAAACAAADEE
++CCCCACCACCACACCACACCACACCACACACCACACACCAACACCACAACACCACACACACAACACCACAAACACACACAAABABABE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACACACAACAACACAAACACAAABE
++CCCCACCACCACCACCACACCACACCACACACACCACACACCACAACACAACACACCACAACACCACAACAACAACCAAAABCAAAAE
++CCCCACCACCACCACCACACCACACCACACCAACCACACACCAACACCAACACCAACACACACACAACACAAACCAAACACAAADEBE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAACACACADECACACACAACACAACACACAABAE
++CCCACCCACCACCACAACCACACCAACCACAACACACACCAACCACAACACACACCAACCACAACACACACCAACCACAAACACADEABE
++CCCACCCACCACCACACCACCACACCACACCACACAACACCACACACCACAACCACACAACAACACACACADECACACAAACACADEABE
++CCCACCCACCACCACACCACCACACCACACCACACACACACACACACACAACCACACACACACACACACACAACCADEACAACAAADEBE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACACCACACACACCACAACAACACACCADEACAACAAADEBE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACAACACAACCACAACACACACAACAACCACAABABACAAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACCACACACACACACACACAAACACAACACAAACAACADEAABE
++CCCCACCACACCACACACCACACACCACACACACACACACACCACACACACACACACACACCACACACAACACACACAACAACADEAABE
++CCCCACCACCACACCACACCAACCACACACCACACACCAACCACACAACACACACACCAACCACACAACACACACADECACACAAABABE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADEACAADEAE
++CCCACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAACACACCAABE
++CCCACACCACCACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACADECACAAE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACACACACCACACAACACACACACCACACAABABABE
++CCCACACCACCACACACCACACCACACACACCACACAACACACACACCACACAACACACACACCACACAACACADECACACAACAACACAAE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACACCACACACACACACCACACACACAABABABABABE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACAACACACACAACACACAACACACAACACAACACAACAAE
++CCCACCCACCACCACACACCACACCAACCACACAACCACACACCAACCACACAACACACACACDECACACAACACACACAACACAAACADEE
++CCCACCCACCACCACACACCACACCAACCACACACACCACACACCAACCACACACAACCACACACACDECACACACAAACACACADEABABE
++CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACACACAACACAACACACAACAACACAACAACACAAABAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACCACACACACACACACCACAAACACAACACAAACADECADEAABE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACACAACAAAE
++CCCCACCACACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCACACACACAACCAACAADEE
++CCCCACCACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACAACCACACAACACAACCAACAADEE
++CCCCACCACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACACAACACACAACAADEAE
++CCCCACCACACCACCACACCACACACCACACACACACACACAACCACACACACACACACAACCACACACACACACACAACAACAAACAAAAE
++CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACACACACAACACACAAACACAAACADEADEE
++CCCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACACACACACACACACAACCAAACACAAACACAAAABDEE
++CCCCACCACCACACCACACACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACADBEABE
++CCCCACCACCACCACCACACCACACAACCACACACACACCACACAACCAACACACACACACACAACCAACACACACACAAACCAACAAADEE
++CCCCACCACCACCACCACACCACACAACCACACCACACACCACACAACCACACACACACACACACACAACCACAACAACACAACAAABBABE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADEACACADEABE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADECAACAAAABE
++CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACACACAACCACAACAACACAADECACAAABE
++CCCCACCACCACCACCACACCACACCACACACACCACACACCACAACCACACAACACACACACACADECACACAACAACACAAACACAAABE
++CCCACCACACCACACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACACACCACAACACAAABE
++CCCACCACCACCACACCACACCACACCACACACCACACACCAACACCACAACACCACACACACCAACACCACAACACACACACAAAABABABAE
++CCCACCCACCACCACACACCACACCACACCACACAACCACACACCACACACCACACAACCACACACAACACACAACACAACCACAAAABABAAE
++CCCACCCACCACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCACCCACCACCACACCAACACCACACCACACACCAACACCACACAACACACACCAACACCACACAACACACACCAABACCACACAABABABE
++CCCACCCACCACCACACCACACACACACCACACACCAACACACACACCACACAACCAACACAACACACACAACCAACAACACACAACCAAABAE
++CCCACCCACCACCACACCACACACACACCACACACCACACACACACACCACACACACCAACACACACACACACACADECAACACACAAABABAE
++CCCACCCACCACCACACCACCACACCACACCACACACACACCACACACCACAACACACAACACAACACACAACAACACAACAACACAAACAAAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACAACACACCACACACACCACAACAACACACAACAAACCACAAACADAEAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACACACACACACACACACACAACACAACACACAACAACACAACAACACAAACAAAE
++CCCCACCACACACCACACCACACACACCACACACACACACACACCACACACACACACACACACCACACACAACACACACAACACACADEABABE
++CCCCACCACCACACCACACCACACACACACCACACACCACACACACACACCACACACACACACACACACAACACACACAACAACACAAAABABE
++CCCCACCACCACCACCACACCACACCACACACACACACACCACACACCACAACACAACACACACACAACCACAACAACACACAAACACAAABAE
++CCCCACCCACCACCACCACACACCACACACACCAACCACACACACCACACACACACCAACACACAACACACAACAACACAACAAACACAAABAE
++CCCACACCACCACACACCACACCACACACACCACACACCACACACACACCACACACAACACACADECACACACAACACAACACACAACAACACAAE
++CCCACCACACCACACCACACACCACACACCACACACACCACACACACACACACACACCACACACAACACACACAACACACACAACACACAAABABE
++CCCACCACCACCACACCACACCACACACACACCACACACCACACACACACACCACACACACCACACACACACACAACACADECAAACACAAAABAE
++CCCACCACCACCACACCACACCACACCACACACCAACACCACACACCACACACACCAACACCACACACAACACACACACDEABCACACADEABABE
++CCCACCCACCACCACACACACACCACACCACACACACACACCAACACCACACAACACACACCAACACCACACAACACACACDEACACADEACADEE
++CCCACCCACCACCACACCAACACACACCACAACCAACACACACCACAACCAACACACACCACAACCAACACACACCACAACCAACAACAADECAAE
++CCCACCCACCACCACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACACCAACACCACAACACACCAABACCACAABABE
++CCCACCCACCACCACACCACACACCACACCACACACCACACACACCACACAACACACACCAACAACACCACACAACACACACCAAABABCAADEAE
++CCCACCCACCACCACACCACCACACCACACCACACACCACAACACACACACACCACACAACCACAACACAACACAACADECACAACAACAAACAAE
++CCCCACCACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACAACCACACAACACAACACACAACAAAE
++CCCCACCACACACCACACACACACACCACACACACACACACCACACAACACACACACCACACAACACACACACCACACAACACACAACACADEABE
++CCCCACCACCACACCACACCAACAACACCACACACCAAACACCACACACACDEACCACACACACAACCACACACACAACCACACACACAACAAAAE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADECACAACAACAAAAE
++CCCCACCACCACCACCACACCACACCACACACACACACACACAACCACACACACACACACACAACCACACACAACACACADECACAACAACAAABE
++CCCCACCACCACCACCACACCACACCACACCAACCACACACCAACACCACACACDECACACACACDEACCACACACAACACACADEACACADEABE
++CCCCACCCACCACCACCACACACCAACCACACCAACCACACACACCAACACACACCAACCACACAACACCAACACAACDECAACAACACAAAABAE
++CCCCACCCACCACCACCACACACCACACACACCACACACACACACCAACACACACCACACACAACACACCAACAACACACAACAACACADBEABAE
++CCCCACCCACCACCACCACACACCACACCAACCACACCACACACACACACACAACCACAACCAACACACACAACAACCAAACCAAACACAAADEBE
++CCCCACCCACCACCACCACACCACACACACACACACACACACCACACACACACACACACACACACCAACAACACACAACAACAACCAAABACAAAE
+diff --git a/producer_census.sh b/producer_census.sh
+new file mode 100755
+index 0000000..7da55ab
+--- /dev/null
++++ b/producer_census.sh
+@@ -0,0 +1,30 @@
++#!/bin/bash
++# PRODUCER census sweep: regenerate the committed classification/census
++# data (data/class_v30.tsv, data/nets_pages.txt, data/eisenstein.tsv,
++# data/symmetry.tsv). Run ONLY when the census or classification
++# changes; outputs are committed data that the consumer regen
++# (regen_personal.sh) reads. Requires the neo tree (data/objs) and an
++# interpreter with numpy AND scipy (scipy 1.18.0 installed for
++# python3.13 on 2026-07-24).
++# TESTED 2026-07-24 (python3.13 + scipy 1.18.0): runs clean end-to-end.
++# Outputs DRIFT from the committed census by design -- they snapshot
++# neo's CURRENT state. Measured that day: 67 floppy flags flipped 1->0
++# (neo's floppers.txt moved since the Jul-14 snapshot), dropping 9
++# nets (v25-30) from the page-worthy list; ~3.1k class rows reordered
++# (classify output order is not stable -- sort before comparing);
++# symmetry gained 53 rows (completion over the now-built records).
++# A census refresh is an EDITORIAL act: run attended, diff against the
++# committed tsvs, and commit deliberately -- never as a silent step.
++set -euo pipefail
++cd "$(dirname "$0")"
++NEO="${NEO_SRC:-$(cd .. && pwd)/neo}"
++PYTHON="${PYTHON:-python3.13}"
++
++"$PYTHON" -c 'import numpy, scipy' || {
++    echo "FATAL: $PYTHON lacks numpy/scipy -- set PYTHON" >&2; exit 1; }
++[ -d "$NEO/data/objs" ] || {
++    echo "FATAL: $NEO/data/objs missing (classify input)" >&2; exit 1; }
++
++"$PYTHON" builders/classify.py     # census classification sweep (neo objs)
++"$PYTHON" builders/members.py      # page-worthy list + eisenstein relations
++"$PYTHON" builders/symmetry.py     # automorphism census over built records
+diff --git a/regen_personal.sh b/regen_personal.sh
+index 1fb6d07..7d79b96 100755
+--- a/regen_personal.sh
++++ b/regen_personal.sh
+@@ -1,32 +1,21 @@
+ #!/bin/bash
+-# Regenerate the personal pages from scratch. Everything is derived from
+-# builders/ + data/nets_v4_14.txt; solver binaries are built if missing.
+-# set -e: any failing step ABORTS the regen (G2 2026-07-22: personal.py
+-# exits nonzero on a failed net -- BUILD-FAIL/dented hero -- and that
+-# signal must stop the pipeline, not roll into special.py).
++# CONSUMER regen: rebuild site/personal from committed data, wholesale.
++# No solver, no neo, no network, no scipy -- reads data/bends (committed
++# bend store), data/*.tsv (committed classification/census outputs),
++# data/walks (dent-walk scan). Deterministic: build twice, diff empty.
++# Producer-tier steps (classify/members/symmetry -- solver sweeps and
++# census classification that WRITE committed data) live in
++# producer_census.sh and run only when the census changes.
+ set -euo pipefail
+ cd "$(dirname "$0")"
+-# neo is a sibling of atlas since the 2026-07-21 move (was the parent);
+-# override with NEO_SRC. PYTHON must have numpy/scipy (bare python3 on this
+-# box is 3.14 without them; the builders run under 3.13).
+-NEO="${NEO_SRC:-$(cd .. && pwd)/neo}"
+ PYTHON="${PYTHON:-python3.13}"
+ 
+-# preflight BEFORE the destructive rm: wrong interpreter or missing
+-# toolchain must fail while the built site is still intact
+-"$PYTHON" -c 'import numpy, scipy' || {
+-    echo "FATAL: $PYTHON lacks numpy/scipy -- set PYTHON" >&2; exit 1; }
+-[ -x "$NEO/bendprover/csrc/euclid_lm_mp" ] || make -C "$NEO/bendprover/csrc" euclid_lm_mp
++# preflight BEFORE the destructive rm: wrong interpreter must fail
++# while the built site is still intact (consumer needs numpy only)
++"$PYTHON" -c 'import numpy' || {
++    echo "FATAL: $PYTHON lacks numpy -- set PYTHON" >&2; exit 1; }
+ [ -x builders/horoz_c ] || cc -O2 -o builders/horoz_c builders/horoz_c.c -lm
+ 
+ /bin/rm -rf site/personal
+-# classification sweep (from neo/data/objs, ~2 min) and the page-worthy
+-# list; then records+artifacts+pages; then galleries/by-v/front.
+-# fetch_dents.py removed 2026-07-22: its dent_v GLBs are consumed by
+-# nothing (the dented gallery reads committed data/walks), and a dead
+-# network step must not be an abort vector under set -e.
+-"$PYTHON" builders/classify.py
+-"$PYTHON" builders/members.py
+-"$PYTHON" builders/personal.py
+-"$PYTHON" builders/symmetry.py
+-"$PYTHON" builders/special.py
++"$PYTHON" builders/personal.py     # records + gated artifacts + pages
++"$PYTHON" builders/special.py      # stamps, galleries, by-v, front, eismaps
+--- notes diff summarized: MORPH_GATE_TODO appends (policy/frames/alpha/floppy records), FOR_NEO+FOR_ATLAS correspondence, 7 codex-gate transcripts from the c0a599a retro rounds (append-only audit) ---
+--- committer evidence ---
+# Commit evidence — 2026-07-24: gallery round 2, morph policy, regen split, census pin
+
+Branch `next`, on top of c0a599a. Code + notes + one 322-line data file
+(no bulk data; the bend store is already committed).
+
+## Staged tree
+
+**builders/special.py** — non-prime gallery organized by the paper's three
+types via the separating-triangle decomposition computed inline (cut along
+non-facial 3-cycles; single-face fragments merged as cut debris; verified:
+8 tet-assemblies, 13 oct-stacks±caps incl. the prime oct base case and the
+(2,0)-subdivided tet as oct+4caps; type 3 honestly empty). Convex gallery
+opens with the eight no-coplanar-faces solids (Rausenberger, later
+Freudenthal & van der Waerden; "arbitrary conditioning, wrong road"
+language per PD; non-prime triangular bipyramid included). "Classics" →
+"Platonic & Archimedean" (title + chip), chip moved up after Non-prime.
+NEW Hyperbolic gallery: the 25 degree-7 nets (Klein heroes, names, α=360/7
+explanation); chip after Convex. Front page title/h1 → "Atlas of
+neoplatonic solids" (PD: search-fallback phrase for the paper).
+
+**builders/personal.py** — MORPH_VMAX = 30 (PD 2026-07-24: no morph movies
+beyond v=30; build policy, not a gate — the realizer generates any finite
+realization on demand and the atlas owns assembly); v>30 nets get
+morph_note "not built: v>30 morph policy", labels/caveats cleared.
+
+**builders/views.py** — "strictly convex" caption → "convex, no coplanar
+faces"; morph labels emitted whenever the record carries them (deg-7
+scaled and partial ladders).
+
+**builders/classify.py** — flopper census input pinned to
+data/floppers.txt; HARD FAIL when missing (the old silent-empty default
+zeroed all 67 floppy flags after neo's 2026-07-15 trash-sweep removed
+euclid_hp/explore/ — root cause verified: trashed list matches the
+committed 67 floppies 67/67 on bare CLERS); output rows sorted
+(imap_unordered completion order measured to reorder ~3.1k rows/run).
+
+**regen_personal.sh** — now the pure CONSUMER regen: numpy-only preflight,
+no solver/neo/network/scipy; personal.py + special.py only.
+**producer_census.sh** (new) — the producer tier (classify/members/
+symmetry), attended-editorial, header documents the 2026-07-24 test run
+and measured drift semantics.
+
+**data/floppers.txt** (new, 322 entries) — the flopper census, pinned
+in-repo from neo/_trash-20260715/euclid_hp/explore/floppers.txt.
+
+**notes/FOR_NEO_morph_frames.md / notes/FOR_ATLAS_frames_ready.md** — the
+frames-mode correspondence: atlas request, neo's delivery note
+(bendprover 672a603, --frames, Klein-normalized emission), atlas
+verification and the closing PD ruling (no --frames-tol; v≤30 policy).
+
+**MORPH_GATE_TODO.md** — appended records: morph policy final + frames
+capability; alpha hypersensitivity of closure certification (measured:
+1.4e-15 alpha perturbation flips v28's closure verdict 5.4e-3→1.9e-2;
+RULE: certify only at the solved alpha, read it from the store); floppy
+disparity resolution.
+
+**notes/codex-consults/** — the 2026-07-22 G2 fail-open transcripts and
+the three retroactive reviews (append-only audit for commit c0a599a).
+
+## Verification (all run this session)
+
+- py_compile clean (special, personal, views, classify).
+- --frames contract verified against neo's note: tet devresid 1.6e-56;
+  v506 PASS at 34.89 (devresid 2.4e-36, 506 pos lines); v506 REFUSED at
+  2.1 with the documented reason. End-to-end assembly test (9 frames,
+  atlas gates re-verified each at 3e-12..4e-7) built and then REVERTED
+  under the v≤30 policy.
+- Policy strip: 155 v>30 nets → policy note, no morph artifacts;
+  2,089 carriers remain, all v≤30 (census: 2,245 − 155 − v30-net).
+- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+  independent rm -rf → full consumer rebuilds, 2.5 min each,
+  20,438 files, manifests BYTE-IDENTICAL (empty diff).
+- Producer census executed under python3.13 + scipy 1.18.0 (installed
+  2026-07-24, PD-authorized): runs clean; drift vs committed census
+  fully decomposed (67 floppy flips = the vanished flopper file; 9
+  page-worthy drops = consequence; ~3.1k row reorder = unsorted output;
+  +53 symmetry rows = completion). Committed census RESTORED (pinned);
+  refresh is editorial.
+- v28/v30/v48 verdicts re-verified at TRUE alphas: v28 legitimately
+  carries morphs (5.37e-3, 29 caveated events); v30 (5.53e-2) and v48
+  (5.13e-2) genuinely fail. Run-A anomaly was a test bug (hardcoded
+  alpha), not a build bug.
+- Hyperbolic gallery: 25 model-viewers, named captions, verified in the
+  generated HTML; deg-7 v≤30 nets keep hyperbolic ladders, deg-7 v>30
+  keep heroes only.
+- Site regenerated and serving at localhost:8765 (root redirects to
+  personal/; front title "Atlas of neoplatonic solids" verified live).
+
+## New conventions / invariants (G1)
+
+No new solver or validation invariants. The non-prime separating-triangle
+decomposition is gallery organization implementing the paper's three
+types per PD's direct instruction, verified against the expected members
+(incl. the subdivided-tet identification); the morph v≤30 bound is a PD
+build-policy ruling; the display gates are unchanged from the
+seven-round G1-approved set (see the c0a599a evidence and
+MORPH_GATE_TODO.md).
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’m checking the committed tree and the evidence claims against the repository, with particular attention to generated-output policy and the new gallery classifier.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'git rev-parse 602a825''^{tree} && git show --stat --oneline --decorate=short 602a825 && git status --short && rg -n "602a825|ee9d3c1b|BUILD-TWICE|20438|py_compile" .session notes/codex-consults TEAMWORK.md TEAMWORK_LOG.md 2>/dev/null | head -120' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad
+602a825 (HEAD -> next) galleries by paper types + morph v<=30 policy + proven regen + census pin
+ MORPH_GATE_TODO.md                                 |   81 +
+ builders/classify.py                               |   25 +-
+ builders/personal.py                               |   17 +-
+ builders/special.py                                |  157 +-
+ builders/views.py                                  |    5 +-
+ data/floppers.txt                                  |  322 +
+ notes/FOR_ATLAS_frames_ready.md                    |   60 +
+ notes/FOR_NEO_morph_frames.md                      |  115 +
+ ...te-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt | 6246 +++++++++++++
+ .../2026-07-22-180254-g2retro-1c4fcf6.txt          | 2775 ++++++
+ ...te-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt |  377 +
+ ...te-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt | 3790 ++++++++
+ .../2026-07-22-181253-g2retro2-e1a814b.txt         |  286 +
+ ...te-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt | 9405 ++++++++++++++++++++
+ .../2026-07-22-181610-g2retro3-c0a599a.txt         |   75 +
+ producer_census.sh                                 |   30 +
+ regen_personal.sh                                  |   37 +-
+ 17 files changed, 23756 insertions(+), 47 deletions(-)
+?? notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt
+.session/claude-commit-evidence.md:62:- py_compile clean (special, personal, views, classify).
+.session/claude-commit-evidence.md:70:- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:14:RETROACTIVE commit-gate review (atlas, commit 602a825, tree ee9d3c1b; the gate hook did not fire at commit time). Bundle: full code diff, summarized notes, committer evidence. Review as a commit gate: correctness of the diff, undisclosed changes, message-vs-diff consistency, evidence adequacy. The batch is galleries reorganization per architect instruction, a v<=30 morph build policy, the consumer/producer regen split with an executed build-twice byte-identity proof, and a census-input pin fixing a measured silent-zero fault. First line exactly one of: PASS / WARN / BLOCK. Max 25 lines.
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:17:=== RETROACTIVE G2: commit 602a825, tree ee9d3c1b (the gate hook did not fire on this commit) ===
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:35:  solver/neo/network) -- BUILD-TWICE PROVEN: two rm -rf rebuilds,
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:36:  2.5 min each, 20438 files byte-identical. producer_census.sh = the
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:891:- py_compile clean (special, personal, views, classify).
+notes/codex-consults/2026-07-24-215046-g2retro-602a825.txt:899:- BUILD-TWICE-DIFF EXECUTED (the promotion gate's regen half): two
+notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:229:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:440:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:9002:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:226:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt:788:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181253-g2retro2-e1a814b.txt:184:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-180254-g2retro-1c4fcf6.txt:1235:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-181010-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt:267:- `py_compile` clean (personal, realize_h, views, special).
+notes/codex-consults/2026-07-22-180129-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt:4731:- `py_compile` clean (personal, realize_h, views, special).
+
+codex
+BLOCK
+Tree hash matches: `602a825^{tree}` is `ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad`.
+The separating-triangle classifier is a new decomposition convention and invariant; G1 was mandatory before implementation. The evidence explicitly exempts it instead of citing an audited five-point specification and verdict.
+The committer evidence lists outcomes but supplies no exact commands, transcripts, manifests, or hashes supporting the build-twice identity, census restoration, counts, or generated-site checks.
+`producer_census.sh` documents the pre-pin 67-flag drift as current expected drift, contradicting the newly pinned input and hard-fail behavior.
+The commit message contains a universally prohibited intensifier.
+The seven large consult transcripts are disclosed in the evidence, so they are not hidden changes; however, calling the supplied material “FULL DIFF” while summarizing note diffs weakens completeness.
+Message and principal code changes otherwise correspond at a high level.
+Retroactive approval requires a G1 audit of `nonprime_pieces`, corrected producer documentation, and reproducible evidence tied to this exact tree.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+43,452
+BLOCK
+Tree hash matches: `602a825^{tree}` is `ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad`.
+The separating-triangle classifier is a new decomposition convention and invariant; G1 was mandatory before implementation. The evidence explicitly exempts it instead of citing an audited five-point specification and verdict.
+The committer evidence lists outcomes but supplies no exact commands, transcripts, manifests, or hashes supporting the build-twice identity, census restoration, counts, or generated-site checks.
+`producer_census.sh` documents the pre-pin 67-flag drift as current expected drift, contradicting the newly pinned input and hard-fail behavior.
+The commit message contains a universally prohibited intensifier.
+The seven large consult transcripts are disclosed in the evidence, so they are not hidden changes; however, calling the supplied material “FULL DIFF” while summarizing note diffs weakens completeness.
+Message and principal code changes otherwise correspond at a high level.
+Retroactive approval requires a G1 audit of `nonprime_pieces`, corrected producer documentation, and reproducible evidence tied to this exact tree.
