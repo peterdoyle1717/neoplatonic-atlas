@@ -24,7 +24,19 @@ TOP = os.path.dirname(HERE)
 OUT = os.path.join(TOP, "site", "personal")
 sys.path.insert(0, HERE)
 from views import net_id
-from members import eis_divides
+
+
+def eis_divides(a, b, c, d):
+    """(a + b w) | (c + d w) in Z[w], w = exp(2 pi i/3)? Compute the
+    quotient via norms: (c+dw)/(a+bw) = (c+dw)(conj)/N, integer test."""
+    N = a * a + a * b + b * b
+    if N == 0:
+        return False
+    # (c + d w)(a + b w-bar): w * w-bar identities give
+    # real-part p = c*a + c*b + d*b, w-part q = d*a - c*b
+    p = c * a + c * b + d * b
+    q = d * a - c * b
+    return p % N == 0 and q % N == 0
 
 SQ3 = 3 ** 0.5
 SCALE = 64

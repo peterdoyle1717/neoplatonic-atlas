@@ -19,6 +19,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 TOP = os.path.dirname(HERE)
 NEO = os.environ.get("NEO_SRC", os.path.join(os.path.dirname(TOP), "neo"))
 sys.path.insert(0, HERE)
+from eisenmap import eis_divides
 
 spec = importlib.util.spec_from_file_location(
     "clers", os.path.join(NEO, "clers", "src", "clers.py"))
@@ -32,19 +33,6 @@ SUBDIV_VCAP = 999
 def netcode_of(name):
     faces = decode(name)
     return ';'.join(','.join(str(x) for x in f) for f in faces)
-
-
-def eis_divides(a, b, c, d):
-    """(a + b w) | (c + d w) in Z[w], w = exp(2 pi i/3)? Compute the
-    quotient via norms: (c+dw)/(a+bw) = (c+dw)(conj)/N, integer test."""
-    N = a * a + a * b + b * b
-    if N == 0:
-        return False
-    # (c + d w)(a + b w-bar): w * w-bar identities give
-    # real-part p = c*a + c*b + d*b, w-part q = d*a - c*b
-    p = c * a + c * b + d * b
-    q = d * a - c * b
-    return p % N == 0 and q % N == 0
 
 
 def main():
