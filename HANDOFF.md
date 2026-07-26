@@ -97,7 +97,8 @@ drafts, all server-side md5s verified against local — 21367250 "The
 Neoplatonic Atlas" (site 2,251 nets + database; cc-zero) and 19761390
 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598 primes,
 checked against the registered MANIFEST on doob + OBJs v4–50;
-cc-by-4.0). The paper cites the CONCEPT DOIs 10.5281/zenodo.21367249
+cc-zero, flipped from cc-by-4.0 per PD 2026-07-25 "move everything to
+cc-zero"). The paper cites the CONCEPT DOIs 10.5281/zenodo.21367249
 (atlas) and 10.5281/zenodo.19761389 (primes) — see
 notes/FOR_GPT_arxiv_assembly.md; they resolve at first publish — PD's
 button, timed to the arXiv submission. CAUTION: zenodo_dist.sh step 4
