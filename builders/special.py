@@ -827,6 +827,16 @@ A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
 with equilateral triangle faces, meeting at most six to a vertex.
 <a href="about.html">More &rarr;</a>
 </p>
+<p style="font-size:.85em;color:#555">
+Archives &amp; code: atlas
+<a href="https://doi.org/10.5281/zenodo.21367249">doi:10.5281/zenodo.21367249</a> &middot;
+prime census
+<a href="https://doi.org/10.5281/zenodo.19761389">doi:10.5281/zenodo.19761389</a> &middot;
+proof software
+<a href="https://doi.org/10.5281/zenodo.21609862">doi:10.5281/zenodo.21609862</a> &middot;
+source
+<a href="https://github.com/peterdoyle1717/neoplatonic-atlas">github.com/peterdoyle1717/neoplatonic-atlas</a>
+</p>
 
 <h2>Themed galleries</h2>
 <div class="gallery-links">

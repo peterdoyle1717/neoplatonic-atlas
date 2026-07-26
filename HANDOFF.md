@@ -92,19 +92,22 @@ per-net dent SETS, ∅ first, from data/walks.
 Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
 landed round. Floppy census kept as pinned (PD): the 67 flags trace to
 data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
-TO PUBLISH (2026-07-25, PD: "get zenodo ready to go"): two refreshed
-drafts, all server-side md5s verified against local — 21367250 "The
-Neoplatonic Atlas" (site 2,251 nets + database; cc-zero) and 19761390
-"Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598 primes,
-checked against the registered MANIFEST on doob + OBJs v4–50;
-cc-zero, flipped from cc-by-4.0 per PD 2026-07-25 "move everything to
-cc-zero"). The paper cites the CONCEPT DOIs 10.5281/zenodo.21367249
-(atlas) and 10.5281/zenodo.19761389 (primes) — see
-notes/FOR_GPT_arxiv_assembly.md; they resolve at first publish — PD's
-button, timed to the arXiv submission. CAUTION: zenodo_dist.sh step 4
-CREATES A NEW deposition every run — to refresh the existing drafts
-use API PUTs to the deposition + bucket (this round's method; big
-uploads also work from doob, token present there). Pushed 2026-07-25 (PD: "push
+TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+2,251 nets, front page carries the archive pointers, md5 ed9e65d6… +
+database), 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 =
+44,646,598 primes, MANIFEST-checked on doob + OBJs v4–50), and
+21609862 "Software for the computer-assisted proof of Euclidean
+neoplatonic realizations" (undented @ git 145d94d). Citation
+architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+the paper cites the atlas ONLY by \seek to the live front page and
+the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+the front page maintains the durable pointers (atlas concept DOI
+21367249, primes concept DOI 19761389, software frozen DOI, GitHub).
+DOIs resolve at first publish — PD's button, timed to the arXiv
+submission. CAUTION: zenodo_dist.sh step 4 CREATES A NEW deposition
+every run — refresh existing drafts via API PUTs to the deposition +
+bucket (big uploads also work from doob, token present there). Pushed 2026-07-25 (PD: "push
 push push"): origin main and next both carry the full arc (gates,
 bend store, galleries, census pins, tet round, self-containment fix);
 consumer regen from a bare clone is proven byte-identical. No tags

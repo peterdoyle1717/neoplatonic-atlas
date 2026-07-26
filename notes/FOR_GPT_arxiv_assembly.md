@@ -1,109 +1,81 @@
 # For GPT: wiring the paper's data/code links for arXiv
 
-You're assembling the arXiv submission; this note is how to point at
-the atlas, the data, and the code so the paper never needs updating
-when they do. The DOI numbers below are final (reserved on Zenodo);
-they begin resolving when the records are published, which happens no
-later than the arXiv announcement — coordinate the date with Peter.
+Final architecture (PD-approved 2026-07-26): the paper carries NO
+Zenodo DOI for the atlas — it cites the atlas by a `\seek` reference
+to the front page, and the front page maintains the durable pointers
+(Zenodo, GitHub, companion records). The proof software is cited by
+its FROZEN version DOI, because that identifies the exact evidence
+used. Everything below is staged; the Zenodo records publish no later
+than the arXiv announcement (Peter's button), at which point the DOIs
+resolve.
 
-## The one rule: cite concept DOIs, not version DOIs
-
-Zenodo gives every record two DOIs. The *version DOI* is a frozen
-snapshot; the *concept DOI* is the permanent umbrella that always
-leads to the latest version. Published files can never be edited, but
-a "new version" can be published under the same concept DOI at any
-time — so a paper citing the concept DOI stays current forever.
-
-- **The Neoplatonic Atlas** (browsable site + per-net database):
-  concept DOI **10.5281/zenodo.21367249**
-  (version DOI of the release at time of writing: 10.5281/zenodo.21367250)
-- **Prime neoplatonic solids** (CLERS lists v = 4..60, Euclidean OBJs
-  v = 4..50): concept DOI **10.5281/zenodo.19761389**
-  (version DOI at time of writing: 10.5281/zenodo.19761390)
-
-If the paper needs to pin exactly what was analyzed, add one clause
-citing the version DOI ("…as archived in version 10.5281/zenodo.21367250"),
-but every reader-facing pointer is the concept DOI.
-
-## Three-layer pointers (most current first, most durable last)
-
-1. Live site: https://math.dartmouth.edu/~doyle/docs/atlas/
-2. Concept DOIs (above) — survive the death of the Dartmouth URL.
-3. Search phrase — the title "Atlas of neoplatonic solids" is the
-   fallback of last resort; a sentence inviting the reader to search
-   for it survives all link rot.
-
-Suggested data-availability paragraph (adapt freely):
-
-> The atlas of neoplatonic solids is browsable at
-> math.dartmouth.edu/~doyle/docs/atlas/ and archived, together with
-> its per-net database, at doi:10.5281/zenodo.21367249. The
-> underlying census — canonical CLERS lists of all 44,646,598 primes
-> with 4 ≤ v ≤ 60 and Euclidean OBJ realizations of all 8,239,684
-> primes with v ≤ 50 — is archived at doi:10.5281/zenodo.19761389.
-> Should these links rot, searching for "Atlas of neoplatonic
-> solids" will find the current copy.
-
-## arXiv mechanics — hard constraints, verified against arXiv docs
-
-- **Ancillary files cannot be your update channel.** They are stored
-  with a specific paper version and "cannot be changed independently
-  from the article" — updating them means submitting a new version of
-  the paper. Anything that will evolve lives behind the concept DOI
-  or the live URL, never in `anc/`.
-- Ancillary files only work with TeX-source submissions (not
-  PDF-only). A few static exemplars in `anc/` are fine if wanted, but
-  unnecessary — Zenodo carries the corpus.
-- The only arXiv metadata editable without generating a new paper
-  version: journal-ref, DOI, report-number — and the DOI field is
-  reserved for the journal version of the article itself. Do not put
-  Zenodo DOIs there; they belong in the paper text and bibliography.
-
-## Bibliography entries
+## The two bibliography entries, blanks filled
 
 ```bibtex
-@misc{neoplatonic-atlas,
-  author    = {Doyle, Peter and Ellison, Matthew},
-  title     = {The Neoplatonic Atlas},
-  publisher = {Zenodo},
-  year      = {2026},
-  doi       = {10.5281/zenodo.21367249},
-  note      = {Interactive atlas and per-net database; live copy at
-               \url{https://math.dartmouth.edu/~doyle/docs/atlas/}}
+@misc{euclidean:software,
+  author       = {Doyle, Peter},
+  title        = {Software for the computer-assisted proof of
+                  Euclidean neoplatonic realizations},
+  year         = {2026},
+  howpublished = {Zenodo,
+                  \url{https://doi.org/10.5281/zenodo.21609862}},
+  note         = {Software for prime $6$-nets with $v \leq 50$}
 }
 
-@misc{neoplatonic-primes,
-  author    = {Doyle, Peter},
-  title     = {Prime neoplatonic solids: lists ($v = 4$ to $60$) and
-               Euclidean OBJs ($v = 4$ to $50$)},
-  publisher = {Zenodo},
-  year      = {2026},
-  doi       = {10.5281/zenodo.19761389}
+@misc{atlas,
+  key  = {Atlas},
+  note = {\seek{Atlas of neoplatonic solids}{https://math.dartmouth.edu/~doyle/docs/atlas/}}
 }
 ```
 
-## Code availability (one line, if wanted)
+10.5281/zenodo.21609862 is the frozen version DOI of the software
+record (snapshot of github.com/peterdoyle1717/undented at git
+145d94d: enumeration + the rigorous IEEE-754 existence prover
+applying Ellison's theorem, arXiv:2312.05376). It is a VERSION DOI by
+design — do not swap in the concept DOI (10.5281/zenodo.21609861);
+the paper pins the exact software. Author list matches the Zenodo
+record (Doyle); if Peter changes the record's creators, mirror it
+here.
 
-All code is public under MIT: the atlas repository
-(github.com/peterdoyle1717/neoplatonic-atlas) regenerates the entire
-site byte-for-byte from its committed data (`./regen_personal.sh`;
-python3 + numpy + a C compiler — no solver runs at build); the solver
-is github.com/peterdoyle1717/bendprover, canonical CLERS naming
-github.com/peterdoyle1717/clers, and the prime enumeration +
-existence-certification pipeline github.com/peterdoyle1717/undented.
+## What the atlas front page now carries (so the paper doesn't have to)
 
-## Numbers safe to state (all checked against the registered census)
+https://math.dartmouth.edu/~doyle/docs/atlas/ has an "Archives &
+code" line: the atlas's own concept DOI (10.5281/zenodo.21367249),
+the prime census concept DOI (10.5281/zenodo.19761389), the proof
+software's frozen DOI (above), and the GitHub repository. The
+archived site tarball on Zenodo contains the same front page, so the
+Zenodo copy is self-describing. Future atlas updates become new
+Zenodo versions under the same concept DOI — nothing in the paper
+ever changes.
+
+## arXiv mechanics — hard constraints, verified against arXiv docs
+
+- Ancillary files are stored with a specific paper version and
+  "cannot be changed independently from the article" — they are not
+  an update channel. Anything that evolves lives behind the atlas
+  front page / concept DOIs, never in `anc/`.
+- Ancillary files only work with TeX-source submissions. A few static
+  exemplars are fine if wanted, but unnecessary — Zenodo carries the
+  corpus.
+- The only arXiv metadata editable without a new paper version:
+  journal-ref, DOI, report-number — and that DOI field is for the
+  journal version of the article itself. Zenodo DOIs go in the
+  bibliography only.
+
+## Numbers safe to state (checked against the registered census)
 
 - 2,251 nets in the atlas at this refresh.
 - 44,646,598 primes with 4 ≤ v ≤ 60 (per-v counts and sha256
   checksums in the corpus MANIFEST).
-- 8,239,684 primes with v ≤ 50 (the range covered by the OBJ
-  tarballs), consistent with the same MANIFEST.
+- 8,239,684 primes with v ≤ 50 — the range covered by the Euclidean
+  OBJ tarballs and by the proof software's certification.
 
-## Coordination with Peter
+## The staged Zenodo records (all drafts, all cc-zero, publish = Peter)
 
-The Zenodo records are staged as drafts, one button from publish.
-Publishing is Peter's click, timed to the arXiv submission — the
-concept DOIs above resolve from that moment on. Nothing in the paper
-needs to change when the atlas later updates: new Zenodo versions
-land under the same concept DOIs.
+- 21367250 The Neoplatonic Atlas (site + database) — concept DOI
+  10.5281/zenodo.21367249.
+- 19761390 Prime neoplatonic solids: lists v = 4..60, OBJs v = 4..50
+  — concept DOI 10.5281/zenodo.19761389.
+- 21609862 proof software (undented @ 145d94d) — cited by this
+  version DOI; concept 10.5281/zenodo.21609861 exists but stays out
+  of the paper.
