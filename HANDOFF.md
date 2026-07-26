@@ -93,8 +93,13 @@ Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
 landed round. Floppy census kept as pinned (PD): the 67 flags trace to
 data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo
 refresh deliberately deferred (PD: "never mind zenodo for now") — the
-draft is BEHIND the live site. Promotion formalities not yet done:
-`next` unpushed, unmerged, untagged.
+draft is BEHIND the live site; its reserved DOI 404s until published
+(README wording now says "reserved"). Pushed 2026-07-25 (PD: "push
+push push"): origin main and next both carry the full arc (gates,
+bend store, galleries, census pins, tet round, self-containment fix);
+consumer regen from a bare clone is proven byte-identical. No tags
+yet. The clers consult-log commit is pushed; bendprover public repo
+already current at 672a603.
 
 ## History (compressed; details in git log and MORPH_GATE_TODO.md)
 
