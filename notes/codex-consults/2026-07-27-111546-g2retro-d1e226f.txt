@@ -1,0 +1,900 @@
+Retroactive G2 review of commit d1e226f (its live gate run hit codex's usage limit -> ERROR/unreviewed; limit since extended).
+Verdict: PASS
+
+===== PROMPT =====
+RETROACTIVE G2 REVIEW REQUEST: commit d1e226f (its gate run got
+an ERROR verdict — codex usage limit — so the commit landed
+unreviewed under the advisory design; the limit is now extended).
+
+Commit message:
+front page: names off the top, CC0 dedication at the foot
+
+Authors line removed; footer added: "CC0: to the extent possible
+under law, Peter Doyle has waived all copyright and related and
+neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+notes/regen-verification-20260726b/). Deployed to gauss (dedication
+serving, authors string gone); site tarball rebuilt and re-uploaded
+to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+record creators unchanged (page display only). HANDOFF: state +
+pending note to link the Doyle-Ellison arXiv paper when it appears.
+
+Substantive diff (excluding the bulky regen logs/manifests and
+swept gate transcripts, which are append-only verification
+artifacts; full diff available via git show d1e226f):
+commit d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+Author: Peter Doyle <peterdoyle1717@gmail.com>
+Date:   Mon Jul 27 09:52:26 2026 -0400
+
+    front page: names off the top, CC0 dedication at the foot
+    
+    Authors line removed; footer added: "CC0: to the extent possible
+    under law, Peter Doyle has waived all copyright and related and
+    neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+    Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+    notes/regen-verification-20260726b/). Deployed to gauss (dedication
+    serving, authors string gone); site tarball rebuilt and re-uploaded
+    to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+    record creators unchanged (page display only). HANDOFF: state +
+    pending note to link the Doyle-Ellison arXiv paper when it appears.
+commit d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+Author: Peter Doyle <peterdoyle1717@gmail.com>
+Date:   Mon Jul 27 09:52:26 2026 -0400
+
+    front page: names off the top, CC0 dedication at the foot
+    
+    Authors line removed; footer added: "CC0: to the extent possible
+    under law, Peter Doyle has waived all copyright and related and
+    neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+    Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+    notes/regen-verification-20260726b/). Deployed to gauss (dedication
+    serving, authors string gone); site tarball rebuilt and re-uploaded
+    to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+    record creators unchanged (page display only). HANDOFF: state +
+    pending note to link the Doyle-Ellison arXiv paper when it appears.
+
+diff --git a/HANDOFF.md b/HANDOFF.md
+index c2b35b1..4b2ed5c 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -94,11 +94,14 @@ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+ data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
+ TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+ md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+-2,251 nets, front page carries the archive pointers, md5 ed9e65d6… +
+-database), 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 =
+-44,646,598 primes, MANIFEST-checked on doob + OBJs v4–50), and
+-21609862 "Software for the computer-assisted proof of Euclidean
+-neoplatonic realizations" (undented @ git 145d94d). Citation
++2,251 nets, front page carries the archive pointers, no author line,
++CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
++19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
++primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
++"Software for the computer-assisted proof of Euclidean neoplatonic
++realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
++link the Doyle–Ellison arXiv paper from the front page when it
++appears. Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+diff --git a/builders/special.py b/builders/special.py
+index da9fe82..48efd5a 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -821,7 +821,6 @@ def main():
+ <meta name=viewport content="width=device-width,initial-scale=1">
+ <title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+ <h1>Atlas of neoplatonic solids</h1>
+-<p class="authors">Peter Doyle, Matthew Ellison</p>
+ <p>
+ A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+ with equilateral triangle faces, meeting at most six to a vertex.
+@@ -905,6 +904,11 @@ function go() {{
+ document.getElementById('q').addEventListener('keydown',
+   function(e) {{ if (e.key === 'Enter') go(); }});
+ </script>
++<p style="font-size:.8em;color:#888;margin-top:3em">
++<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>:
++to the extent possible under law, Peter Doyle has waived all
++copyright and related and neighboring rights to this atlas.
++</p>
+ </body></html>'''
+     with open(os.path.join(OUT, 'index.html'), 'w') as f:
+         f.write(front)
+
+Committer evidence file at commit time:
+# Commit evidence — front page: names off, CC0 footer (2026-07-26)
+
+PD: "remove the names from the top of the front page. place a cc0
+copyright notice in my name at the foot. we'll link to the
+Doyle-Ellison arxiv paper when that appears." Staged: special.py (two
+front-page edits), notes/regen-verification-20260726b/, HANDOFF
+(state + the pending arXiv-link note), swept gate transcript of the
+prior round.
+
+## Measured this session
+
+- special.py: the authors <p> removed; CC0 footer added before
+  </body> ("CC0: to the extent possible under law, Peter Doyle has
+  waived all copyright and related and neighboring rights to this
+  atlas", linked to creativecommons.org/publicdomain/zero/1.0/).
+- Build-twice at this tree: both manifests sha256
+  c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19,
+  20,492 files, diff EMPTY (notes/regen-verification-20260726b/).
+- Deployed to gauss; live checks: the dedication sentence serves
+  ("Peter Doyle has waived all copyright…"); grep for the removed
+  authors string returns nothing.
+- Site tarball rebuilt: 2,245,453,760 bytes, md5 b65c7417…;
+  atlas_records.jsonl re-aggregated byte-identical (git status clean
+  on it, 2,251 records) — db tarball untouched. Upload to the atlas
+  draft bucket: HTTP 201 full byte count; server-side md5 EQUAL
+  (final GET in session transcript).
+- Zenodo record CREATORS unchanged (Doyle + Ellison on the atlas
+  record) — PD's instruction was about the PAGE display, not record
+  credit.
+
+## New conventions / invariants (G1)
+
+None — static HTML only.
+
+===== CODEX OUTPUT =====
+Reading additional input from stdin...
+OpenAI Codex v0.145.0-alpha.18
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: read-only
+reasoning effort: low
+reasoning summaries: none
+session id: 019fa424-3db2-7452-acd1-9c455a81abdf
+--------
+user
+RETROACTIVE G2 REVIEW REQUEST: commit d1e226f (its gate run got
+an ERROR verdict — codex usage limit — so the commit landed
+unreviewed under the advisory design; the limit is now extended).
+
+Commit message:
+front page: names off the top, CC0 dedication at the foot
+
+Authors line removed; footer added: "CC0: to the extent possible
+under law, Peter Doyle has waived all copyright and related and
+neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+notes/regen-verification-20260726b/). Deployed to gauss (dedication
+serving, authors string gone); site tarball rebuilt and re-uploaded
+to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+record creators unchanged (page display only). HANDOFF: state +
+pending note to link the Doyle-Ellison arXiv paper when it appears.
+
+Substantive diff (excluding the bulky regen logs/manifests and
+swept gate transcripts, which are append-only verification
+artifacts; full diff available via git show d1e226f):
+commit d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+Author: Peter Doyle <peterdoyle1717@gmail.com>
+Date:   Mon Jul 27 09:52:26 2026 -0400
+
+    front page: names off the top, CC0 dedication at the foot
+    
+    Authors line removed; footer added: "CC0: to the extent possible
+    under law, Peter Doyle has waived all copyright and related and
+    neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+    Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+    notes/regen-verification-20260726b/). Deployed to gauss (dedication
+    serving, authors string gone); site tarball rebuilt and re-uploaded
+    to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+    record creators unchanged (page display only). HANDOFF: state +
+    pending note to link the Doyle-Ellison arXiv paper when it appears.
+commit d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+Author: Peter Doyle <peterdoyle1717@gmail.com>
+Date:   Mon Jul 27 09:52:26 2026 -0400
+
+    front page: names off the top, CC0 dedication at the foot
+    
+    Authors line removed; footer added: "CC0: to the extent possible
+    under law, Peter Doyle has waived all copyright and related and
+    neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+    Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+    notes/regen-verification-20260726b/). Deployed to gauss (dedication
+    serving, authors string gone); site tarball rebuilt and re-uploaded
+    to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+    record creators unchanged (page display only). HANDOFF: state +
+    pending note to link the Doyle-Ellison arXiv paper when it appears.
+
+diff --git a/HANDOFF.md b/HANDOFF.md
+index c2b35b1..4b2ed5c 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -94,11 +94,14 @@ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+ data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
+ TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+ md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+-2,251 nets, front page carries the archive pointers, md5 ed9e65d6… +
+-database), 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 =
+-44,646,598 primes, MANIFEST-checked on doob + OBJs v4–50), and
+-21609862 "Software for the computer-assisted proof of Euclidean
+-neoplatonic realizations" (undented @ git 145d94d). Citation
++2,251 nets, front page carries the archive pointers, no author line,
++CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
++19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
++primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
++"Software for the computer-assisted proof of Euclidean neoplatonic
++realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
++link the Doyle–Ellison arXiv paper from the front page when it
++appears. Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+diff --git a/builders/special.py b/builders/special.py
+index da9fe82..48efd5a 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -821,7 +821,6 @@ def main():
+ <meta name=viewport content="width=device-width,initial-scale=1">
+ <title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+ <h1>Atlas of neoplatonic solids</h1>
+-<p class="authors">Peter Doyle, Matthew Ellison</p>
+ <p>
+ A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+ with equilateral triangle faces, meeting at most six to a vertex.
+@@ -905,6 +904,11 @@ function go() {{
+ document.getElementById('q').addEventListener('keydown',
+   function(e) {{ if (e.key === 'Enter') go(); }});
+ </script>
++<p style="font-size:.8em;color:#888;margin-top:3em">
++<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>:
++to the extent possible under law, Peter Doyle has waived all
++copyright and related and neighboring rights to this atlas.
++</p>
+ </body></html>'''
+     with open(os.path.join(OUT, 'index.html'), 'w') as f:
+         f.write(front)
+
+Committer evidence file at commit time:
+# Commit evidence — front page: names off, CC0 footer (2026-07-26)
+
+PD: "remove the names from the top of the front page. place a cc0
+copyright notice in my name at the foot. we'll link to the
+Doyle-Ellison arxiv paper when that appears." Staged: special.py (two
+front-page edits), notes/regen-verification-20260726b/, HANDOFF
+(state + the pending arXiv-link note), swept gate transcript of the
+prior round.
+
+## Measured this session
+
+- special.py: the authors <p> removed; CC0 footer added before
+  </body> ("CC0: to the extent possible under law, Peter Doyle has
+  waived all copyright and related and neighboring rights to this
+  atlas", linked to creativecommons.org/publicdomain/zero/1.0/).
+- Build-twice at this tree: both manifests sha256
+  c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19,
+  20,492 files, diff EMPTY (notes/regen-verification-20260726b/).
+- Deployed to gauss; live checks: the dedication sentence serves
+  ("Peter Doyle has waived all copyright…"); grep for the removed
+  authors string returns nothing.
+- Site tarball rebuilt: 2,245,453,760 bytes, md5 b65c7417…;
+  atlas_records.jsonl re-aggregated byte-identical (git status clean
+  on it, 2,251 records) — db tarball untouched. Upload to the atlas
+  draft bucket: HTTP 201 full byte count; server-side md5 EQUAL
+  (final GET in session transcript).
+- Zenodo record CREATORS unchanged (Doyle + Ellison on the atlas
+  record) — PD's instruction was about the PAGE display, not record
+  credit.
+
+## New conventions / invariants (G1)
+
+None — static HTML only.
+
+VERDICT REQUEST: PASS / WARN / BLOCK for this already-landed commit, with specifics.
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll review the exact commit tree and its verification artifacts, then return a retroactive G2 verdict focused on defects or release-state inconsistencies.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "pwd && rg --files -g 'TEAMWORK.md' -g 'TEAMWORK_LOG.md' -g 'TEAMWORK_V2_DESIGN.md' -g 'AGENTS.md' -g 'NO_UNMEASURED_DIAGNOSES.md' | sort && git status --short && git show --stat --oneline --decorate --no-renames d1e226f && git diff --check d1e226f"'^ d1e226f' in /Users/doyle/Dropbox/projects/atlas
+ exited 2 in 0ms:
+/Users/doyle/Dropbox/projects/atlas
+?? notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt
+d1e226f (HEAD -> next, origin/next, origin/main, main) front page: names off the top, CC0 dedication at the foot
+ HANDOFF.md                                         |    13 +-
+ builders/special.py                                |     6 +-
+ ...te-ac54de5d0cc694e651353a71012beac9d5501fac.txt |  3208 +++
+ ...te-ac54de5d0cc694e651353a71012beac9d5501fac.txt |  3626 ++++
+ notes/regen-verification-20260726b/README.md       |    11 +
+ notes/regen-verification-20260726b/regen_A.log     |  2300 +++
+ notes/regen-verification-20260726b/regen_B.log     |  2300 +++
+ .../site_manifest_A.txt                            | 20492 +++++++++++++++++++
+ .../site_manifest_B.txt                            | 20492 +++++++++++++++++++
+ 9 files changed, 52442 insertions(+), 6 deletions(-)
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:296: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:305: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:319: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:375: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:394: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:407: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:428: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:437: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:452: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:298: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:307: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:321: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:377: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:396: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:409: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:430: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:439: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:454: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3233: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3242: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3256: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3312: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3331: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3344: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3365: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3374: trailing whitespace.
++ 
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3389: trailing whitespace.
++ 
+
+codex
+The tree has one pre-existing untracked gate transcript; I’m leaving it untouched. The only `diff --check` findings are trailing spaces inside archived consult transcripts, not executable or generated-page changes, so I’m separating that artifact noise from substantive review.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git show --format=fuller --no-ext-diff --no-renames d1e226f -- HANDOFF.md builders/special.py notes/regen-verification-20260726b/README.md && sed -n '1,180p' TEAMWORK.md 2>/dev/null; sed -n '1,140p' TEAMWORK_V2_DESIGN.md 2>/dev/null; tail -n 100 TEAMWORK_LOG.md 2>/dev/null; sha256sum notes/regen-verification-20260726b/site_manifest_A.txt notes/regen-verification-20260726b/site_manifest_B.txt; cmp -s notes/regen-verification-20260726b/site_manifest_A.txt notes/regen-verification-20260726b/site_manifest_B.txt; echo \"cmp_exit="'$?"; tail -n 25 notes/regen-verification-20260726b/regen_A.log; tail -n 25 notes/regen-verification-20260726b/regen_B.log' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+commit d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+Author:     Peter Doyle <peterdoyle1717@gmail.com>
+AuthorDate: Mon Jul 27 09:52:26 2026 -0400
+Commit:     Peter Doyle <peterdoyle1717@gmail.com>
+CommitDate: Mon Jul 27 09:52:26 2026 -0400
+
+    front page: names off the top, CC0 dedication at the foot
+    
+    Authors line removed; footer added: "CC0: to the extent possible
+    under law, Peter Doyle has waived all copyright and related and
+    neighboring rights to this atlas" (linked to the CC0 1.0 deed).
+    Build-twice EMPTY at this tree (c6e0e7fe..., 20,492 files;
+    notes/regen-verification-20260726b/). Deployed to gauss (dedication
+    serving, authors string gone); site tarball rebuilt and re-uploaded
+    to the atlas draft, server-side md5 b65c7417... verified. Zenodo
+    record creators unchanged (page display only). HANDOFF: state +
+    pending note to link the Doyle-Ellison arXiv paper when it appears.
+
+diff --git a/HANDOFF.md b/HANDOFF.md
+index c2b35b1..4b2ed5c 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -94,11 +94,14 @@ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+ data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
+ TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+ md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+-2,251 nets, front page carries the archive pointers, md5 ed9e65d6… +
+-database), 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 =
+-44,646,598 primes, MANIFEST-checked on doob + OBJs v4–50), and
+-21609862 "Software for the computer-assisted proof of Euclidean
+-neoplatonic realizations" (undented @ git 145d94d). Citation
++2,251 nets, front page carries the archive pointers, no author line,
++CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
++19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
++primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
++"Software for the computer-assisted proof of Euclidean neoplatonic
++realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
++link the Doyle–Ellison arXiv paper from the front page when it
++appears. Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+diff --git a/builders/special.py b/builders/special.py
+index da9fe82..48efd5a 100644
+--- a/builders/special.py
++++ b/builders/special.py
+@@ -821,7 +821,6 @@ def main():
+ <meta name=viewport content="width=device-width,initial-scale=1">
+ <title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+ <h1>Atlas of neoplatonic solids</h1>
+-<p class="authors">Peter Doyle, Matthew Ellison</p>
+ <p>
+ A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+ with equilateral triangle faces, meeting at most six to a vertex.
+@@ -905,6 +904,11 @@ function go() {{
+ document.getElementById('q').addEventListener('keydown',
+   function(e) {{ if (e.key === 'Enter') go(); }});
+ </script>
++<p style="font-size:.8em;color:#888;margin-top:3em">
++<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>:
++to the extent possible under law, Peter Doyle has waived all
++copyright and related and neighboring rights to this atlas.
++</p>
+ </body></html>'''
+     with open(os.path.join(OUT, 'index.html'), 'w') as f:
+         f.write(front)
+diff --git a/notes/regen-verification-20260726b/README.md b/notes/regen-verification-20260726b/README.md
+new file mode 100644
+index 0000000..bf00149
+--- /dev/null
++++ b/notes/regen-verification-20260726b/README.md
+@@ -0,0 +1,11 @@
++# Build-twice verification — 2026-07-26 (front-page names/CC0 round)
++
++Tree: authors line removed from the front-page top; CC0 dedication in
++Peter Doyle's name added at the foot (linked to
++creativecommons.org/publicdomain/zero/1.0/).
++
++Two ./regen_personal.sh runs, per-file sha256 manifests:
++
++    sha256(site_manifest_A.txt) = c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19
++    sha256(site_manifest_B.txt) = c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19
++    files: 20,492   diff A B: EMPTY
+c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19  notes/regen-verification-20260726b/site_manifest_A.txt
+c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19  notes/regen-verification-20260726b/site_manifest_B.txt
+cmp_exit=0
+eisenmap/oct.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/tet.html (41/41 built)
+  per-net eismaps: 41
+eisenmap/v7.html (13/13 built)
+  per-net eismaps: 13
+eisenmap/v8a.html (15/15 built)
+  per-net eismaps: 15
+eisenmap/v8b.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/v9a.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/tri2.html (8/8 built)
+  per-net eismaps: 7
+eisenmap/hexanti.html (5/5 built)
+  per-net eismaps: 5
+eisenmap/v10x.html (7/7 built)
+  per-net eismaps: 7
+eisenmap/v11x.html (7/7 built)
+  per-net eismaps: 7
+eisenmap/bur20.html (6/6 built)
+  per-net eismaps: 6
+eisenmap/bur24.html (6/6 built)
+  per-net eismaps: 6
+rendered 2251 pages
+eisenmap/oct.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/tet.html (41/41 built)
+  per-net eismaps: 41
+eisenmap/v7.html (13/13 built)
+  per-net eismaps: 13
+eisenmap/v8a.html (15/15 built)
+  per-net eismaps: 15
+eisenmap/v8b.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/v9a.html (12/12 built)
+  per-net eismaps: 12
+eisenmap/tri2.html (8/8 built)
+  per-net eismaps: 7
+eisenmap/hexanti.html (5/5 built)
+  per-net eismaps: 5
+eisenmap/v10x.html (7/7 built)
+  per-net eismaps: 7
+eisenmap/v11x.html (7/7 built)
+  per-net eismaps: 7
+eisenmap/bur20.html (6/6 built)
+  per-net eismaps: 6
+eisenmap/bur24.html (6/6 built)
+  per-net eismaps: 6
+rendered 2251 pages
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "rg -n \"Peter Doyle, Matthew Ellison|has waived all|creativecommons.org/publicdomain/zero/1.0\" . --glob '"'!notes/codex-consults/**'"' --glob '"'!notes/regen-verification-20260726b/site_manifest_*.txt'"' --glob '"'!notes/regen-verification-20260726b/regen_*.log'"' --glob '"'!HANDOFF.md'"' --glob '"'!builders/special.py'"' | head -80; rg -n -i \"traceback|error|failed|exception\" notes/regen-verification-20260726b/regen_A.log notes/regen-verification-20260726b/regen_B.log | head -80; rg -n \"("'^|/)index.html$" notes/regen-verification-20260726b/site_manifest_A.txt | head; git show d1e226f''^:builders/special.py | sed -n '"'790,930p'; sed -n '790,930p' builders/special.py; git status --short" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+./notes/regen-verification-20260726b/README.md:5:creativecommons.org/publicdomain/zero/1.0/).
+./builders/assets/about.html:10:<p class="authors">Peter Doyle, Matthew Ellison</p>
+390:035b87cd72d090e5890bb62e7d98b459f266d60c750062cd4040e86acdde1ede  ./index.html
+396:d53162fabe4674f95541bc63adf63d76b62ab3879c246ae1d656cd16d25e1584  ./nets/v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACABCACACACACADEACACACACADEACACACADEACACADEACADEADEE/index.html
+404:5ad8ff8b400ee04ef27bccc0fe8df0455cbf9dcb5f97e3bd60d1b3389d91c7da  ./nets/v100CCACCCACCACACCACCACACCACACACCACACCACACACCACACACACCACACACCACACACACCACACACACACCACACACACCACACACACACCACACACACACACCACACACACACCACACACACACACCACACACACACACACCACABABACACACCACACABABABACACCACACABABABACADEADEE/index.html
+411:c864f03ce38ef966417f9cbd881f49df06fd73e1f6b5491139439da1918198bd  ./nets/v102h248728676c88abd7/index.html
+419:3770f9cf0b55e199d3b17d39b41511b9358813e1798eb042917b0b31e4f9d9d1  ./nets/v102h63135343ab206f3b/index.html
+426:cb7e84d3e524d81d8ac90a22b952c7a0380a94fadcf9c1e54b160576730ca582  ./nets/v102ha0145080ab94fac9/index.html
+433:e818502f81a4123cb270655b8ec38b39c76938d4b0c54d5762d02a17045e0729  ./nets/v102hae056372ee7b85b8/index.html
+440:309d01c725d1e3fded3dfa390bf4db02aeb1a7f8bddbf087225ba9db7c8717e8  ./nets/v102he0fc26d1f37f5c66/index.html
+447:d0c149cc993bdc26a1bfba53be5db415a1a5bd7b9b0d74e663142d876becf122  ./nets/v102he593564ce5c632e4/index.html
+455:a3955fa85577dc37ed84dd11fb7699efa7122b468bdcd839450648e27a6f69bf  ./nets/v106hb125deb358f972a7/index.html
+        note = ('' if v <= 14 else
+                ' &middot; exemplars only, not the full set at this size')
+        n_other = sum(1 for r in rows if 'nonprime' in r.get("themes", [])
+                      or r.get("maxdeg", 6) > 6)
+        counts = (f'{len(rows) - n_other} primes'
+                  + (f' + {n_other} marked others' if n_other else ''))
+        body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
+                f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
+                f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
+                f'v = {v}</h1><p class=desc>{counts}{note}</p>',
+                grid([item(r, f'v={v}'
+                           + (' non-prime' if 'nonprime' in r.get("themes", [])
+                              else '')
+                           + (f' deg {r["maxdeg"]}' if r.get("maxdeg", 6) > 6
+                              else '')) for r in
+                      sorted(rows, key=lambda r: (r.get("maxdeg", 6) > 6,
+                                                  r["name"]))]),
+                '</body></html>']
+        with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
+            f.write('\n'.join(body))
+    print(f'by-v pages: {len(byv)}')
+
+    # -- front page ----------------------------------------------------
+    quick = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                    for v in sorted(byv) if v <= 14)
+    more = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                   for v in sorted(byv) if v > 14)
+    ex = "v9CCCACACACACAAE"
+    if ex not in recs:
+        ex = sorted(recs)[0]
+    front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+<h1>Atlas of neoplatonic solids</h1>
+<p class="authors">Peter Doyle, Matthew Ellison</p>
+<p>
+A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+with equilateral triangle faces, meeting at most six to a vertex.
+<a href="about.html">More &rarr;</a>
+</p>
+<p style="font-size:.85em;color:#555">
+Archives &amp; code: atlas
+<a href="https://doi.org/10.5281/zenodo.21367249">doi:10.5281/zenodo.21367249</a> &middot;
+prime census
+<a href="https://doi.org/10.5281/zenodo.19761389">doi:10.5281/zenodo.19761389</a> &middot;
+proof software
+<a href="https://doi.org/10.5281/zenodo.21609862">doi:10.5281/zenodo.21609862</a> &middot;
+source
+<a href="https://github.com/peterdoyle1717/neoplatonic-atlas">github.com/peterdoyle1717/neoplatonic-atlas</a>
+</p>
+
+<h2>Themed galleries</h2>
+<div class="gallery-links">
+<a href="gallery/small.html">Primes v&le;12</a>
+<a href="by-v/13.html">Primes v=13</a>
+<a href="by-v/14.html">Primes v=14</a>
+<a href="gallery/nonprime.html">Non-prime</a>
+<a href="gallery/classics.html">Platonic &amp; Archimedean</a>
+<a href="gallery/convex.html">Convex</a>
+<a href="gallery/hyperbolic.html">Hyperbolic</a>
+<a href="gallery/dented.html">Dented</a>
+<a href="gallery/buried.html">Hull-buried</a>
+<a href="gallery/pancakes.html">Pancakes</a>
+<a href="gallery/floppy.html">Floppy</a>
+<a href="gallery/symmetry.html">Symmetry</a>
+<a href="gallery/subdiv.html">Eisenstein subdivisions</a>
+<a href="gallery/recognized.html">All angles recognized</a>
+<a href="gallery/decap.html">Cap-replaced convex</a>
+<a href="gallery/phyllo31.html">(3,1)</a>
+<a href="gallery/phyllo22.html">(2,2)</a>
+<a href="gallery/phyllo41.html">(4,1)</a>
+<a href="gallery/phyllo51.html">(5,1)</a>
+<a href="gallery/preapproved.html">Preapproved</a>
+<a href="gallery/flops.html">Tough cases</a>
+</div>
+<h2>Example</h2>
+<div class="example-row">
+  <div class="blurb">
+    Each neoplatonic has its own page &mdash; the Euclidean solid, the
+    ideal net, the CLERS triangulation, and, where the development from
+    the ideal limit is certified, the morph in the Poincar&eacute; and
+    Klein models. <strong>Click the CLERS code under the model to the
+    right</strong> to open its page.
+  </div>
+  <div class="thumb">
+    <model-viewer src="nets/{ex}/rb.glb"
+      camera-orbit="0deg 100deg auto" camera-controls interaction-prompt="none"></model-viewer>
+    <div class="label"><a href="nets/{ex}/">{ex}</a></div>
+  </div>
+</div>
+<h2>Quick links by size</h2>
+<div class="gallery-links">
+{quick}</div>
+<div class="gallery-links" style="font-size:.85em">
+{more}</div>
+<h2>Find a net</h2>
+<div class="search">
+<input id=q placeholder="CLERS name, e.g. CCCACACACACAAE">
+<button onclick="go()">go</button>
+<div id="search-msg"></div>
+
+
+
+</div>
+<script>
+function go() {{
+  var m = document.getElementById('search-msg');
+  var s = document.getElementById('q').value.trim().toUpperCase();
+  m.className = 'err';
+  if (/^V[0-9]+/.test(s)) s = s.replace(/^V[0-9]+/, '');
+  if (!/^[ABCDE]+$/.test(s)) {{ m.textContent = 'letters ABCDE only'; return; }}
+  var v = (s.length + 4) / 2;
+  if (v !== Math.floor(v)) {{ m.textContent = 'length must be even'; return; }}
+  window.location = 'nets/v' + v + s + '/';
+}}
+document.getElementById('q').addEventListener('keydown',
+  function(e) {{ if (e.key === 'Enter') go(); }});
+</script>
+</body></html>'''
+    with open(os.path.join(OUT, 'index.html'), 'w') as f:
+        f.write(front)
+    print('front page written')
+    import shutil
+    shutil.copy(os.path.join(HERE, "assets", "about.html"),
+                os.path.join(OUT, "about.html"))
+    import eisenmap
+    eisenmap.generate()
+    import views
+    views.main()
+
+
+if __name__ == "__main__":
+    main()
+        note = ('' if v <= 14 else
+                ' &middot; exemplars only, not the full set at this size')
+        n_other = sum(1 for r in rows if 'nonprime' in r.get("themes", [])
+                      or r.get("maxdeg", 6) > 6)
+        counts = (f'{len(rows) - n_other} primes'
+                  + (f' + {n_other} marked others' if n_other else ''))
+        body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
+                f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
+                f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
+                f'v = {v}</h1><p class=desc>{counts}{note}</p>',
+                grid([item(r, f'v={v}'
+                           + (' non-prime' if 'nonprime' in r.get("themes", [])
+                              else '')
+                           + (f' deg {r["maxdeg"]}' if r.get("maxdeg", 6) > 6
+                              else '')) for r in
+                      sorted(rows, key=lambda r: (r.get("maxdeg", 6) > 6,
+                                                  r["name"]))]),
+                '</body></html>']
+        with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
+            f.write('\n'.join(body))
+    print(f'by-v pages: {len(byv)}')
+
+    # -- front page ----------------------------------------------------
+    quick = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                    for v in sorted(byv) if v <= 14)
+    more = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
+                   for v in sorted(byv) if v > 14)
+    ex = "v9CCCACACACACAAE"
+    if ex not in recs:
+        ex = sorted(recs)[0]
+    front = f'''<!DOCTYPE html><html lang=en><head><meta charset=utf-8>
+<meta name=viewport content="width=device-width,initial-scale=1">
+<title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
+<h1>Atlas of neoplatonic solids</h1>
+<p>
+A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
+with equilateral triangle faces, meeting at most six to a vertex.
+<a href="about.html">More &rarr;</a>
+</p>
+<p style="font-size:.85em;color:#555">
+Archives &amp; code: atlas
+<a href="https://doi.org/10.5281/zenodo.21367249">doi:10.5281/zenodo.21367249</a> &middot;
+prime census
+<a href="https://doi.org/10.5281/zenodo.19761389">doi:10.5281/zenodo.19761389</a> &middot;
+proof software
+<a href="https://doi.org/10.5281/zenodo.21609862">doi:10.5281/zenodo.21609862</a> &middot;
+source
+<a href="https://github.com/peterdoyle1717/neoplatonic-atlas">github.com/peterdoyle1717/neoplatonic-atlas</a>
+</p>
+
+<h2>Themed galleries</h2>
+<div class="gallery-links">
+<a href="gallery/small.html">Primes v&le;12</a>
+<a href="by-v/13.html">Primes v=13</a>
+<a href="by-v/14.html">Primes v=14</a>
+<a href="gallery/nonprime.html">Non-prime</a>
+<a href="gallery/classics.html">Platonic &amp; Archimedean</a>
+<a href="gallery/convex.html">Convex</a>
+<a href="gallery/hyperbolic.html">Hyperbolic</a>
+<a href="gallery/dented.html">Dented</a>
+<a href="gallery/buried.html">Hull-buried</a>
+<a href="gallery/pancakes.html">Pancakes</a>
+<a href="gallery/floppy.html">Floppy</a>
+<a href="gallery/symmetry.html">Symmetry</a>
+<a href="gallery/subdiv.html">Eisenstein subdivisions</a>
+<a href="gallery/recognized.html">All angles recognized</a>
+<a href="gallery/decap.html">Cap-replaced convex</a>
+<a href="gallery/phyllo31.html">(3,1)</a>
+<a href="gallery/phyllo22.html">(2,2)</a>
+<a href="gallery/phyllo41.html">(4,1)</a>
+<a href="gallery/phyllo51.html">(5,1)</a>
+<a href="gallery/preapproved.html">Preapproved</a>
+<a href="gallery/flops.html">Tough cases</a>
+</div>
+<h2>Example</h2>
+<div class="example-row">
+  <div class="blurb">
+    Each neoplatonic has its own page &mdash; the Euclidean solid, the
+    ideal net, the CLERS triangulation, and, where the development from
+    the ideal limit is certified, the morph in the Poincar&eacute; and
+    Klein models. <strong>Click the CLERS code under the model to the
+    right</strong> to open its page.
+  </div>
+  <div class="thumb">
+    <model-viewer src="nets/{ex}/rb.glb"
+      camera-orbit="0deg 100deg auto" camera-controls interaction-prompt="none"></model-viewer>
+    <div class="label"><a href="nets/{ex}/">{ex}</a></div>
+  </div>
+</div>
+<h2>Quick links by size</h2>
+<div class="gallery-links">
+{quick}</div>
+<div class="gallery-links" style="font-size:.85em">
+{more}</div>
+<h2>Find a net</h2>
+<div class="search">
+<input id=q placeholder="CLERS name, e.g. CCCACACACACAAE">
+<button onclick="go()">go</button>
+<div id="search-msg"></div>
+
+
+
+</div>
+<script>
+function go() {{
+  var m = document.getElementById('search-msg');
+  var s = document.getElementById('q').value.trim().toUpperCase();
+  m.className = 'err';
+  if (/^V[0-9]+/.test(s)) s = s.replace(/^V[0-9]+/, '');
+  if (!/^[ABCDE]+$/.test(s)) {{ m.textContent = 'letters ABCDE only'; return; }}
+  var v = (s.length + 4) / 2;
+  if (v !== Math.floor(v)) {{ m.textContent = 'length must be even'; return; }}
+  window.location = 'nets/v' + v + s + '/';
+}}
+document.getElementById('q').addEventListener('keydown',
+  function(e) {{ if (e.key === 'Enter') go(); }});
+</script>
+<p style="font-size:.8em;color:#888;margin-top:3em">
+<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>:
+to the extent possible under law, Peter Doyle has waived all
+copyright and related and neighboring rights to this atlas.
+</p>
+</body></html>'''
+    with open(os.path.join(OUT, 'index.html'), 'w') as f:
+        f.write(front)
+    print('front page written')
+    import shutil
+    shutil.copy(os.path.join(HERE, "assets", "about.html"),
+                os.path.join(OUT, "about.html"))
+    import eisenmap
+    eisenmap.generate()
+    import views
+    views.main()
+
+
+if __name__ == "__main__":
+    main()
+ M HANDOFF.md
+?? notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt
+
+codex
+The substantive change matches the request: only the generated front-page template loses the author line, and the footer names only Peter Doyle’s waiver. The separate `about.html` author line remains, which is consistent with “names off the top of the front page,” not a site-wide removal. I’m checking the archived deployment/upload evidence before fixing the verdict.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'rg -n "b65c7417|HTTP 201|server-side|Peter Doyle has waived|authors string|CREATORS|creators|gauss|usage limit|ERROR|VERDICT" notes/codex-consults/2026-07-26-1423*-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt | tail -n 160; git diff -- HANDOFF.md; git rev-parse d1e226f''^{tree} d1e226f''^{}; git show --format= --name-only d1e226f | wc -l; git status --short' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:199:  201, server-side md5 EQUAL.
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:206:  bucket — HTTP 201, full byte count, 634 s; final GET shows
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:207:  server-side md5 EQUAL (ed9e65d6…). atlas_records.jsonl
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:209:  it) — db tarball untouched, md5 still a689d123… server-side.
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:210:  Final sweep: all three depositions listed, every server-side md5
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:221:  with its log — both logs present). Deployed to gauss; live front
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:247:-drafts, all server-side md5s verified against local — 21367250 "The
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:259:+TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:415:+record (Doyle); if Peter changes the record's creators, mirror it
+notes/codex-consults/2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3175:/bin/zsh -lc "git show :notes/codex-consults/2026-07-26-000213-codex-gate-81fa2d4e5d638b4497adafe43eee4407c821299b.txt | sed -n '1,280p'; find /private/tmp/claude-501 -name 'commit-msg-software.txt' -print 2>/dev/null; git show :notes/regen-verification-20260726/regen_A.log | rg -n '(Traceback|ERROR|FAILED|No such file|Exception|built 2251|rendered 2251)' ; git show :notes/regen-verification-20260726/regen_B.log | rg -n '(Traceback|ERROR|FAILED|No such file|Exception|built 2251|rendered 2251)'; git diff --cached --summary; git cat-file -s :notes/regen-verification-20260726/site_manifest_A.txt; git cat-file -s :notes/regen-verification-20260726/regen_A.log" in /Users/doyle/Dropbox/projects/atlas
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:201:  201, server-side md5 EQUAL.
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:208:  bucket — HTTP 201, full byte count, 634 s; final GET shows
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:209:  server-side md5 EQUAL (ed9e65d6…). atlas_records.jsonl
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:211:  it) — db tarball untouched, md5 still a689d123… server-side.
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:212:  Final sweep: all three depositions listed, every server-side md5
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:223:  with its log — both logs present). Deployed to gauss; live front
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:249:-drafts, all server-side md5s verified against local — 21367250 "The
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:261:+TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:417:+record (Doyle); if Peter changes the record's creators, mirror it
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3184:-drafts, all server-side md5s verified against local — 21367250 "The
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3196:+TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3352:+record (Doyle); if Peter changes the record's creators, mirror it
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3520:  201, server-side md5 EQUAL.
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3527:  bucket — HTTP 201, full byte count, 634 s; final GET shows
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3528:  server-side md5 EQUAL (ed9e65d6…). atlas_records.jsonl
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3530:  it) — db tarball untouched, md5 still a689d123… server-side.
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3531:  Final sweep: all three depositions listed, every server-side md5
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3542:  with its log — both logs present). Deployed to gauss; live front
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3570:files; notes/regen-verification-20260726/); deployed to gauss (three
+notes/codex-consults/2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt:3572:draft (md5 ed9e65d6... verified server-side).
+diff --git a/HANDOFF.md b/HANDOFF.md
+index 4b2ed5c..fabdc6b 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -99,9 +99,10 @@ CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
+ 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
+ primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
+ "Software for the computer-assisted proof of Euclidean neoplatonic
+-realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
+-link the Doyle–Ellison arXiv paper from the front page when it
+-appears. Citation
++realizations" (undented @ git 145d94d). Creators = Doyle alone on all
++three records (PD 2026-07-26: "that should change too", matching the
++de-authored front page). PENDING (PD 2026-07-26): link the
++Doyle–Ellison arXiv paper from the front page when it appears. Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+f296c738780656562e18a2c9317fd37778035a12
+d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1
+       9
+ M HANDOFF.md
+?? notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt
+
+codex
+VERDICT: PASS
+
+No blocking or warning-level defect found in commit `d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1` (tree `f296c738780656562e18a2c9317fd37778035a12`).
+
+Evidence reviewed:
+
+- `builders/special.py` removes only the front-page author line and adds the requested CC0 footer with the correct deed URL.
+- `about.html` retains its authors line, consistent with a front-page-only change.
+- Both 20,492-file manifests have SHA-256 `c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19`; `cmp` returned 0.
+- Both regeneration logs end with `rendered 2251 pages`; searching them found no traceback, error, failure, or exception.
+- `HANDOFF.md` records the changed page state and the pending Doyle–Ellison arXiv link.
+- No new mathematical convention or invariant was introduced, so G1 was not required.
+
+Non-blocking artifact note: `git diff --check` finds trailing spaces inside the archived gate transcripts. Those transcripts are append-only records and the whitespace does not affect the site or build.
+
+The present working tree has later, uncommitted changes to `HANDOFF.md` plus an untracked consult transcript; these are outside the reviewed commit.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+39,456
+VERDICT: PASS
+
+No blocking or warning-level defect found in commit `d1e226f6ce27cdec3acf6f48a80f220f9f51d6d1` (tree `f296c738780656562e18a2c9317fd37778035a12`).
+
+Evidence reviewed:
+
+- `builders/special.py` removes only the front-page author line and adds the requested CC0 footer with the correct deed URL.
+- `about.html` retains its authors line, consistent with a front-page-only change.
+- Both 20,492-file manifests have SHA-256 `c6e0e7fe204adf1ee640bdf97723eb1a913593e40200dbaf202cc0b76528ae19`; `cmp` returned 0.
+- Both regeneration logs end with `rendered 2251 pages`; searching them found no traceback, error, failure, or exception.
+- `HANDOFF.md` records the changed page state and the pending Doyle–Ellison arXiv link.
+- No new mathematical convention or invariant was introduced, so G1 was not required.
+
+Non-blocking artifact note: `git diff --check` finds trailing spaces inside the archived gate transcripts. Those transcripts are append-only records and the whitespace does not affect the site or build.
+
+The present working tree has later, uncommitted changes to `HANDOFF.md` plus an untracked consult transcript; these are outside the reviewed commit.

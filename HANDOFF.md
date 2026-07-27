@@ -99,9 +99,10 @@ CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
 primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
 "Software for the computer-assisted proof of Euclidean neoplatonic
-realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
-link the Doyle–Ellison arXiv paper from the front page when it
-appears. Citation
+realizations" (undented @ git 145d94d). Creators = Doyle alone on all
+three records (PD 2026-07-26: "that should change too", matching the
+de-authored front page). PENDING (PD 2026-07-26): link the
+Doyle–Ellison arXiv paper from the front page when it appears. Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
