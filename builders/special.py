@@ -821,7 +821,6 @@ def main():
 <meta name=viewport content="width=device-width,initial-scale=1">
 <title>Atlas of neoplatonic solids</title><style>{FRONT_CSS}</style>{MV.replace('../vendor', 'vendor')}</head><body>
 <h1>Atlas of neoplatonic solids</h1>
-<p class="authors">Peter Doyle, Matthew Ellison</p>
 <p>
 A <em>neoplatonic solid</em> is an undented Euclidean polyhedron
 with equilateral triangle faces, meeting at most six to a vertex.
@@ -905,6 +904,11 @@ function go() {{
 document.getElementById('q').addEventListener('keydown',
   function(e) {{ if (e.key === 'Enter') go(); }});
 </script>
+<p style="font-size:.8em;color:#888;margin-top:3em">
+<a href="https://creativecommons.org/publicdomain/zero/1.0/">CC0</a>:
+to the extent possible under law, Peter Doyle has waived all
+copyright and related and neighboring rights to this atlas.
+</p>
 </body></html>'''
     with open(os.path.join(OUT, 'index.html'), 'w') as f:
         f.write(front)

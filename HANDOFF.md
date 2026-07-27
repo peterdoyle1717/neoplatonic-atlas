@@ -94,11 +94,14 @@ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
 data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
 TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
 md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
-2,251 nets, front page carries the archive pointers, md5 ed9e65d6… +
-database), 19761390 "Prime neoplatonic solids" (CLERS lists v4–60 =
-44,646,598 primes, MANIFEST-checked on doob + OBJs v4–50), and
-21609862 "Software for the computer-assisted proof of Euclidean
-neoplatonic realizations" (undented @ git 145d94d). Citation
+2,251 nets, front page carries the archive pointers, no author line,
+CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
+19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
+primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
+"Software for the computer-assisted proof of Euclidean neoplatonic
+realizations" (undented @ git 145d94d). PENDING (PD 2026-07-26):
+link the Doyle–Ellison arXiv paper from the front page when it
+appears. Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
