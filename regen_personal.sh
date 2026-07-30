@@ -19,3 +19,6 @@ PYTHON="${PYTHON:-python3.13}"
 /bin/rm -rf site/personal
 "$PYTHON" builders/personal.py     # records + gated artifacts + pages
 "$PYTHON" builders/special.py      # stamps, galleries, by-v, front, eismaps
+"$PYTHON" builders/aggregate_records.py # aggregate stamped personal-page records
+"$PYTHON" builders/elt_paper.py    # ELT still gallery
+"$PYTHON" builders/elt_symmetry.py # one ELT example per symmetry type

@@ -21,7 +21,7 @@ GLBs, morph_p/k, ideal_net.svg, clers_layout.svg, eismap.svg). id =
 `views.py` is the only renderer.
 
 Committed data is the source of truth:
-- `data/bends/` (2,249 json) — the bend store: hero + morph-ladder
+- `data/bends/` (2,283 json) — the bend store: hero + morph-ladder
   bends per net, persisted by producer runs, consumed at build.
   Store-only rule: with a store present the solver is NEVER invoked.
 - `data/*.tsv` — census pins (class_v30, symmetry, conway, classics,
@@ -38,6 +38,9 @@ Two tiers:
 - `./producer_census.sh` — PRODUCER census sweep (classify/members/
   symmetry; needs the neo tree + scipy): attended, editorial; its
   header records the measured drift semantics.
+- `builders/aggregate_records.py` — deterministic consumer-side aggregation
+  of the stamped `net.json` records into `data/atlas_records.jsonl`;
+  `regen_personal.sh` runs it before the two ELT galleries.
 
 Display gates (G1-audited, seven rounds; specs + calibration in
 MORPH_GATE_TODO.md and notes/gate-calibration-20260722/): every
@@ -52,9 +55,9 @@ bendprover `--frames` (672a603) emits any finite realization on demand
 (Klein-normalized, mp development); the atlas owns assembly.
 Correspondence: notes/FOR_NEO_morph_frames.md / FOR_ATLAS_frames_ready.md.
 
-## Site content (2026-07-25)
+## Site content (2026-07-30)
 
-2,251 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
+2,283 nets. Front title "Atlas of neoplatonic solids". Chips: Primes
 v≤12 / v=13 / v=14 · Non-prime · Platonic & Archimedean · Convex ·
 Hyperbolic · Dented · Hull-buried · Pancakes · Floppy · Symmetry ·
 Eisenstein subdivisions · … Non-prime is organized by the paper's three
@@ -87,7 +90,90 @@ per-net dent SETS, ∅ first, from data/walks.
   atlas_records.jsonl); old atlas parked at docs/atlas_old.
 - Builders run under python3.13 (numpy 2.4.4, scipy 1.18.0).
 
-## State (2026-07-25)
+## State (2026-07-30)
+
+Atlax sandbox round (2026-07-29): `docs/atlax` on gauss is an
+independent clone of the deployed atlas for site experiments. Its first
+addition is `gallery/all-v10.html`: every unoriented simple sphere
+triangulation with `4 <= V <= 10` and maximum vertex degree at most 6,
+including prime and non-prime. Counts by v are 1, 1, 2, 5, 10, 15, 30
+(64 total: 15 prime, 49 non-prime). Identity is canonical unoriented
+CLERS; the frozen prime subset agrees exactly with `data/nets_v4_14.txt`.
+Gallery thumbnails are the Euclidean `rb.glb` models, and every row
+links to its personal page. G1:
+`notes/codex-consults/2026-07-29-all-v10-g1-pass.jsonl` (PASS after
+one BLOCK and resubmission). Census spec and measured checker output:
+`notes/all-v10-g1-spec.md`, `notes/all-v10-check.out`.
+All 28 previously absent census nets now also have normal personal
+pages and bend stores. The established producer solved all
+28 by the direct route; every page passed the existing hero/morph
+display gates and has the complete artifact set (Euclidean and CLERS
+GLBs, 11-frame Poincare and Klein morphs, ideal net, CLERS layout).
+A store-only rebuild of all 252 generated files was byte-identical.
+`nets_pages.txt` and `atlas_records.jsonl` now contain 2,283 records;
+the v=4..10 by-v pages and all-v10 gallery are complete.
+`gallery/elt-paper.html` is a 20-model working selection for the ELT
+paper. Peter's 2026-07-29 caption pass cut three more small examples,
+removed all visible CLERS names, and added the v14 hexagonal antiprism,
+the largest built (5,1)-phyllohedron, and the v452 hexanti-family
+example.
+It is a single four-column, five-row desktop grid with paper captions
+and no family remarks. Thumbnails
+are non-interactive instances of the same `turntable.html` + `rb.glb`
+view shown at the top left of each personal page. A single temporary
+`static=1&capture=1` iframe renders each initial frame in sequence,
+copies it to an ordinary PNG data-URL image, releases its WebGL context,
+then advances to the next model. This avoids keeping 20 WebGL contexts
+alive; each whole thumbnail links to its atlas page. The
+superseded custom PNG renderer had
+per-model camera orbits tuned against Peter's reference screenshot. G1
+runner startup failed four times (`Operation not permitted`); Peter
+explicitly said `proceed` on 2026-07-29.
+The follow-up caption pass removed the provisional “Big Eight” remarks
+and replaced the three `name?` placeholders with the atlas-supported
+names snub disphenoid, triaugmented triangular prism, and gyroelongated
+square bipyramid.  The ELT gallery is a permanent themed gallery linked
+from the atlas front page as “ELT gallery.”  The provisional
+Alexandrov-limit-theorem gallery was withdrawn on 2026-07-30 and will be
+redesigned carefully later; the consumer regen now writes only the ELT
+gallery after the ordinary atlas build.
+`gallery/elt-symmetry.html` is the separate ELT symmetry page: one
+representative for each of the 33 Conway symmetry types possible for a
+Euclidean 6-net, in the frozen Conway-family order with the `x` types
+last.  Hyperbolic-only `*55` and `55` are excluded.  Four ordinary atlas
+records complete the Euclidean catalog: `3*` at v=24, chiral `422` at
+v=26, `3x` at v=36, and `3*2` at v=48.  The v=24 and v=26 records have
+complete morph ladders; v=36 and v=48 follow the established v>30
+hero-only policy.  Representatives are the minimum `(v, name)` in each
+symbol class after filtering to `maxdeg <= 6`.  Tiles are labeled by
+symbol/order/v and a common name where one is stored; no CLERS name is
+displayed.  The strengthened checker verifies the four ordinary records,
+stored bends, symmetry rows, cutoff behavior, 33 ordered tiles, distinct
+ids, and local targets; measured output is in
+`notes/elt-symmetry-euclidean-g1-check.out`.
+The complete 2,283-page consumer build was regenerated and deployed to
+`gauss:public_html/docs/atlax/` on 2026-07-30.  A checksum rsync found
+no file-content differences after deployment, and the local and remote
+`atlas_records.jsonl` SHA-256 values both equal
+`65420bcc09adae46fdfb80a554a7d39fdf0927a7e92709c77b788ddae89b0498`.
+The next ELT pass places the eight F. and van der Waerden solids in the
+first two rows without labeling the set on the gallery; the paper text
+will identify them. The v=10 name is gyroelongated square bipyramid.
+It removes the three-around-an-axis, three-rhombus,
+subdivided-tetrahedron, and trapezoid-faced examples, replacing them
+with Peter's v=23, v=28, v=107 T=21 (4,1), and v=9 negative-bend
+examples. Their captions report the measured negative hero-bend counts
+16, 20, 70, and 2; the v=28 caption is “buried vertices example.”
+After the fixed first two rows, the remaining twelve examples are
+ordered by vertex count.
+Every ELT item now derives and displays its hero-bend partition
+`(positive, zero, negative)` from the committed bend store using the atlas
+flat-bend tolerance `1e-6`; the counts sum to `3v-6` for all 20 models.
+Static gallery captures share azimuth 0 degrees and elevation 35 degrees,
+chosen from a 3-by-3 contact-sheet comparison; personal-page interactive
+views retain their 0-degree azimuth, 10-degree elevation default.  The G1
+runner again failed before session creation with `Operation not permitted`;
+the spec, checker, and two full failure logs are under `notes/`.
 
 Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
 landed round. Floppy census kept as pinned (PD): the 67 flags trace to

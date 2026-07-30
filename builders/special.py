@@ -192,6 +192,39 @@ def grid(items):
     return '<div class=grid>' + ''.join(items) + '</div>'
 
 
+def build_by_v(recs, out=OUT, only=None):
+    """Build vertex-count listings, optionally restricted to selected v."""
+    byv = {}
+    for r in recs.values():
+        byv.setdefault(r["v"], []).append(r)
+    for v, rows in sorted(byv.items()):
+        if only is not None and v not in only:
+            continue
+        note = ('' if v <= 14 else
+                ' &middot; exemplars only, not the full set at this size')
+        n_other = sum(1 for r in rows if 'nonprime' in r.get("themes", [])
+                      or r.get("maxdeg", 6) > 6)
+        counts = (f'{len(rows) - n_other} primes'
+                  + (f' + {n_other} marked others' if n_other else ''))
+        body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
+                f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
+                f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
+                f'v = {v}</h1><p class=desc>{counts}{note}</p>',
+                grid([item(r, f'v={v}'
+                           + (' non-prime' if 'nonprime' in r.get("themes", [])
+                              else '')
+                           + (f' deg {r["maxdeg"]}' if r.get("maxdeg", 6) > 6
+                              else '')) for r in
+                      sorted(rows, key=lambda r: (r.get("maxdeg", 6) > 6,
+                                                  r["name"]))]),
+                '</body></html>']
+        os.makedirs(os.path.join(out, "by-v"), exist_ok=True)
+        with open(os.path.join(out, "by-v", f"{v}.html"), "w") as f:
+            f.write('\n'.join(body))
+    print(f'by-v pages: {len(byv) if only is None else len(set(byv) & set(only))}')
+    return byv
+
+
 def census_counts():
     """class counts over the full v<=30 census (not just built pages)."""
     n = {"total": 0, "pancake": 0, "convex": 0, "floppy": 0, "buried": 0}
@@ -520,6 +553,9 @@ def main():
         gallery(f'{tag}.html', title, desc,
                 grid([item(r, f'v={r["v"]}') for r in rows]))
 
+    import all_v10
+    all_v10.build(OUT, recs)
+
     # -- non-prime gallery, organized by the paper's three types -------
     #    (separating-triangle decomposition: cut along non-facial
     #    3-cycles; pieces are tets, octs, or a prime core. Single-face
@@ -783,31 +819,7 @@ def main():
             ''.join(parts))
 
     # -- by-v listing pages -------------------------------------------
-    byv = {}
-    for r in recs.values():
-        byv.setdefault(r["v"], []).append(r)
-    for v, rows in sorted(byv.items()):
-        note = ('' if v <= 14 else
-                ' &middot; exemplars only, not the full set at this size')
-        n_other = sum(1 for r in rows if 'nonprime' in r.get("themes", [])
-                      or r.get("maxdeg", 6) > 6)
-        counts = (f'{len(rows) - n_other} primes'
-                  + (f' + {n_other} marked others' if n_other else ''))
-        body = [f'<!DOCTYPE html><html lang=en><head><meta charset=utf-8>'
-                f'<title>v = {v}</title><style>{GALLERY_CSS}</style>{MV}</head><body>'
-                f'<h1><a href="../index.html">Neoplatonic solids</a> &middot; '
-                f'v = {v}</h1><p class=desc>{counts}{note}</p>',
-                grid([item(r, f'v={v}'
-                           + (' non-prime' if 'nonprime' in r.get("themes", [])
-                              else '')
-                           + (f' deg {r["maxdeg"]}' if r.get("maxdeg", 6) > 6
-                              else '')) for r in
-                      sorted(rows, key=lambda r: (r.get("maxdeg", 6) > 6,
-                                                  r["name"]))]),
-                '</body></html>']
-        with open(os.path.join(OUT, "by-v", f"{v}.html"), "w") as f:
-            f.write('\n'.join(body))
-    print(f'by-v pages: {len(byv)}')
+    byv = build_by_v(recs)
 
     # -- front page ----------------------------------------------------
     quick = ''.join(f'<a href="by-v/{v}.html">v={v}</a>\n'
@@ -839,6 +851,9 @@ source
 
 <h2>Themed galleries</h2>
 <div class="gallery-links">
+<a href="gallery/all-v10.html">All nets v&le;10</a>
+<a href="gallery/elt-paper.html">ELT gallery</a>
+<a href="gallery/elt-symmetry.html">ELT symmetry types</a>
 <a href="gallery/small.html">Primes v&le;12</a>
 <a href="by-v/13.html">Primes v=13</a>
 <a href="by-v/14.html">Primes v=14</a>

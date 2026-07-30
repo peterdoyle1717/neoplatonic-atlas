@@ -1,0 +1,10 @@
+v=4: plantri=1  maxdeg<=6=1  prime=1  nonprime=0
+v=5: plantri=1  maxdeg<=6=1  prime=0  nonprime=1
+v=6: plantri=2  maxdeg<=6=2  prime=1  nonprime=1
+v=7: plantri=5  maxdeg<=6=5  prime=1  nonprime=4
+v=8: plantri=14  maxdeg<=6=10  prime=2  nonprime=8
+v=9: plantri=50  maxdeg<=6=15  prime=3  nonprime=12
+v=10: plantri=233  maxdeg<=6=30  prime=7  nonprime=23
+prime subset matches data/nets_v4_14.txt exactly (15 names)
+canonical-name sha256=005e7b4fdf34a33e1082c227d35014df1b167d2b76b562ce44bdbbd0948edfd9
+all checks passed; census total=64

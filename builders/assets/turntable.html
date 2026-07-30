@@ -14,9 +14,14 @@ import * as THREE from 'three';
 import {GLTFLoader} from 'three/addons/loaders/GLTFLoader.js';
 import {RoomEnvironment} from 'three/addons/environments/RoomEnvironment.js';
 
-const file = new URLSearchParams(location.search).get('file') || '';
+const params = new URLSearchParams(location.search);
+const file = params.get('file') || '';
+const staticView = params.get('static') === '1';
+const captureView = params.get('capture') === '1';
 const canvas = document.getElementById('c');
-const renderer = new THREE.WebGLRenderer({canvas, antialias:true});
+const renderer = new THREE.WebGLRenderer({
+  canvas, antialias:true, preserveDrawingBuffer:captureView
+});
 renderer.setPixelRatio(Math.min(devicePixelRatio,2));
 renderer.setSize(innerWidth,innerHeight,false);
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -29,13 +34,27 @@ const camera = new THREE.PerspectiveCamera(45,innerWidth/innerHeight,0.01,1000);
 const turntable = new THREE.Group();
 scene.add(turntable);
 
-// Standard initial view: camera-orbit="0deg 100deg auto"
-// 100deg polar = 10deg above horizontal
-const POLAR = 10 * Math.PI / 180;
+// Standard personal-page view remains 0deg azimuth, 10deg elevation.
+// Static gallery captures may supply one shared elevated view.
+const azimuthDegrees = Number(params.get('azimuth') || 0);
+const elevationDegrees = Number(params.get('elevation') || 10);
+const AZIMUTH = THREE.MathUtils.degToRad(
+  Number.isFinite(azimuthDegrees) ? azimuthDegrees : 0
+);
+const ELEVATION = THREE.MathUtils.degToRad(
+  Number.isFinite(elevationDegrees)
+    ? THREE.MathUtils.clamp(elevationDegrees,-89,89) : 10
+);
 let camDist = 3, camTarget = 3;
+let loaded = false;
 
 function setCamera(d) {
-  camera.position.set(0, Math.sin(POLAR)*d, Math.cos(POLAR)*d);
+  const horizontal = Math.cos(ELEVATION)*d;
+  camera.position.set(
+    Math.sin(AZIMUTH)*horizontal,
+    Math.sin(ELEVATION)*d,
+    Math.cos(AZIMUTH)*horizontal
+  );
   camera.lookAt(0,0,0);
 }
 
@@ -50,21 +69,40 @@ new GLTFLoader().load(file, gltf=>{
   camDist = Math.max(radius / Math.tan(fov/2) * 1.1, 0.5);
   camTarget = camDist;
   setCamera(camDist);
-  animate();
+  loaded = true;
+  if (staticView) {
+    renderer.render(scene,camera);
+    if (captureView) {
+      parent.postMessage({
+        type: 'atlax-turntable-capture',
+        token: params.get('token') || '',
+        image: canvas.toDataURL('image/png')
+      }, location.origin);
+      renderer.dispose();
+      renderer.forceContextLoss();
+    }
+  } else animate();
 });
 
 let drag=false, lx=0, ly=0;
-canvas.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;canvas.classList.add('dragging');canvas.setPointerCapture(e.pointerId)});
-canvas.addEventListener('pointermove',e=>{if(!drag)return;
-  const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
-  const qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), 3*dx/innerWidth);
-  const qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), 3*dy/innerHeight);
-  turntable.quaternion.premultiply(qy.multiply(qx));
+if (!staticView) {
+  canvas.addEventListener('pointerdown',e=>{drag=true;lx=e.clientX;ly=e.clientY;canvas.classList.add('dragging');canvas.setPointerCapture(e.pointerId)});
+  canvas.addEventListener('pointermove',e=>{if(!drag)return;
+    const dx=e.clientX-lx, dy=e.clientY-ly; lx=e.clientX; ly=e.clientY;
+    const qy = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(0,1,0), 3*dx/innerWidth);
+    const qx = new THREE.Quaternion().setFromAxisAngle(new THREE.Vector3(1,0,0), 3*dy/innerHeight);
+    turntable.quaternion.premultiply(qy.multiply(qx));
+  });
+  canvas.addEventListener('pointerup',()=>{drag=false;canvas.classList.remove('dragging')});
+  canvas.addEventListener('pointercancel',()=>{drag=false;canvas.classList.remove('dragging')});
+  canvas.addEventListener('wheel',e=>{e.preventDefault();camTarget*=Math.exp(0.0015*e.deltaY);camTarget=THREE.MathUtils.clamp(camTarget,0.3*camDist,5*camDist)},{passive:false});
+}
+addEventListener('resize',()=>{
+  camera.aspect=innerWidth/innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth,innerHeight,false);
+  if (staticView && loaded) renderer.render(scene,camera);
 });
-canvas.addEventListener('pointerup',()=>{drag=false;canvas.classList.remove('dragging')});
-canvas.addEventListener('pointercancel',()=>{drag=false;canvas.classList.remove('dragging')});
-canvas.addEventListener('wheel',e=>{e.preventDefault();camTarget*=Math.exp(0.0015*e.deltaY);camTarget=THREE.MathUtils.clamp(camTarget,0.3*camDist,5*camDist)},{passive:false});
-addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight,false)});
 function animate(){requestAnimationFrame(animate);
   const d = camDist + 0.18*(camTarget-camDist); camDist=d;
   setCamera(d);

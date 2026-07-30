@@ -336,6 +336,31 @@ EDGE_LEN_TOL = 1e-2
 MORPH_VMAX = 30
 
 
+def load_bend_store(st, V, alphas):
+    """Deserialize a committed bend store and reject incomplete low-v ladders."""
+    if V <= MORPH_VMAX:
+        got = [round(row["alpha"], 6) for row in st["morph"]]
+        expected = [round(alpha, 6) for alpha in alphas]
+        if got != expected:
+            raise ValueError(
+                f"incomplete morph store for v={V}: "
+                f"got {len(got)} rungs, expected {len(expected)}"
+            )
+    return {
+        "hero": {
+            tuple(int(x) for x in edge.split(",")): float(value)
+            for edge, value in st["hero"].items()
+        },
+        "morph": {
+            round(row["alpha"], 6): {
+                tuple(int(x) for x in edge.split(",")): float(value)
+                for edge, value in row["bends"].items()
+            }
+            for row in st["morph"]
+        },
+    }
+
+
 def _edges_of(faces):
     return {tuple(sorted((a, b))) for f in faces
             for a, b in zip(f, f[1:] + f[:1])}
@@ -644,12 +669,7 @@ def _build_net(job, morphs=True):
     spath = os.path.join(TOP, "data", "bends", f"{nid}.json")
     if os.path.exists(spath):
         st = json.load(open(spath))
-        store = {"hero": {tuple(int(x) for x in k.split(',')): float(v)
-                          for k, v in st["hero"].items()},
-                 "morph": {round(m["alpha"], 6):
-                           {tuple(int(x) for x in k.split(',')): float(v)
-                            for k, v in m["bends"].items()}
-                           for m in st["morph"]}}
+        store = load_bend_store(st, V, alphas)
     # Displayed artifacts are ALWAYS regenerated through the gates from
     # the committed bends (G1 r3): certifying a reconstruction while
     # reusing on-disk GLBs proves nothing about the bytes actually
@@ -737,18 +757,25 @@ def _build_net(job, morphs=True):
     # solver build populates data/bends/, and the consumer builder reads it
     # -- no solver / neo / network at build time. Written only when this net
     # was actually solved (fresh); reused nets keep their existing store.
-    # persist ONLY a complete, gate-passing snapshot (G1 r4): a partial
-    # or empty morph ladder written as a store would poison later
-    # store-only builds ("store incomplete" forever). Incomplete solves
-    # are simply not persisted; the next build re-attempts producer mode.
-    if (hero_bends is not None and morph_note is None
-            and morph_bends is not None and len(morph_bends) == len(alphas)):
+    # Persist a complete, gate-passing snapshot. Above MORPH_VMAX the
+    # established display policy has no ladder at all, so the complete
+    # snapshot is hero-only and carries an empty morph list. At or below
+    # the cutoff, an empty or partial ladder remains incomplete and is not
+    # persisted; the next producer build re-attempts it.
+    complete_morph = (
+        morph_note is None
+        and morph_bends is not None
+        and len(morph_bends) == len(alphas)
+    )
+    complete_hero_only = vpolicy and V > MORPH_VMAX
+    if hero_bends is not None and (complete_morph or complete_hero_only):
         def _ser(bd):
             return {f"{min(e)},{max(e)}": float(bd[e]) for e in bd}
         store = {"clers": name, "v": V, "netcode": nc, "maxdeg": maxdeg,
                  "hero": _ser(hero_bends),
-                 "morph": [{"alpha": a, "bends": _ser(bd)}
-                           for a, bd in morph_bends.items()]}
+                 "morph": ([] if complete_hero_only else
+                           [{"alpha": a, "bends": _ser(bd)}
+                            for a, bd in morph_bends.items()])}
         bdir = os.path.join(TOP, "data", "bends")
         os.makedirs(bdir, exist_ok=True)
         with open(os.path.join(bdir, f"{nid}.json"), "w") as bf:
