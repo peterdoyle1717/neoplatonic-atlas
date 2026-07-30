@@ -1,0 +1,6 @@
+all-v10 census=64 records=64 links=64 rb=64 pass
+elt-paper selection=20 links=20 rb=20 camera=(0,35) pass
+legacy_missing=
+legacy_extra=
+symmetry types=33 corrections=3 output=exact pass
+actual_contracts=pass legacy_current=true

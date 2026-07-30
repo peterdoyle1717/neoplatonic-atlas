@@ -151,6 +151,10 @@ displayed.  The strengthened checker verifies the four ordinary records,
 stored bends, symmetry rows, cutoff behavior, 33 ordered tiles, distinct
 ids, and local targets; measured output is in
 `notes/elt-symmetry-euclidean-g1-check.out`.
+The evolved all-v10 GLB/link contract, the completed symmetry corrections,
+and the current 20-id ELT still contract received a consolidated G1 PASS in
+`notes/codex-consults/2026-07-30-atlax-gallery-contract-g1.jsonl`; the still
+checker now derives its ids directly from `elt_paper.selection()`.
 The complete 2,283-page consumer build was regenerated and deployed to
 `gauss:public_html/docs/atlax/` on 2026-07-30.  A checksum rsync found
 no file-content differences after deployment, and the local and remote

@@ -5,24 +5,21 @@ import argparse
 import json
 import math
 import struct
+import sys
 import zlib
 from pathlib import Path
 
 import numpy as np
 
+TOP = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(TOP / "builders"))
+from elt_paper import selection
+from views import net_id
 
 SELECTED = [
-    "v4CCAE", "v5CCACAE", "v6CCACACAE", "v6CCCACAAE",
-    "v7CCACACACAE", "v7CCACACCABE", "v7CCACCACAAE",
-    "v7CCCACACAAE", "v8CCACCCABCABE",
-    "v8CCCACACACAAE", "v8CCCACACCAABE", "v9CCCACAACCACAAE",
-    "v9CCCACCACACAAAE",
-    "v10CCACCCACCACABDEE", "v10CCCACACACCAACAAE",
-    "v10CCCACCACACAACAAE",
-    "v12CCCCACCACACACAACAAAE",
-    "v14CCCCACCACACACACACAACAAAE",
-    "v452hdf751e9c22065e97",
-    "v443h91956484cfa84d32",
+    row.get("id", net_id(row["v"], row["name"]))
+    for _, group in selection()
+    for row in group
 ]
 
 
