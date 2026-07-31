@@ -5,9 +5,16 @@ Zenodo DOI for the atlas — it cites the atlas by a `\seek` reference
 to the front page, and the front page maintains the durable pointers
 (Zenodo, GitHub, companion records). The proof software is cited by
 its FROZEN version DOI, because that identifies the exact evidence
-used. Everything below is staged; the Zenodo records publish no later
-than the arXiv announcement (Peter's button), at which point the DOIs
-resolve.
+used.
+
+STATUS UPDATE 2026-07-31: all three records were PUBLISHED on
+2026-07-28 — every DOI below resolves NOW. The software record
+additionally carries nonprime-v50-certificates-20260727.tar.gz
+(attachment generator, two independent MPFI embeddedness checkers,
+the complete 2,172,511-case primary run, exact rational construction
+checks), so 10.5281/zenodo.21609862 is citable for the prime AND
+non-prime v ≤ 50 proofs; its bibtex note can say so if the paper
+wants.
 
 ## The two bibliography entries, blanks filled
 

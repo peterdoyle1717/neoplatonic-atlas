@@ -91,18 +91,36 @@ per-net dent SETS, ∅ first, from data/walks.
 
 Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
 landed round. Floppy census kept as pinned (PD): the 67 flags trace to
-data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
-TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
-md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
-2,251 nets, front page carries the archive pointers, no author line,
-CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
-19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
-primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
-"Software for the computer-assisted proof of Euclidean neoplatonic
-realizations" (undented @ git 145d94d). Creators = Doyle alone on all
-three records (PD 2026-07-26: "that should change too", matching the
-de-authored front page). PENDING (PD 2026-07-26): link the
-Doyle–Ellison arXiv paper from the front page when it appears. Citation
+data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo PUBLISHED 2026-07-28 (by the chat session that took over
+distribution prep; verified via API 2026-07-31): all three records
+live, cc-zero, creators Doyle alone, concept DOIs resolving —
+21367250 "The Neoplatonic Atlas" (exactly the staged tarballs: site
+md5 b65c7417…, 2,251 nets, CC0 front page + archive pointers, +
+database), 19761390 primes (lists v4–60 + OBJs v4–50, unchanged),
+21609862 software (undented @ 145d94d PLUS chat's addition
+nonprime-v50-certificates-20260727.tar.gz, 14.4 MB: attachment
+generator, two independent MPFI endpoint-interval embeddedness
+checkers, complete output of the 2,172,511-case primary run, exact
+rational construction checks — the record now covers prime AND
+non-prime proofs; description updated accordingly). Future atlas
+updates = "New version" on 21367249, never a new deposition.
+
+ATLAX (2026-07-31): another session is building a revised atlas at
+gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
+official copy. Observed deltas vs the official front page (HTTP diff;
+gauss/doob ssh unreachable from home when checked): three new chips —
+"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
+20-model working selection, bend counts (+, 0, −)), "ELT symmetry
+types" — and by-v extended to v=36; archive pointers + CC0 footer
+retained. Its build source is NOT this repo's committed state — DO
+NOT rsync-deploy from here while atlax is in progress (a deploy
+targets docs/atlas only, but the repo no longer matches what will
+become official). When atlax is promoted, absorb its builder/data
+changes into this repo (or adopt its tree) FIRST, re-prove
+build-twice, then resume deploys; the Zenodo atlas record then gets a
+"New version". PENDING: link the Doyle–Ellison arXiv paper from the
+front page when it appears (no arXiv mention on atlax or the records
+as of 2026-07-31). Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
