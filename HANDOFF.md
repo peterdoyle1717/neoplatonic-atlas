@@ -120,9 +120,17 @@ DISCIPLINE until promotion: main = the atlax session's line (do not
 push next:main over it — a 2026-07-31 push was correctly rejected
 non-fast-forward); this session's line = next. Promotion = merge (or
 adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
-docs/atlas deploys, then "New version" on Zenodo 21367249. PENDING:
-link the Doyle–Ellison arXiv paper from the front page when it
-appears (no arXiv mention on atlax or the records as of 2026-07-31). Citation
+docs/atlas deploys, then "New version" on Zenodo 21367249. THE PAPER APPEARED: arXiv:2607.26363 "Neoplatonic solids" (Doyle &
+Ellison, submitted 2026-07-29; verified against the abs page) —
+linked from the front page on this line 2026-07-31, build-twice
+proven (199a369e…). DEPLOY PENDING: gauss ssh unreachable from home
+at commit time (port-22 timeout; a background retry loop is
+deploying docs/atlas as soon as connectivity returns — verify the
+live front page shows the paper line). The atlax line still lacks
+the link; the promotion merge carries it, but if atlax deploys to
+docs/atlas before merging, add it there first. Optional follow-up not done (needs PD's word): add the
+paper as a related identifier on the three published Zenodo records
+(metadata edits are allowed post-publication). Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;

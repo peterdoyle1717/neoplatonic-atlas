@@ -1,0 +1,980 @@
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/atlas
+staged tree: e204ca0b56f214617018359e753fd1bd20fe2aa6
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-hqymlerm.txt
+codex exit: 0
+
+final message:
+WARN
+Files reviewed: HANDOFF.md; added Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; commit ancestry and branch verification; credential scan; staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check found trailing whitespace in six lines of the archived transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.146.0-alpha.3.1
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: high
+reasoning summaries: none
+session id: 019fb898-98c1-7292-bbaa-9485313c9afc
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/projects/atlas
+
+Staged tree:
+e204ca0b56f214617018359e753fd1bd20fe2aa6
+
+Proposed command:
+cd /Users/doyle/Dropbox/projects/atlas
+S=/private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad
+cat > "$S/commit-msg-atlaxfix.txt" <<'EOF'
+HANDOFF correction: atlax lives on this repo's main branch
+
+The 2753a62 claim that atlax's build source is outside this repo was
+wrong: a rejected next:main push exposed origin/main = e3264bc, the
+atlax session's line (f7ec05a + e3264bc on top of 6e0238d -- new
+builders all_v10/elt_paper/elt_symmetry/render_elt_stills/
+aggregate_records, +32 records with bends, G1 specs in notes/, its
+own HANDOFF update). Corrected: main = atlax line (hands off from
+this session; the rejected push was correct behavior), next = this
+line; promotion = merge main, reconcile HANDOFFs, build-twice,
+resume deploys, then a Zenodo "New version". Local main reset to
+track origin/main. Sweeps 2753a62's gate transcript.
+EOF
+git commit -F "$S/commit-msg-atlaxfix.txt"
+
+Status:
+M  HANDOFF.md
+A  notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt
+
+
+Staged diff stat:
+ HANDOFF.md                                         |  34 +-
+ ...te-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt | 495 +++++++++++++++++++++
+ 2 files changed, 513 insertions(+), 16 deletions(-)
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+2026-07-14-101901-codex-gate-1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4.txt
+2026-07-14-103502-codex-gate-f2fbd863bdd15acccd0bfda262f544637f04d3b8.txt
+2026-07-14-125406-codex-gate-060357cfb98d78330737aca087486f00a7735032.txt
+2026-07-14-132309-codex-gate-50b403ea027bb716b1eaa98db5085a0ed6904b5f.txt
+2026-07-14-133540-codex-gate-fc8d1f6da60dd5b343355c8f61c721c3793a9950.txt
+2026-07-14-134813-codex-gate-93b9d2ec3683d2ba10c2cf0acbfa246f08402c1f.txt
+2026-07-14-152756-codex-gate-122f9d9c38e05751ba3a6842bb2fc8f86e2253eb.txt
+2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt
+2026-07-14-161259-codex-gate-66d65fd3278505edb5d721e97fc7aea6b3ffaee6.txt
+2026-07-14-170958-codex-gate-b605d697b3dbffada21fb08eb97f7eb2cbe22bb9.txt
+2026-07-14-171239-codex-gate-fe3d2dbb95df6b62212d9894f98fe6c875afc1c7.txt
+2026-07-14-172154-codex-gate-1093cbe3bd01aeae93a536fc3b6e923fde88b2bf.txt
+2026-07-14-173029-codex-gate-7c69e7c0e04dbe81732e9649f27e5a35501a4f2b.txt
+2026-07-14-180614-codex-gate-90636b018737efd42f87e55774625919cdd74952.txt
+2026-07-14-183507-codex-gate-00cd11020f300d3cd29523693b057178c1027a2a.txt
+2026-07-14-185544-codex-gate-566d79c294fb5b392c5546570a7ad58e4fb3db6e.txt
+2026-07-14-192549-codex-gate-78924caa5c65110828884bb69282f57972927f6c.txt
+2026-07-14-223200-codex-gate-9efb20903c8b49d889bb8d7e084696009b104d91.txt
+2026-07-14-223658-codex-gate-b15c90098b5e9ff31c01c81b923fa5a325d1cbb5.txt
+2026-07-14-224857-codex-gate-2b36da1c069db914d9aeaa39754a399e380ce884.txt
+2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+2026-07-15-094806-codex-gate-87781ee5d118ed974e5254446f47c3d22f96b8e1.txt
+2026-07-15-102447-codex-gate-82b4ab34a46f52702438751bec3ad7645fd95e84.txt
+2026-07-15-102900-codex-gate-5c23c33f3f533179762462db5136dc5171516d1b.txt
+2026-07-17-114359-codex-gate-ec8b4bf2c2e400c5d21a9f3766fb74b2553d2a51.txt
+2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt
+2026-07-17-193316-codex-gate-79d5db5a2969f60e2cf9d0d36a81e6c31216c307.txt
+2026-07-17-194727-codex-gate-f18f4ccd183e294cba892d646661d4090cb66b78.txt
+2026-07-17-194825-codex-gate-e37f396044b2ca3e9ce1bed180b1a7a7af53346f.txt
+2026-07-17-215425-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-215816-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-233951-codex-gate-8fea647624d147134934551e82af2d2e24c27696.txt
+2026-07-18-180702-codex-gate-03f43a9077c3a3f4c2e7370438a684313cf49c30.txt
+2026-07-19-012944-codex-gate-5c13d51d4fc3a2e1fac1ceb876c51c60670dd91b.txt
+2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+2026-07-21-230211-codex-gate-16c2e834a4268607f71818a16ee05d2b752e58da.txt
+2026-07-22-161343-g1-display-gates.txt
+2026-07-22-162535-g1r2-display-gates.txt
+2026-07-22-162856-g1r3-display-gates.txt
+2026-07-22-163649-g1r4-display-gates.txt
+2026-07-22-164416-g1r5-display-gates.txt
+2026-07-22-164845-g1r6-display-gates.txt
+2026-07-22-175729-g1r7-display-gates.txt
+2026-07-22-180129-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-180254-g2retro-1c4fcf6.txt
+2026-07-22-181010-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181253-g2retro2-e1a814b.txt
+2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181610-g2retro3-c0a599a.txt
+2026-07-24-215046-g2retro-602a825.txt
+2026-07-24-215321-g1-nonprime-decomposition.txt
+2026-07-24-220537-g1r2-nonprime-decomposition.txt
+2026-07-24-220707-g1r3-nonprime-decomposition.txt
+2026-07-24-220734-codex-gate-ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad.txt
+2026-07-24-220827-g2retro2-540ac2a.txt
+2026-07-24-220849-g2retro2-540ac2a.txt
+2026-07-24-221602-codex-gate-7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a.txt
+2026-07-24-221700-g2retro3-ed1365b.txt
+2026-07-25-122524-codex-gate-f9db3c8ac835761749260d913f59e1b49b828660.txt
+2026-07-25-135030-g2retro-024d34d.txt
+2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt
+2026-07-25-153532-g1-assembly-shape.txt
+2026-07-25-154213-codex-gate-9a3917cd1b44b60434c8b5735ee1604136d5f1e8.txt
+2026-07-25-164426-codex-gate-0966c306ccd9369afb03284e1f4b54fa03a296da.txt
+2026-07-25-164610-codex-gate-0966c306ccd9369afb03284e1f4b54fa03a296da.txt
+2026-07-25-211026-codex-gate-e45223647aca8caf6bbe7f46f123f84086e9bc48.txt
+2026-07-25-211111-codex-gate-e45223647aca8caf6bbe7f46f123f84086e9bc48.txt
+2026-07-25-221955-codex-gate-f5c54a383ee5c3f2ed9e4a5c254252ecc1fcc6e0.txt
+2026-07-26-000213-codex-gate-81fa2d4e5d638b4497adafe43eee4407c821299b.txt
+2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt
+2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt
+2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt
+2026-07-27-111546-g2retro-d1e226f.txt
+2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — atlax-source correction (2026-07-31)
+
+Follow-up to 2753a62: the push of next:main was REJECTED
+non-fast-forward, revealing origin/main = e3264bc — the atlax session
+COMMITS TO THIS REPO'S MAIN. Fetched and verified: 6e0238d →
+f7ec05a "atlax: add v10 and ELT galleries" → e3264bc "atlax: close
+gallery audit gaps"; diff --stat vs 6e0238d shows the new builders
+(all_v10, elt_paper, elt_symmetry, render_elt_stills,
+aggregate_records), personal.py/special.py changes, +32
+atlas_records entries with new bends (non-prime v10s), G1
+specs+checker outputs under notes/, and chat's own HANDOFF update on
+main. My 2753a62 claim "its build source is NOT this repo's committed
+state" was WRONG — corrected in this commit's HANDOFF text (the
+source is origin/main). Local main reset to track origin/main
+(git branch -f; branch -vv verified). Branch discipline recorded:
+push next only; promotion = merge main. Also sweeps 2753a62's own
+gate transcript (tree 553c39e8 matched via git log --format=%T).
+
+## New conventions / invariants (G1)
+
+None — prose correction + audit sweep.
+
+
+Staged diff:
+diff --git a/HANDOFF.md b/HANDOFF.md
+index ddf991d..24bbc79 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -105,22 +105,24 @@ rational construction checks — the record now covers prime AND
+ non-prime proofs; description updated accordingly). Future atlas
+ updates = "New version" on 21367249, never a new deposition.
+ 
+-ATLAX (2026-07-31): another session is building a revised atlas at
+-gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
+-official copy. Observed deltas vs the official front page (HTTP diff;
+-gauss/doob ssh unreachable from home when checked): three new chips —
+-"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
+-20-model working selection, bend counts (+, 0, −)), "ELT symmetry
+-types" — and by-v extended to v=36; archive pointers + CC0 footer
+-retained. Its build source is NOT this repo's committed state — DO
+-NOT rsync-deploy from here while atlax is in progress (a deploy
+-targets docs/atlas only, but the repo no longer matches what will
+-become official). When atlax is promoted, absorb its builder/data
+-changes into this repo (or adopt its tree) FIRST, re-prove
+-build-twice, then resume deploys; the Zenodo atlas record then gets a
+-"New version". PENDING: link the Doyle–Ellison arXiv paper from the
+-front page when it appears (no arXiv mention on atlax or the records
+-as of 2026-07-31). Citation
++ATLAX (2026-07-31, corrected after fetch): the revised atlas lives ON
++THIS REPO'S MAIN BRANCH — the atlax session commits there (6e0238d →
++f7ec05a "add v10 and ELT galleries" → e3264bc "close gallery audit
++gaps": new builders all_v10/elt_paper/elt_symmetry/render_elt_stills/
++aggregate_records, personal+special changes, +32 records with bends
++incl. non-prime v10s, G1 specs+checkers in notes/, its own HANDOFF
++update) and deploys to gauss docs/atlax/, which will AT SOME POINT
++REPLACE docs/atlas as the official copy. Observed on the atlax front
++page: chips "All nets v≤10", "ELT gallery" ("Possibilities for the
++ELT paper", 20 models, bend counts (+, 0, −)), "ELT symmetry types",
++by-v to 36; archive pointers + CC0 footer retained. BRANCH
++DISCIPLINE until promotion: main = the atlax session's line (do not
++push next:main over it — a 2026-07-31 push was correctly rejected
++non-fast-forward); this session's line = next. Promotion = merge (or
++adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
++docs/atlas deploys, then "New version" on Zenodo 21367249. PENDING:
++link the Doyle–Ellison arXiv paper from the front page when it
++appears (no arXiv mention on atlax or the records as of 2026-07-31). Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’m checking the exact staged tree, the evidence file, and the added transcript for contradictions or sensitive material.
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --cached --check && git diff --cached --name-status && git write-tree && git status --short && git diff --cached -- HANDOFF.md && sed -n '1,560p' notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt && sed -n '1,220p' .session/claude-commit-evidence.md" in /Users/doyle/Dropbox/projects/atlas
+ exited 2 in 0ms:
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:243: trailing whitespace.
++ 
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:312: trailing whitespace.
++ 
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:314: trailing whitespace.
++ 
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:343: trailing whitespace.
++ 
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:412: trailing whitespace.
++ 
+notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt:414: trailing whitespace.
++ 
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --cached --name-status; git write-tree; git status --short; git diff --cached --numstat; git diff --cached -- HANDOFF.md; sed -n '1,560p' notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt; sed -n '1,220p' .session/claude-commit-evidence.md" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+M	HANDOFF.md
+A	notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt
+fatal: Unable to create '/Users/doyle/Dropbox/projects/atlas/.git/index.lock': Operation not permitted
+M  HANDOFF.md
+A  notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt
+18	16	HANDOFF.md
+495	0	notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt
+diff --git a/HANDOFF.md b/HANDOFF.md
+index ddf991d..24bbc79 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -105,22 +105,24 @@ rational construction checks — the record now covers prime AND
+ non-prime proofs; description updated accordingly). Future atlas
+ updates = "New version" on 21367249, never a new deposition.
+ 
+-ATLAX (2026-07-31): another session is building a revised atlas at
+-gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
+-official copy. Observed deltas vs the official front page (HTTP diff;
+-gauss/doob ssh unreachable from home when checked): three new chips —
+-"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
+-20-model working selection, bend counts (+, 0, −)), "ELT symmetry
+-types" — and by-v extended to v=36; archive pointers + CC0 footer
+-retained. Its build source is NOT this repo's committed state — DO
+-NOT rsync-deploy from here while atlax is in progress (a deploy
+-targets docs/atlas only, but the repo no longer matches what will
+-become official). When atlax is promoted, absorb its builder/data
+-changes into this repo (or adopt its tree) FIRST, re-prove
+-build-twice, then resume deploys; the Zenodo atlas record then gets a
+-"New version". PENDING: link the Doyle–Ellison arXiv paper from the
+-front page when it appears (no arXiv mention on atlax or the records
+-as of 2026-07-31). Citation
++ATLAX (2026-07-31, corrected after fetch): the revised atlas lives ON
++THIS REPO'S MAIN BRANCH — the atlax session commits there (6e0238d →
++f7ec05a "add v10 and ELT galleries" → e3264bc "close gallery audit
++gaps": new builders all_v10/elt_paper/elt_symmetry/render_elt_stills/
++aggregate_records, personal+special changes, +32 records with bends
++incl. non-prime v10s, G1 specs+checkers in notes/, its own HANDOFF
++update) and deploys to gauss docs/atlax/, which will AT SOME POINT
++REPLACE docs/atlas as the official copy. Observed on the atlax front
++page: chips "All nets v≤10", "ELT gallery" ("Possibilities for the
++ELT paper", 20 models, bend counts (+, 0, −)), "ELT symmetry types",
++by-v to 36; archive pointers + CC0 footer retained. BRANCH
++DISCIPLINE until promotion: main = the atlax session's line (do not
++push next:main over it — a 2026-07-31 push was correctly rejected
++non-fast-forward); this session's line = next. Promotion = merge (or
++adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
++docs/atlas deploys, then "New version" on Zenodo 21367249. PENDING:
++link the Doyle–Ellison arXiv paper from the front page when it
++appears (no arXiv mention on atlax or the records as of 2026-07-31). Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+codex-review wrapper log
+repo: /Users/doyle/Dropbox/projects/atlas
+staged tree: 553c39e8e7398d51189d8871a9e1c86ffaab440b
+review file: /var/folders/fv/8qttwcjj567gs_5hfhz3mh300000gn/T/claude-codex-review-f1x8_p4o.txt
+codex exit: 0
+
+final message:
+WARN
+Files reviewed: HANDOFF.md; notes/FOR_GPT_arxiv_assembly.md; staged Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; credential scan; transcript inspection; supplied staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check reports trailing whitespace in the archived gate transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
+raw transcript:
+Reading additional input from stdin...
+OpenAI Codex v0.146.0-alpha.3.1
+--------
+workdir: /Users/doyle/Dropbox/projects/atlas
+model: gpt-5.6-sol
+provider: openai
+approval: never
+sandbox: workspace-write [workdir, /tmp, $TMPDIR] (network access enabled)
+reasoning effort: high
+reasoning summaries: none
+session id: 019fb896-50d9-7500-9611-fd34ab218244
+--------
+user
+Review the staged diff only as a commit gate. Be concise. Output at most 80 lines unless a blocking issue cannot be explained briefly. Do not restate project background. Do not paste full diffs, long file excerpts, long Lean terms, logs, or architectural summaries.
+
+Your FIRST line must be exactly one of: PASS / WARN / BLOCK. Then, on separate lines, ONLY:
+Files reviewed:
+Checks run:
+Blocking issues:
+Warnings:
+Recommendation:
+
+Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+
+DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+
+Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+
+Use WARN for nonblocking concerns; PASS if none; BLOCK only for a real veto. The wrapper logs the full raw transcript and prints its path; do not write separate notes yourself.
+
+<stdin>
+Repository:
+/Users/doyle/Dropbox/projects/atlas
+
+Staged tree:
+553c39e8e7398d51189d8871a9e1c86ffaab440b
+
+Proposed command:
+cd /Users/doyle/Dropbox/projects/atlas
+S=/private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad
+cat > "$S/commit-msg-tieup.txt" <<'EOF'
+tie-up: zenodo published 2026-07-28 (by chat), atlax transition noted
+
+Another session published all three records on 2026-07-28 -- atlas
+21367250 and primes 19761390 exactly as staged, software 21609862
+with one addition: nonprime-v50-certificates-20260727.tar.gz
+(attachment generator, two independent MPFI embeddedness checkers,
+the 2,172,511-case primary run, exact rational construction checks)
+-- so the software DOI now covers prime AND non-prime v<=50 proofs.
+All concept DOIs measured resolving; creators Doyle alone, cc-zero
+throughout.
+
+HANDOFF records the atlax situation: a revised atlas is being built
+at gauss docs/atlax/ (observed so far: All-nets-v<=10, ELT gallery
+"Possibilities for the ELT paper" with 20 models, ELT symmetry
+types, by-v to 36; pointers + CC0 kept) and will replace docs/atlas;
+deploy freeze from this repo until atlax's changes are absorbed and
+build-twice re-proven. FOR_GPT brief: DOIs-live status update.
+Sweeps in 6e0238d's own gate transcript.
+EOF
+git commit -F "$S/commit-msg-tieup.txt"
+
+Status:
+M  HANDOFF.md
+M  notes/FOR_GPT_arxiv_assembly.md
+A  notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+
+
+Staged diff stat:
+ HANDOFF.md                                         |  42 ++-
+ notes/FOR_GPT_arxiv_assembly.md                    |  13 +-
+ ...te-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt | 400 +++++++++++++++++++++
+ 3 files changed, 440 insertions(+), 15 deletions(-)
+
+
+Live baton (TEAMWORK.md):
+(missing)
+
+G1 consult index (notes/codex-consults/):
+2026-07-10-143647-codex-gate-99661533f5e5094e6afbb56d6ab74101e8906c94.txt
+2026-07-11-173614-codex-gate-2c2054c45668c2e37c080674661457b831236f05.txt
+2026-07-11-173635-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-180137-codex-gate-9b7889eb84a5737bc2997564680076c97bd5f479.txt
+2026-07-11-181221-codex-gate-ba3ab4367378bcdc89172c605b8ca69596aa83d0.txt
+2026-07-11-183409-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-231636-codex-gate-bfa16bc41944fbc61d0f2a3f33e26d5a0ddaacc6.txt
+2026-07-11-234311-codex-gate-312c475697d95d4f180481d84a4e5f195bca82c9.txt
+2026-07-11-235932-codex-gate-57ec7d1b451521e3a727801c588434638c36552c.txt
+2026-07-12-154906-codex-gate-c9b7f8a383400ecace68259ee72ab17bff93400f.txt
+2026-07-12-174217-codex-gate-7629aaa6b3ff41ffc3e83fcf02880e30e0e30aa6.txt
+2026-07-12-183526-codex-gate-f1f4b0b01853eb083a3ba379481aebc5f7a5c91a.txt
+2026-07-12-232724-codex-gate-9731bc377ca92a2e973ce78e7a640013215fcc69.txt
+2026-07-12-235719-codex-gate-0213b1867f9a34d4f1986eb8b2dff0dba7a42e85.txt
+2026-07-13-095120-codex-gate-415036403dcc90fa17f1874ef96006185f4a4711.txt
+2026-07-13-231055-codex-gate-cf2ea6c361b858e6f80f50ddead7a037fbcd815b.txt
+2026-07-14-002734-codex-gate-f4eb8c666309c9b3eef0c417af68c21daea0fbe6.txt
+2026-07-14-004537-codex-gate-28302d8727cb0a402d64f1fb998bf639239e7851.txt
+2026-07-14-101901-codex-gate-1c3a3c07dd9dc881a0ea47fa5ad530ad8a15d9f4.txt
+2026-07-14-103502-codex-gate-f2fbd863bdd15acccd0bfda262f544637f04d3b8.txt
+2026-07-14-125406-codex-gate-060357cfb98d78330737aca087486f00a7735032.txt
+2026-07-14-132309-codex-gate-50b403ea027bb716b1eaa98db5085a0ed6904b5f.txt
+2026-07-14-133540-codex-gate-fc8d1f6da60dd5b343355c8f61c721c3793a9950.txt
+2026-07-14-134813-codex-gate-93b9d2ec3683d2ba10c2cf0acbfa246f08402c1f.txt
+2026-07-14-152756-codex-gate-122f9d9c38e05751ba3a6842bb2fc8f86e2253eb.txt
+2026-07-14-160316-codex-gate-64d4b41d59a4f558115762e67c1be114e5928938.txt
+2026-07-14-161259-codex-gate-66d65fd3278505edb5d721e97fc7aea6b3ffaee6.txt
+2026-07-14-170958-codex-gate-b605d697b3dbffada21fb08eb97f7eb2cbe22bb9.txt
+2026-07-14-171239-codex-gate-fe3d2dbb95df6b62212d9894f98fe6c875afc1c7.txt
+2026-07-14-172154-codex-gate-1093cbe3bd01aeae93a536fc3b6e923fde88b2bf.txt
+2026-07-14-173029-codex-gate-7c69e7c0e04dbe81732e9649f27e5a35501a4f2b.txt
+2026-07-14-180614-codex-gate-90636b018737efd42f87e55774625919cdd74952.txt
+2026-07-14-183507-codex-gate-00cd11020f300d3cd29523693b057178c1027a2a.txt
+2026-07-14-185544-codex-gate-566d79c294fb5b392c5546570a7ad58e4fb3db6e.txt
+2026-07-14-192549-codex-gate-78924caa5c65110828884bb69282f57972927f6c.txt
+2026-07-14-223200-codex-gate-9efb20903c8b49d889bb8d7e084696009b104d91.txt
+2026-07-14-223658-codex-gate-b15c90098b5e9ff31c01c81b923fa5a325d1cbb5.txt
+2026-07-14-224857-codex-gate-2b36da1c069db914d9aeaa39754a399e380ce884.txt
+2026-07-15-005058-codex-gate-150e4e9ed0a5987ab7040ffb6d6f47051d7125fd.txt
+2026-07-15-094806-codex-gate-87781ee5d118ed974e5254446f47c3d22f96b8e1.txt
+2026-07-15-102447-codex-gate-82b4ab34a46f52702438751bec3ad7645fd95e84.txt
+2026-07-15-102900-codex-gate-5c23c33f3f533179762462db5136dc5171516d1b.txt
+2026-07-17-114359-codex-gate-ec8b4bf2c2e400c5d21a9f3766fb74b2553d2a51.txt
+2026-07-17-114444-codex-gate-983cd52ef24b36c740b1aa9051552e1b860f4df4.txt
+2026-07-17-193316-codex-gate-79d5db5a2969f60e2cf9d0d36a81e6c31216c307.txt
+2026-07-17-194727-codex-gate-f18f4ccd183e294cba892d646661d4090cb66b78.txt
+2026-07-17-194825-codex-gate-e37f396044b2ca3e9ce1bed180b1a7a7af53346f.txt
+2026-07-17-215425-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-215816-codex-gate-b73d93e1e9789ffe763dc4599c625362db5875a0.txt
+2026-07-17-233951-codex-gate-8fea647624d147134934551e82af2d2e24c27696.txt
+2026-07-18-180702-codex-gate-03f43a9077c3a3f4c2e7370438a684313cf49c30.txt
+2026-07-19-012944-codex-gate-5c13d51d4fc3a2e1fac1ceb876c51c60670dd91b.txt
+2026-07-21-174450-codex-gate-1338c63f0208cbcdc8dd4bed1ac8c5c3e7c59a59.txt
+2026-07-21-230211-codex-gate-16c2e834a4268607f71818a16ee05d2b752e58da.txt
+2026-07-22-161343-g1-display-gates.txt
+2026-07-22-162535-g1r2-display-gates.txt
+2026-07-22-162856-g1r3-display-gates.txt
+2026-07-22-163649-g1r4-display-gates.txt
+2026-07-22-164416-g1r5-display-gates.txt
+2026-07-22-164845-g1r6-display-gates.txt
+2026-07-22-175729-g1r7-display-gates.txt
+2026-07-22-180129-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-180254-g2retro-1c4fcf6.txt
+2026-07-22-181010-codex-gate-8c647ef8f9585fc83c2277d1cc166726be2b6be7.txt
+2026-07-22-181123-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181253-g2retro2-e1a814b.txt
+2026-07-22-181329-codex-gate-672fac78957c75f24eca1ac3e1ab27b19fd8b842.txt
+2026-07-22-181610-g2retro3-c0a599a.txt
+2026-07-24-215046-g2retro-602a825.txt
+2026-07-24-215321-g1-nonprime-decomposition.txt
+2026-07-24-220537-g1r2-nonprime-decomposition.txt
+2026-07-24-220707-g1r3-nonprime-decomposition.txt
+2026-07-24-220734-codex-gate-ee9d3c1b5e171274ec9b3db02f53dbcea58b7aad.txt
+2026-07-24-220827-g2retro2-540ac2a.txt
+2026-07-24-220849-g2retro2-540ac2a.txt
+2026-07-24-221602-codex-gate-7cf8fe9a923b2f8c38d759cc6254ee814fa98c0a.txt
+2026-07-24-221700-g2retro3-ed1365b.txt
+2026-07-25-122524-codex-gate-f9db3c8ac835761749260d913f59e1b49b828660.txt
+2026-07-25-135030-g2retro-024d34d.txt
+2026-07-25-152104-codex-gate-c72efdbeee10995c263615c2efdffc2a4d669dca.txt
+2026-07-25-153532-g1-assembly-shape.txt
+2026-07-25-154213-codex-gate-9a3917cd1b44b60434c8b5735ee1604136d5f1e8.txt
+2026-07-25-164426-codex-gate-0966c306ccd9369afb03284e1f4b54fa03a296da.txt
+2026-07-25-164610-codex-gate-0966c306ccd9369afb03284e1f4b54fa03a296da.txt
+2026-07-25-211026-codex-gate-e45223647aca8caf6bbe7f46f123f84086e9bc48.txt
+2026-07-25-211111-codex-gate-e45223647aca8caf6bbe7f46f123f84086e9bc48.txt
+2026-07-25-221955-codex-gate-f5c54a383ee5c3f2ed9e4a5c254252ecc1fcc6e0.txt
+2026-07-26-000213-codex-gate-81fa2d4e5d638b4497adafe43eee4407c821299b.txt
+2026-07-26-142301-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt
+2026-07-26-142346-codex-gate-ac54de5d0cc694e651353a71012beac9d5501fac.txt
+2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt
+2026-07-27-111546-g2retro-d1e226f.txt
+2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+
+Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+(no matches in staged .lean files)
+
+Committer evidence file (.session/claude-commit-evidence.md, gitignored worktree path — present on disk, not in the staged tree):
+# Commit evidence — post-publication tie-up (2026-07-31)
+
+PD: another session ("chat") took over distribution prep; find out
+what it did, tie things up comprehensibly; atlax on gauss will
+eventually replace the official atlas. Staged: HANDOFF (publication +
+atlax state), FOR_GPT brief status update, sweep-in of 6e0238d's own
+gate transcript (tree 15bfc1cc = 6e0238d's tree, matched via git log
+--format=%T).
+
+## What chat did (all verified via API/HTTP this session)
+
+- PUBLISHED all three Zenodo records 2026-07-28 (deposition state
+  done/submitted; publication_date 2026-07-28; public records GET):
+  atlas 21367250 (exactly the staged tarballs — site md5 b65c7417…
+  byte-count 2,245,453,760 matches the published file), primes
+  19761390 (four tarballs unchanged), software 21609862 with ONE
+  ADDITION: nonprime-v50-certificates-20260727.tar.gz (14,354,821
+  bytes) + description updated (quoted in session: attachment
+  generator, two independent MPFI endpoint-interval embeddedness
+  checkers, complete output of the 2,172,511-case primary run, exact
+  rational construction checks).
+- All three concept DOIs measured resolving (curl -L 200): 21367249,
+  19761389, 21609861. Creators Doyle alone, cc-zero on all three
+  (public metadata GET).
+- ATLAX: docs/atlax/ serves (200). Front-page HTML diff vs official:
+  +3 gallery chips (All nets v≤10; ELT gallery = "Possibilities for
+  the ELT paper", 20 models, bend counts (+,0,−); ELT symmetry
+  types), +by-v/36; no removals (pointers + CC0 footer intact). All
+  four new pages return 200. No arXiv mention anywhere yet.
+- No new/draft depositions exist (API list: only the three, all
+  done).
+
+## Constraints recorded
+
+- gauss and doob ssh unreachable from home at check time (timeout /
+  DNS); all findings via HTTPS + Zenodo API.
+- Deploy freeze noted in HANDOFF: this repo currently regenerates the
+  OLD official site; atlax's build source is elsewhere — absorb
+  before deploying again.
+
+## New conventions / invariants (G1)
+
+None — prose and audit sweep only.
+
+
+Staged diff:
+diff --git a/HANDOFF.md b/HANDOFF.md
+index fabdc6b..ddf991d 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -91,18 +91,36 @@ per-net dent SETS, ∅ first, from data/walks.
+ 
+ Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
+ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+-data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
+-TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+-md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+-2,251 nets, front page carries the archive pointers, no author line,
+-CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
+-19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
+-primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
+-"Software for the computer-assisted proof of Euclidean neoplatonic
+-realizations" (undented @ git 145d94d). Creators = Doyle alone on all
+-three records (PD 2026-07-26: "that should change too", matching the
+-de-authored front page). PENDING (PD 2026-07-26): link the
+-Doyle–Ellison arXiv paper from the front page when it appears. Citation
++data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo PUBLISHED 2026-07-28 (by the chat session that took over
++distribution prep; verified via API 2026-07-31): all three records
++live, cc-zero, creators Doyle alone, concept DOIs resolving —
++21367250 "The Neoplatonic Atlas" (exactly the staged tarballs: site
++md5 b65c7417…, 2,251 nets, CC0 front page + archive pointers, +
++database), 19761390 primes (lists v4–60 + OBJs v4–50, unchanged),
++21609862 software (undented @ 145d94d PLUS chat's addition
++nonprime-v50-certificates-20260727.tar.gz, 14.4 MB: attachment
++generator, two independent MPFI endpoint-interval embeddedness
++checkers, complete output of the 2,172,511-case primary run, exact
++rational construction checks — the record now covers prime AND
++non-prime proofs; description updated accordingly). Future atlas
++updates = "New version" on 21367249, never a new deposition.
++
++ATLAX (2026-07-31): another session is building a revised atlas at
++gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
++official copy. Observed deltas vs the official front page (HTTP diff;
++gauss/doob ssh unreachable from home when checked): three new chips —
++"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
++20-model working selection, bend counts (+, 0, −)), "ELT symmetry
++types" — and by-v extended to v=36; archive pointers + CC0 footer
++retained. Its build source is NOT this repo's committed state — DO
++NOT rsync-deploy from here while atlax is in progress (a deploy
++targets docs/atlas only, but the repo no longer matches what will
++become official). When atlax is promoted, absorb its builder/data
++changes into this repo (or adopt its tree) FIRST, re-prove
++build-twice, then resume deploys; the Zenodo atlas record then gets a
++"New version". PENDING: link the Doyle–Ellison arXiv paper from the
++front page when it appears (no arXiv mention on atlax or the records
++as of 2026-07-31). Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+diff --git a/notes/FOR_GPT_arxiv_assembly.md b/notes/FOR_GPT_arxiv_assembly.md
+index 17e32b6..b66a3bd 100644
+--- a/notes/FOR_GPT_arxiv_assembly.md
++++ b/notes/FOR_GPT_arxiv_assembly.md
+@@ -5,9 +5,16 @@ Zenodo DOI for the atlas — it cites the atlas by a `\seek` reference
+ to the front page, and the front page maintains the durable pointers
+ (Zenodo, GitHub, companion records). The proof software is cited by
+ its FROZEN version DOI, because that identifies the exact evidence
+-used. Everything below is staged; the Zenodo records publish no later
+-than the arXiv announcement (Peter's button), at which point the DOIs
+-resolve.
++used.
++
++STATUS UPDATE 2026-07-31: all three records were PUBLISHED on
++2026-07-28 — every DOI below resolves NOW. The software record
++additionally carries nonprime-v50-certificates-20260727.tar.gz
++(attachment generator, two independent MPFI embeddedness checkers,
++the complete 2,172,511-case primary run, exact rational construction
++checks), so 10.5281/zenodo.21609862 is citable for the prime AND
++non-prime v ≤ 50 proofs; its bibtex note can say so if the paper
++wants.
+ 
+ ## The two bibliography entries, blanks filled
+ 
+</stdin>
+hook: SessionStart
+hook: SessionStart Completed
+codex
+I’ll verify the staged tree, evidence file, and added transcript, then return only the gate verdict fields.
+hook: PreToolUse
+hook: PreToolUse Completed
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc "git diff --cached --name-status
+git diff --cached --numstat
+git diff --cached -- HANDOFF.md notes/FOR_GPT_arxiv_assembly.md
+sed -n '1,240p' .session/claude-commit-evidence.md
+rg -n -i '(password|passwd|api[_ -]?key|secret|credential|authorization:|BEGIN [A-Z ]*PRIVATE KEY|sorry|admit|axiom|native_decide)' -- HANDOFF.md notes/FOR_GPT_arxiv_assembly.md notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt .session/claude-commit-evidence.md
+git status --short" in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+M	HANDOFF.md
+M	notes/FOR_GPT_arxiv_assembly.md
+A	notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+30	12	HANDOFF.md
+10	3	notes/FOR_GPT_arxiv_assembly.md
+400	0	notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+diff --git a/HANDOFF.md b/HANDOFF.md
+index fabdc6b..ddf991d 100644
+--- a/HANDOFF.md
++++ b/HANDOFF.md
+@@ -91,18 +91,36 @@ per-net dent SETS, ∅ first, from data/walks.
+ 
+ Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
+ landed round. Floppy census kept as pinned (PD): the 67 flags trace to
+-data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo READY
+-TO PUBLISH (2026-07-26): three drafts, all cc-zero, all server-side
+-md5s verified against local — 21367250 "The Neoplatonic Atlas" (site
+-2,251 nets, front page carries the archive pointers, no author line,
+-CC0 dedication in PD's name at the foot; md5 b65c7417… + database),
+-19761390 "Prime neoplatonic solids" (CLERS lists v4–60 = 44,646,598
+-primes, MANIFEST-checked on doob + OBJs v4–50), and 21609862
+-"Software for the computer-assisted proof of Euclidean neoplatonic
+-realizations" (undented @ git 145d94d). Creators = Doyle alone on all
+-three records (PD 2026-07-26: "that should change too", matching the
+-de-authored front page). PENDING (PD 2026-07-26): link the
+-Doyle–Ellison arXiv paper from the front page when it appears. Citation
++data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo PUBLISHED 2026-07-28 (by the chat session that took over
++distribution prep; verified via API 2026-07-31): all three records
++live, cc-zero, creators Doyle alone, concept DOIs resolving —
++21367250 "The Neoplatonic Atlas" (exactly the staged tarballs: site
++md5 b65c7417…, 2,251 nets, CC0 front page + archive pointers, +
++database), 19761390 primes (lists v4–60 + OBJs v4–50, unchanged),
++21609862 software (undented @ 145d94d PLUS chat's addition
++nonprime-v50-certificates-20260727.tar.gz, 14.4 MB: attachment
++generator, two independent MPFI endpoint-interval embeddedness
++checkers, complete output of the 2,172,511-case primary run, exact
++rational construction checks — the record now covers prime AND
++non-prime proofs; description updated accordingly). Future atlas
++updates = "New version" on 21367249, never a new deposition.
++
++ATLAX (2026-07-31): another session is building a revised atlas at
++gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
++official copy. Observed deltas vs the official front page (HTTP diff;
++gauss/doob ssh unreachable from home when checked): three new chips —
++"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
++20-model working selection, bend counts (+, 0, −)), "ELT symmetry
++types" — and by-v extended to v=36; archive pointers + CC0 footer
++retained. Its build source is NOT this repo's committed state — DO
++NOT rsync-deploy from here while atlax is in progress (a deploy
++targets docs/atlas only, but the repo no longer matches what will
++become official). When atlax is promoted, absorb its builder/data
++changes into this repo (or adopt its tree) FIRST, re-prove
++build-twice, then resume deploys; the Zenodo atlas record then gets a
++"New version". PENDING: link the Doyle–Ellison arXiv paper from the
++front page when it appears (no arXiv mention on atlax or the records
++as of 2026-07-31). Citation
+ architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
+ the paper cites the atlas ONLY by \seek to the live front page and
+ the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
+diff --git a/notes/FOR_GPT_arxiv_assembly.md b/notes/FOR_GPT_arxiv_assembly.md
+index 17e32b6..b66a3bd 100644
+--- a/notes/FOR_GPT_arxiv_assembly.md
++++ b/notes/FOR_GPT_arxiv_assembly.md
+@@ -5,9 +5,16 @@ Zenodo DOI for the atlas — it cites the atlas by a `\seek` reference
+ to the front page, and the front page maintains the durable pointers
+ (Zenodo, GitHub, companion records). The proof software is cited by
+ its FROZEN version DOI, because that identifies the exact evidence
+-used. Everything below is staged; the Zenodo records publish no later
+-than the arXiv announcement (Peter's button), at which point the DOIs
+-resolve.
++used.
++
++STATUS UPDATE 2026-07-31: all three records were PUBLISHED on
++2026-07-28 — every DOI below resolves NOW. The software record
++additionally carries nonprime-v50-certificates-20260727.tar.gz
++(attachment generator, two independent MPFI embeddedness checkers,
++the complete 2,172,511-case primary run, exact rational construction
++checks), so 10.5281/zenodo.21609862 is citable for the prime AND
++non-prime v ≤ 50 proofs; its bibtex note can say so if the paper
++wants.
+ 
+ ## The two bibliography entries, blanks filled
+ 
+# Commit evidence — post-publication tie-up (2026-07-31)
+
+PD: another session ("chat") took over distribution prep; find out
+what it did, tie things up comprehensibly; atlax on gauss will
+eventually replace the official atlas. Staged: HANDOFF (publication +
+atlax state), FOR_GPT brief status update, sweep-in of 6e0238d's own
+gate transcript (tree 15bfc1cc = 6e0238d's tree, matched via git log
+--format=%T).
+
+## What chat did (all verified via API/HTTP this session)
+
+- PUBLISHED all three Zenodo records 2026-07-28 (deposition state
+  done/submitted; publication_date 2026-07-28; public records GET):
+  atlas 21367250 (exactly the staged tarballs — site md5 b65c7417…
+  byte-count 2,245,453,760 matches the published file), primes
+  19761390 (four tarballs unchanged), software 21609862 with ONE
+  ADDITION: nonprime-v50-certificates-20260727.tar.gz (14,354,821
+  bytes) + description updated (quoted in session: attachment
+  generator, two independent MPFI endpoint-interval embeddedness
+  checkers, complete output of the 2,172,511-case primary run, exact
+  rational construction checks).
+- All three concept DOIs measured resolving (curl -L 200): 21367249,
+  19761389, 21609861. Creators Doyle alone, cc-zero on all three
+  (public metadata GET).
+- ATLAX: docs/atlax/ serves (200). Front-page HTML diff vs official:
+  +3 gallery chips (All nets v≤10; ELT gallery = "Possibilities for
+  the ELT paper", 20 models, bend counts (+,0,−); ELT symmetry
+  types), +by-v/36; no removals (pointers + CC0 footer intact). All
+  four new pages return 200. No arXiv mention anywhere yet.
+- No new/draft depositions exist (API list: only the three, all
+  done).
+
+## Constraints recorded
+
+- gauss and doob ssh unreachable from home at check time (timeout /
+  DNS); all findings via HTTPS + Zenodo API.
+- Deploy freeze noted in HANDOFF: this repo currently regenerates the
+  OLD official site; atlax's build source is elsewhere — absorb
+  before deploying again.
+
+## New conventions / invariants (G1)
+
+None — prose and audit sweep only.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:10:Checks run: Staged diff/name-status/numstat; diff-check; targeted credential scan; transcript verdict review; staged Lean grep supplied (no matches).
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:37:Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:39:DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:41:Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:165:Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:217:/bin/zsh -lc "git diff --cached --check && git diff --cached --name-status && git diff --cached -- HANDOFF.md && sed -n '1,220p' /private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad/commit-msg-creators.txt && sed -n '1,220p' .session/claude-commit-evidence.md && rg -n \""'^(PASS|WARN|BLOCK)|staged tree|15bfc1c|d1e226f|creator|HTTP 200|TEAMWORK|G1|sorry|admit|axiom|native_decide|secret|credential" notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt notes/codex-consults/2026-07-27-111546-g2retro-d1e226f.txt | head -n 220' in /Users/doyle/Dropbox/projects/atlas
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:287:/bin/zsh -lc "git diff --cached --name-status; git diff --cached -- HANDOFF.md; sed -n '1,160p' /private/tmp/claude-501/-Users-doyle-Dropbox-projects-atlas/de07464c-6d20-43e1-aaf7-f8e85f0152d8/scratchpad/commit-msg-creators.txt; sed -n '1,180p' .session/claude-commit-evidence.md; rg -n \""'^(PASS|WARN|BLOCK)|15bfc1c|d1e226f|Creators|creators|HTTP 200|G1|TEAMWORK|sorry|admit|axiom|native_decide" notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt notes/codex-consults/2026-07-27-111546-g2retro-d1e226f.txt | head -n 240' in /Users/doyle/Dropbox/projects/atlas
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:372:notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt:32:Check for: new sorry/admit/axiom/native_decide; build regressions if a build was run; obvious Lean/API breakage; accidental weakening of the clean-shelling architecture; missing files/imports; secrets, credentials, large binaries, destructive changes; commit-message claims contradicted by the diff.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:373:notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt:34:DISCLOSED-WIP RULE (this project commits honest WIP checkpoints): a new sorry/admit/axiom/native_decide is a WARNING, NOT a blocker, WHEN it is enumerated in the commit message (by file and name) AND listed in the committer evidence file. It is a BLOCK only when UNDISCLOSED -- present in the diff but absent from the commit message or the evidence file. Do not block a checkpoint solely because it introduces sorries that are openly disclosed and the message states the theorem is not yet complete.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:374:notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt:36:Trust-base verification (Lean repos): the bundle includes the live baton (TEAMWORK.md), a G1 consult index, a mechanical grep of staged Lean files for sorry/admit/axiom/native_decide, and a committer evidence file (build result, #print axioms, every new convention/invariant with its G1 consult citation). BLOCK if: the evidence file is missing; the commit message claims a trust base ("cert-free", a specific axiom footprint) the evidence file does not substantiate; or the diff introduces a new convention/invariant/local-predicate with no cited G1 consult.
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:377:notes/codex-consults/2026-07-27-095223-codex-gate-f296c738780656562e18a2c9317fd37778035a12.txt:170:Mechanical grep of staged *.lean for sorry|admit|axiom|native_decide:
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:385:Checks run: Staged diff/name-status/numstat; diff-check; targeted credential scan; transcript verdict review; staged Lean grep supplied (no matches).
+notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt:397:Checks run: Staged diff/name-status/numstat; diff-check; targeted credential scan; transcript verdict review; staged Lean grep supplied (no matches).
+M  HANDOFF.md
+M  notes/FOR_GPT_arxiv_assembly.md
+A  notes/codex-consults/2026-07-27-111601-codex-gate-15bfc1cca9b847ab91abe43fa6b81bac7950ad5f.txt
+
+hook: PreToolUse
+hook: PreToolUse Completed
+codex
+WARN
+Files reviewed: HANDOFF.md; notes/FOR_GPT_arxiv_assembly.md; staged Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; credential scan; transcript inspection; supplied staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check reports trailing whitespace in the archived gate transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+24,740
+WARN
+Files reviewed: HANDOFF.md; notes/FOR_GPT_arxiv_assembly.md; staged Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; credential scan; transcript inspection; supplied staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check reports trailing whitespace in the archived gate transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
+# Commit evidence — atlax-source correction (2026-07-31)
+
+Follow-up to 2753a62: the push of next:main was REJECTED
+non-fast-forward, revealing origin/main = e3264bc — the atlax session
+COMMITS TO THIS REPO'S MAIN. Fetched and verified: 6e0238d →
+f7ec05a "atlax: add v10 and ELT galleries" → e3264bc "atlax: close
+gallery audit gaps"; diff --stat vs 6e0238d shows the new builders
+(all_v10, elt_paper, elt_symmetry, render_elt_stills,
+aggregate_records), personal.py/special.py changes, +32
+atlas_records entries with new bends (non-prime v10s), G1
+specs+checker outputs under notes/, and chat's own HANDOFF update on
+main. My 2753a62 claim "its build source is NOT this repo's committed
+state" was WRONG — corrected in this commit's HANDOFF text (the
+source is origin/main). Local main reset to track origin/main
+(git branch -f; branch -vv verified). Branch discipline recorded:
+push next only; promotion = merge main. Also sweeps 2753a62's own
+gate transcript (tree 553c39e8 matched via git log --format=%T).
+
+## New conventions / invariants (G1)
+
+None — prose correction + audit sweep.
+
+hook: PreToolUse
+hook: PreToolUse Completed
+exec
+/bin/zsh -lc 'git rev-parse --verify 6e0238d''^{commit}; git rev-parse --verify f7ec05a''^{commit}; git rev-parse --verify e3264bc''^{commit}; git merge-base --is-ancestor 6e0238d f7ec05a; printf '"'ancestor_6_to_f7=%s\\n' "'$?; git merge-base --is-ancestor f7ec05a e3264bc; printf '"'ancestor_f7_to_e3=%s\\n' "'$?; git show -s --format='"'%h %P %s' f7ec05a e3264bc; git branch -vv; git diff --stat 6e0238d..e3264bc; git cat-file -s :notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt; git grep --cached -n -I -E '(AKIA[0-9A-Z]{16}|-----BEGIN [A-Z ]*PRIVATE KEY-----|gh[pousr]_[A-Za-z0-9_]{20,}|xox[baprs]-|sk-[A-Za-z0-9_-]{20,}|password[[:space:]]*[:=]|api[_-]?key[[:space:]]*[:=]|authorization:[[:space:]]*bearer)' -- HANDOFF.md notes/codex-consults/2026-07-31-103126-codex-gate-553c39e8e7398d51189d8871a9e1c86ffaab440b.txt; test -e TEAMWORK.md; printf 'teamwork_present=%s\\n' "'$?' in /Users/doyle/Dropbox/projects/atlas
+ succeeded in 0ms:
+6e0238d4a4f30f364c85ff89154ba0c31c30de72
+f7ec05a14afbb43ea6d1cec8f3822caceee5e5b8
+e3264bc4623a801045dc0b2f7b8fcf7f61c24ccc
+ancestor_6_to_f7=0
+ancestor_f7_to_e3=0
+f7ec05a 6e0238d4a4f30f364c85ff89154ba0c31c30de72 atlax: add v10 and ELT galleries
+e3264bc f7ec05a14afbb43ea6d1cec8f3822caceee5e5b8 atlax: close gallery audit gaps
+  main e3264bc [origin/main] atlax: close gallery audit gaps
+* next 2753a62 tie-up: zenodo published 2026-07-28 (by chat), atlax transition noted
+ HANDOFF.md                                         |  98 +++++++-
+ builders/aggregate_records.py                      |  33 +++
+ builders/all_v10.py                                | 194 +++++++++++++++
+ builders/assets/turntable.html                     |  72 ++++--
+ builders/elt_paper.py                              | 272 +++++++++++++++++++++
+ builders/elt_symmetry.py                           | 137 +++++++++++
+ builders/personal.py                               |  55 +++--
+ builders/render_elt_stills.py                      | 256 +++++++++++++++++++
+ builders/special.py                                |  65 +++--
+ data/atlas_records.jsonl                           |  32 +++
+ data/bends/v10CCACACCACAACACAE.json                |   1 +
+ data/bends/v10CCACACCACAACCAAE.json                |   1 +
+ data/bends/v10CCACACCACACAACAE.json                |   1 +
+ data/bends/v10CCACACCACACABCAE.json                |   1 +
+ data/bends/v10CCACACCACACACAAE.json                |   1 +
+ data/bends/v10CCACACCACACACDEE.json                |   1 +
+ data/bends/v10CCACCACACACAACAE.json                |   1 +
+ data/bends/v10CCACCACACACACAAE.json                |   1 +
+ data/bends/v10CCACCACACACACABE.json                |   1 +
+ data/bends/v10CCACCACACACCAABE.json                |   1 +
+ data/bends/v10CCACCACCACAACAAE.json                |   1 +
+ data/bends/v10CCACCACCACAACABE.json                |   1 +
+ data/bends/v10CCACCACCACABCAAE.json                |   1 +
+ data/bends/v10CCACCACCACACAAAE.json                |   1 +
+ data/bends/v10CCACCACCACACAABE.json                |   1 +
+ data/bends/v10CCACCACCACACABAE.json                |   1 +
+ data/bends/v10CCACCCABCACACAAE.json                |   1 +
+ data/bends/v10CCACCCACCACAAAAE.json                |   1 +
+ ...CACCACACCACACCACACACCACACACCACACADABCAAEAE.json |   1 +
+ ...CACCACCACACCACACACACACACAACACAACAACAAACAAE.json |   1 +
+ ...CACCAACACACACCACACAACACCAACAACACCAAAABABAE.json |   1 +
+ ...AACACCAAACCACAACACCAAACACDEACDECADEACDEAAE.json |   1 +
+ data/bends/v8CCACACCACAAE.json                     |   1 +
+ data/bends/v8CCACCACACAAE.json                     |   1 +
+ data/bends/v9CCACACCACAACAE.json                   |   1 +
+ data/bends/v9CCACACCACACAAE.json                   |   1 +
+ data/bends/v9CCACACCACACABE.json                   |   1 +
+ data/bends/v9CCACCACACAACAE.json                   |   1 +
+ data/bends/v9CCACCACACACAAE.json                   |   1 +
+ data/bends/v9CCACCACCACAAAE.json                   |   1 +
+ data/bends/v9CCACCACCACAABE.json                   |   1 +
+ data/bends/v9CCACCCABCACAAE.json                   |   1 +
+ data/conway.tsv                                    |  32 +++
+ data/nets_all_v4_10.txt                            |  71 ++++++
+ data/nets_pages.txt                                |  32 +++
+ data/symmetry.tsv                                  |  32 +++
+ data/themes.tsv                                    |  28 +++
+ notes/all-v10-check.out                            |  10 +
+ notes/all-v10-check.py                             | 211 ++++++++++++++++
+ notes/all-v10-g1-spec.md                           |  49 ++++
+ notes/atlax-gallery-contract-g1-check.out          |   6 +
+ notes/atlax-gallery-contract-g1-check.py           | 120 +++++++++
+ notes/atlax-gallery-contract-g1-spec.md            |  61 +++++
+ .../2026-07-29-all-v10-g1-attempt1.jsonl           |  60 +++++
+ .../2026-07-29-all-v10-g1-block.jsonl              |  34 +++
+ .../2026-07-29-all-v10-g1-pass.jsonl               |  34 +++
+ .../codex-consults/2026-07-29-all-v10-g1-prompt.md |  40 +++
+ .../2026-07-29-all-v10-g1-resubmit-prompt.md       |  33 +++
+ .../2026-07-29-elt-stills-g1-attempt2.jsonl        |   0
+ .../2026-07-29-elt-stills-g1-attempt3.jsonl        |   0
+ .../2026-07-29-elt-stills-g1-attempt4.jsonl        |   0
+ .../2026-07-29-elt-stills-g1-prompt.md             |  34 +++
+ .../codex-consults/2026-07-29-elt-stills-g1.jsonl  |   0
+ .../2026-07-30-atlax-audit-closure-g2-prompt.md    |  27 ++
+ .../2026-07-30-atlax-gallery-contract-g1-prompt.md |  39 +++
+ .../2026-07-30-atlax-gallery-contract-g1.jsonl     |  27 ++
+ .../2026-07-30-atlax-round-g2-7c5e4211.jsonl       |  17 ++
+ .../2026-07-30-atlax-round-g2-9c9d009b.jsonl       |  23 ++
+ .../2026-07-30-atlax-round-g2-prompt.md            |  39 +++
+ ...-07-30-elt-gallery-bends-view-g1-attempt1.jsonl |   3 +
+ ...-07-30-elt-gallery-bends-view-g1-attempt2.jsonl |   3 +
+ .../2026-07-30-elt-gallery-bends-view-g1-prompt.md |  15 ++
+ ...-07-30-elt-symmetry-euclidean-g1-attempt1.jsonl |   3 +
+ ...-07-30-elt-symmetry-euclidean-g1-attempt2.jsonl |   8 +
+ ...-07-30-elt-symmetry-euclidean-g1-attempt3.jsonl |   4 +
+ ...-07-30-elt-symmetry-euclidean-g1-attempt4.jsonl |   4 +
+ .../2026-07-30-elt-symmetry-euclidean-g1-prompt.md |  33 +++
+ .../2026-07-30-elt-symmetry-g1-attempt1.jsonl      |   3 +
+ .../2026-07-30-elt-symmetry-g1-attempt2.jsonl      |   3 +
+ .../2026-07-30-elt-symmetry-g1-prompt.md           |  13 +
+ notes/elt-gallery-bends-view-g1-check.out          |  21 ++
+ notes/elt-gallery-bends-view-g1-check.py           |  48 ++++
+ notes/elt-gallery-bends-view-g1-spec.md            |  52 ++++
+ notes/elt-stills-g1-check.out                      |   1 +
+ notes/elt-stills-g1-check.py                       | 117 +++++++++
+ notes/elt-stills-g1-spec.md                        |  54 ++++
+ notes/elt-symmetry-euclidean-g1-check.out          |  38 +++
+ notes/elt-symmetry-euclidean-g1-check.py           | 207 ++++++++++++++++
+ notes/elt-symmetry-euclidean-g1-spec.md            |  73 ++++++
+ notes/elt-symmetry-g1-check.out                    |  33 +++
+ notes/elt-symmetry-g1-check.py                     |  54 ++++
+ notes/elt-symmetry-g1-spec.md                      |  37 +++
+ regen_personal.sh                                  |   3 +
+ 93 files changed, 3075 insertions(+), 60 deletions(-)
+33092
+teamwork_present=1
+
+codex
+WARN
+Files reviewed: HANDOFF.md; added Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; commit ancestry and branch verification; credential scan; staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check found trailing whitespace in six lines of the archived transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
+hook: Stop
+hook: Stop
+hook: Stop Completed
+hook: Stop Completed
+tokens used
+32,777
+WARN
+Files reviewed: HANDOFF.md; added Codex gate transcript; proposed commit message; committer evidence.
+Checks run: Staged diff/name-status/numstat; diff-check; commit ancestry and branch verification; credential scan; staged Lean grep.
+Blocking issues: None.
+Warnings: TEAMWORK.md is missing. Diff-check found trailing whitespace in six lines of the archived transcript.
+Recommendation: Commit may proceed; restore the live baton separately.
