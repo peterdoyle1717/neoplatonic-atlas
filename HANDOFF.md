@@ -123,14 +123,14 @@ adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
 docs/atlas deploys, then "New version" on Zenodo 21367249. THE PAPER APPEARED: arXiv:2607.26363 "Neoplatonic solids" (Doyle &
 Ellison, submitted 2026-07-29; verified against the abs page) —
 linked from the front page on this line 2026-07-31, build-twice
-proven (199a369e…). DEPLOY PENDING: gauss ssh unreachable from home
-at commit time (port-22 timeout; a background retry loop is
-deploying docs/atlas as soon as connectivity returns — verify the
-live front page shows the paper line). The atlax line still lacks
-the link; the promotion merge carries it, but if atlax deploys to
-docs/atlas before merging, add it there first. Optional follow-up not done (needs PD's word): add the
-paper as a related identifier on the three published Zenodo records
-(metadata edits are allowed post-publication). Citation
+proven (199a369e…), DEPLOYED to docs/atlas (the outage was VPN-off;
+live front page verified serving the paper line). All three
+published Zenodo records now carry related identifier isSupplementTo
+arXiv:2607.26363 (PD's yes 2026-07-31; edit → metadata PUT →
+republish per record, 201/200/202, DOIs unchanged, verified on the
+public API). The atlax line still lacks the front-page link; the
+promotion merge carries it, but if atlax deploys to docs/atlas
+before merging, add it there first. Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
