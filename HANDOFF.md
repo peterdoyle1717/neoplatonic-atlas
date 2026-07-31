@@ -91,7 +91,7 @@ per-net dent SETS, ∅ first, from data/walks.
 
 Live at math.dartmouth.edu/~doyle/docs/atlas; redeploy after each
 landed round. Floppy census kept as pinned (PD): the 67 flags trace to
-data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo PUBLISHED 2026-07-28 (by the chat session that took over
+data/floppers.txt (in-repo; classify hard-fails if missing). Zenodo PUBLISHED 2026-07-28 (by the ChatGPT session that took over
 distribution prep; verified via API 2026-07-31): all three records
 live, cc-zero, creators Doyle alone, concept DOIs resolving —
 21367250 "The Neoplatonic Atlas" (exactly the staged tarballs: site
@@ -105,22 +105,25 @@ rational construction checks — the record now covers prime AND
 non-prime proofs; description updated accordingly). Future atlas
 updates = "New version" on 21367249, never a new deposition.
 
-ATLAX (2026-07-31, corrected after fetch): the revised atlas lives ON
-THIS REPO'S MAIN BRANCH — the atlax session commits there (6e0238d →
-f7ec05a "add v10 and ELT galleries" → e3264bc "close gallery audit
-gaps": new builders all_v10/elt_paper/elt_symmetry/render_elt_stills/
-aggregate_records, personal+special changes, +32 records with bends
-incl. non-prime v10s, G1 specs+checkers in notes/, its own HANDOFF
-update) and deploys to gauss docs/atlax/, which will AT SOME POINT
-REPLACE docs/atlas as the official copy. Observed on the atlax front
-page: chips "All nets v≤10", "ELT gallery" ("Possibilities for the
-ELT paper", 20 models, bend counts (+, 0, −)), "ELT symmetry types",
-by-v to 36; archive pointers + CC0 footer retained. BRANCH
-DISCIPLINE until promotion: main = the atlax session's line (do not
-push next:main over it — a 2026-07-31 push was correctly rejected
-non-fast-forward); this session's line = next. Promotion = merge (or
-adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
-docs/atlas deploys, then "New version" on Zenodo 21367249. THE PAPER APPEARED: arXiv:2607.26363 "Neoplatonic solids" (Doyle &
+ATLAX (2026-07-31; PD: "for now atlax is a chatgpt sandbox, we'll
+address making it official in due course"): a ChatGPT session works
+ON THIS REPO'S MAIN BRANCH (6e0238d → f7ec05a "add v10 and ELT
+galleries" → e3264bc "close gallery audit gaps": new builders
+all_v10/elt_paper/elt_symmetry/render_elt_stills/aggregate_records,
+personal+special changes, +32 records with bends incl. non-prime
+v10s, G1 specs+checkers in notes/, its own HANDOFF update) and
+deploys to gauss docs/atlax/ — a SANDBOX, not the official atlas.
+docs/atlas (this line, next) REMAINS OFFICIAL. Observed on the atlax
+front page: chips "All nets v≤10", "ELT gallery" ("Possibilities for
+the ELT paper", 20 models, bend counts (+, 0, −)), "ELT symmetry
+types", by-v to 36; archive pointers + CC0 footer retained; no
+front-page paper link yet. BRANCH DISCIPLINE: main = ChatGPT's
+sandbox line (do not push next:main over it — a 2026-07-31 push was
+correctly rejected non-fast-forward); this session's line = next.
+Whenever officialization comes: merge (or adopt) main, add the paper
+link there if still missing, reconcile the two HANDOFFs, re-prove
+build-twice, then deploy docs/atlas and mint a "New version" on
+Zenodo 21367249. THE PAPER APPEARED: arXiv:2607.26363 "Neoplatonic solids" (Doyle &
 Ellison, submitted 2026-07-29; verified against the abs page) —
 linked from the front page on this line 2026-07-31, build-twice
 proven (199a369e…), DEPLOYED to docs/atlas (the outage was VPN-off;
