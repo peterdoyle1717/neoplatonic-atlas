@@ -105,22 +105,24 @@ rational construction checks — the record now covers prime AND
 non-prime proofs; description updated accordingly). Future atlas
 updates = "New version" on 21367249, never a new deposition.
 
-ATLAX (2026-07-31): another session is building a revised atlas at
-gauss docs/atlax/ which will AT SOME POINT REPLACE docs/atlas as the
-official copy. Observed deltas vs the official front page (HTTP diff;
-gauss/doob ssh unreachable from home when checked): three new chips —
-"All nets v≤10", "ELT gallery" ("Possibilities for the ELT paper", a
-20-model working selection, bend counts (+, 0, −)), "ELT symmetry
-types" — and by-v extended to v=36; archive pointers + CC0 footer
-retained. Its build source is NOT this repo's committed state — DO
-NOT rsync-deploy from here while atlax is in progress (a deploy
-targets docs/atlas only, but the repo no longer matches what will
-become official). When atlax is promoted, absorb its builder/data
-changes into this repo (or adopt its tree) FIRST, re-prove
-build-twice, then resume deploys; the Zenodo atlas record then gets a
-"New version". PENDING: link the Doyle–Ellison arXiv paper from the
-front page when it appears (no arXiv mention on atlax or the records
-as of 2026-07-31). Citation
+ATLAX (2026-07-31, corrected after fetch): the revised atlas lives ON
+THIS REPO'S MAIN BRANCH — the atlax session commits there (6e0238d →
+f7ec05a "add v10 and ELT galleries" → e3264bc "close gallery audit
+gaps": new builders all_v10/elt_paper/elt_symmetry/render_elt_stills/
+aggregate_records, personal+special changes, +32 records with bends
+incl. non-prime v10s, G1 specs+checkers in notes/, its own HANDOFF
+update) and deploys to gauss docs/atlax/, which will AT SOME POINT
+REPLACE docs/atlas as the official copy. Observed on the atlax front
+page: chips "All nets v≤10", "ELT gallery" ("Possibilities for the
+ELT paper", 20 models, bend counts (+, 0, −)), "ELT symmetry types",
+by-v to 36; archive pointers + CC0 footer retained. BRANCH
+DISCIPLINE until promotion: main = the atlax session's line (do not
+push next:main over it — a 2026-07-31 push was correctly rejected
+non-fast-forward); this session's line = next. Promotion = merge (or
+adopt) main, reconcile the two HANDOFFs, re-prove build-twice, resume
+docs/atlas deploys, then "New version" on Zenodo 21367249. PENDING:
+link the Doyle–Ellison arXiv paper from the front page when it
+appears (no arXiv mention on atlax or the records as of 2026-07-31). Citation
 architecture (PD + GPT, 2026-07-26; notes/FOR_GPT_arxiv_assembly.md):
 the paper cites the atlas ONLY by \seek to the live front page and
 the proof software by its FROZEN version DOI 10.5281/zenodo.21609862;
